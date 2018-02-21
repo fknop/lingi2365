@@ -26,11 +26,23 @@ public class DFSearch {
     private Choice choice;
     private Trail state;
 
-    private List<SolutionListener> solutionListeners = new LinkedList<SolutionListener>();
-    private List<FailListener> failListeners = new LinkedList<FailListener>();
+    private List<SolutionListener> solutionListeners = new LinkedList<>();
+    private List<FailListener> failListeners = new LinkedList<>();
+    private List<NodeListener> nodeListeners = new LinkedList<>();
 
+    @FunctionalInterface
+    public interface NodeListener {
+        void onNode();
+    }
 
+    public DFSearch onNode(NodeListener listener) {
+        nodeListeners.add(listener);
+        return this;
+    }
 
+    void notifyNode() {
+        nodeListeners.forEach(NodeListener::onNode);
+    }
 
     @FunctionalInterface
     public interface SolutionListener {
@@ -137,12 +149,11 @@ public class DFSearch {
                 try {
                     level++;
                     Alternative alternative = alternatives.pop().getValue();
+                    notifyNode();
                     alternative.call();
                     statistics.nNodes++;
                 }
                 catch (InconsistencyException e) {
-
-                    e.printStackTrace();
                     statistics.nFailures++;
                     notifyFailure();
                     level = alternatives.size() > 0 ? alternatives.peek().getKey() : -1;
@@ -152,6 +163,8 @@ public class DFSearch {
             }
 
             Alternative[] alt = choice.call();
+
+
             if (alt.length == 0) {
                 statistics.nSolutions++;
                 notifySolutionFound();
@@ -160,10 +173,13 @@ public class DFSearch {
                 state.popUntil(level);
             }
             else {
-                for (Alternative alternative : alt) {
-                    alternatives.push(new Pair<>(level, alternative));
+                if (alt.length > 1) {
+                    alternatives.add(new Pair<>(level, alt[1]));
                 }
+                
+                alternatives.add(new Pair<>(level, alt[0]));
             }
+
         } while(alternatives.size() > 0);
     }
 }
