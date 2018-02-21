@@ -43,6 +43,11 @@ public class MaximizeTest {
 
                 cp.post(maximize(y,dfs));
 
+                dfs.onSolution(() -> {
+                    System.out.println("y bound");
+                    System.out.println(y.getMin());
+                });
+
                 SearchStatistics stats = dfs.start();
 
                 assertEquals(stats.nSolutions,11);

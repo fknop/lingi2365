@@ -15,7 +15,6 @@
 
 package minicp.search;
 
-import javafx.util.Pair;
 import minicp.reversible.ReversibleInt;
 import minicp.reversible.Trail;
 import minicp.util.InconsistencyException;
@@ -103,11 +102,30 @@ public class DFSearch {
 //        }
 //    }
 
+    private class Pair<T, V> {
+
+        private T key;
+        private V value;
+
+        Pair(T t, V v) {
+            this.key = t;
+            this.value = v;
+        }
+
+        public T getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+    }
+
     private void dfs(SearchStatistics statistics, SearchLimit limit) {
 
         Stack<Pair<Integer, Alternative>> alternatives = new Stack<>();
 
-        int level = 0;
+        int level = -1;
 
         do {
             if (limit.stopSearch(statistics)) {
@@ -123,10 +141,13 @@ public class DFSearch {
                     statistics.nNodes++;
                 }
                 catch (InconsistencyException e) {
+
+                    e.printStackTrace();
                     statistics.nFailures++;
                     notifyFailure();
-                    level = alternatives.size() > 0 ? alternatives.peek().getKey() : 0;
-                    state.popUntil(level - 1);
+                    level = alternatives.size() > 0 ? alternatives.peek().getKey() : -1;
+                    state.popUntil(level);
+                    continue;
                 }
             }
 
@@ -135,8 +156,8 @@ public class DFSearch {
                 statistics.nSolutions++;
                 notifySolutionFound();
 
-                level = alternatives.size() > 0 ? alternatives.peek().getKey() : 0;
-                state.popUntil(level - 1);
+                level = alternatives.size() > 0 ? alternatives.peek().getKey() : -1;
+                state.popUntil(level);
             }
             else {
                 for (Alternative alternative : alt) {

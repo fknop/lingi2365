@@ -22,9 +22,9 @@ public class InconsistencyException extends Throwable {
 
     private static final long serialVersionUID = 1240061199250453776L;
     public String toString() { return "inconsistency";}
-
-    @Override
-    public synchronized Throwable fillInStackTrace() {
-        return this;
-    }
+//
+//    @Override
+//    public synchronized Throwable fillInStackTrace() {
+//        return this;
+//    }
 }
