@@ -26,6 +26,7 @@ import static minicp.search.Selector.*;
 import minicp.reversible.Trail;
 import minicp.util.Counter;
 import minicp.util.InconsistencyException;
+import org.junit.Assert;
 import org.junit.Test;
 import static minicp.search.Selector.*;
 import static minicp.cp.Factory.*;

@@ -36,7 +36,35 @@ public class IsLessOrEqual extends Constraint { // b <=> x <= c
 
     @Override
     public void post() throws InconsistencyException {
-        // TODO
-        throw new NotImplementedException("IsLessOrEqual");
+        if (b.isTrue()) {
+            x.removeAbove(c);
+        } else if (b.isFalse()) {
+            x.removeBelow(c + 1);
+        } else if (x.isBound()) {
+            b.assign(x.getMin() <= c);
+        } else if (x.getMax() <= c) {
+            b.assign(true);
+        } else if (x.getMin() > c) {
+            b.assign(false);
+        } else {
+            b.whenBind(() -> {
+                if (b.isTrue())
+                    x.removeAbove(c);
+                else {
+                    // should deactivate the constraint as it is entailed
+                    x.removeBelow(c + 1);
+                }
+            });
+            x.whenBind(() ->
+                    b.assign(x.getMin() <= c)
+            );
+            x.whenDomainChange(() -> {
+                if (x.getMax() <= c) {
+                    b.assign(true);
+                } else if (x.getMin() > c) {
+                    b.assign(false);
+                }
+            });
+        }
     }
 }
