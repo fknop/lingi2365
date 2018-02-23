@@ -80,146 +80,50 @@ public class DFSearch {
         return start(statistics -> false);
     }
 
+    public void dfs(SearchStatistics statistics, SearchLimit limit) {
+        Stack<Alternative> alternatives = new Stack<>();
+        expandNode(alternatives, statistics);
 
-//    private void dfs(SearchStatistics statistics, SearchLimit limit) {
-//        if (limit.stopSearch(statistics)) throw new StopSearchException();
-//        Alternative [] alternatives = choice.call();
-//        if (alternatives.length == 0) {
-//            statistics.nSolutions++;
-//            notifySolutionFound();
-//        }
-//        else {
-//            for (Alternative alt : alternatives) {
-//                trail.push();
-//                try {
-//                    statistics.nNodes++;
-//                    alt.call();
-//                    dfs(statistics,limit);
-//                } catch (InconsistencyException e) {
-//                    notifyFailure();
-//                    statistics.nFailures++;
-//                }
-//                trail.pop();
-//            }
-//        }
-//    }
-
-    private class Pair<T, V> {
-
-        private T key;
-        private V value;
-
-        Pair(T t, V v) {
-            this.key = t;
-            this.value = v;
-        }
-
-        public T getKey() {
-            return key;
-        }
-
-        public V getValue() {
-            return value;
-        }
-    }
-
-    private void dfs(SearchStatistics statistics, SearchLimit limit) {
-
-        Stack<Pair<Integer, Alternative>> alternatives = new Stack<>();
-
-        int level = -1;
-
-        do {
-            if (limit.stopSearch(statistics)) {
-                throw new StopSearchException();
+        while(!alternatives.isEmpty()) {
+            if (limit.stopSearch(statistics)) throw new StopSearchException();
+            try {
+                alternatives.pop().call();
             }
-
-            if (alternatives.size() > 0) {
-                trail.push();
-                try {
-                    level++;
-                    Alternative alternative = alternatives.pop().getValue();
-                    alternative.call();
-                    statistics.nNodes++;
-                }
-                catch (InconsistencyException e) {
-                    statistics.nFailures++;
-                    notifyFailure();
-                    level = alternatives.size() > 0 ? alternatives.peek().getKey() : -1;
-                    trail.popUntil(level);
-                    continue;
-                }
+            catch (InconsistencyException e) {
+                notifyFailure();
+                statistics.nFailures++;
             }
+        }
+     }
 
-            Alternative[] alt = choice.call();
+     private void expandNode(Stack<Alternative> alternatives, SearchStatistics statistics) {
+        Alternative[] alts = choice.call();
 
-
-            if (alt.length == 0) {
+        if (alts.length == 0) {
+            alternatives.push(() -> {
                 statistics.nSolutions++;
                 notifySolutionFound();
+            });
+        }
 
-                level = alternatives.size() > 0 ? alternatives.peek().getKey() : -1;
-                trail.popUntil(level);
-            }
-            else {
-                if (alt.length > 1) {
-                    alternatives.add(new Pair<>(level, alt[1]));
-                }
-                alternatives.add(new Pair<>(level, alt[0]));
-            }
+        for (int i = alts.length - 1; i >= 0; i--) {
+            Alternative alt = alts[i];
 
-        } while(alternatives.size() > 0);
-    }
+            alternatives.push(() -> {
+                trail.pop();
+            });
 
-//    public void dfs(SearchStatistics statistics, SearchLimit limit) {
-//        Stack<Alternative> alternatives = new Stack<>();
-//        expandNode(alternatives, statistics);
-//
-//        while(!alternatives.isEmpty()) {
-//            if (limit.stopSearch(statistics)) throw new StopSearchException();
-//            try {
-//                alternatives.pop().call();
-//                statistics.nNodes++;
-//            }
-//            catch (InconsistencyException e) {
-//                notifyFailure();
-//                statistics.nFailures++;
-//            }
-//        }
-//     }
-//
-//     private void expandNode(Stack<Alternative> alternatives, SearchStatistics statistics) {
-//        Alternative[] alts = choice.call();
-//
-//        if (alts.length == 0) {
-//            alternatives.push(() -> {
-//                trail.pop();
-//            });
-//
-//            alternatives.push(() -> {
-//                statistics.nSolutions++;
-//                notifySolutionFound();
-//            });
-//        }
-//
-//        for (int i = alts.length - 1; i >= 0; i--) {
-//            Alternative alt = alts[i];
-//
-//            alternatives.push(() -> {
-//                expandNode(alternatives, statistics);
-//            });
-//
-//            alternatives.push(() -> {
-//                trail.pop();
-//            });
-//
-//            alternatives.push(alt);
-//
-//            alternatives.push(() -> {
-//                trail.push();
-//            });
-//        }
-//     }
+            alternatives.push(() -> {
+                alt.call();
+                expandNode(alternatives, statistics);
+                statistics.nNodes++;
+            });
+
+            alternatives.push(() -> {
+                trail.push();
+            });
+        }
+     }
 }
 
 

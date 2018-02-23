@@ -41,7 +41,7 @@ public class QAP {
         int [][] w = new int[n][n];
         for (int i = 0; i < n ; i++) {
             for (int j = 0; j < n; j++) {
-                w[i][j] = reader.getInt();
+                 w[i][j] = reader.getInt();
             }
         }
         // Distance
@@ -64,10 +64,6 @@ public class QAP {
             selectMin(x,
                 xi -> xi.getSize() > 1, // filter,
                 xi -> {
-                    if (xi.isBound()) {
-                        return Integer.MAX_VALUE;
-                    }
-
                     int max = Integer.MIN_VALUE;
                     int[] values = new int[xi.getSize()];
                     int size = xi.fillArray(values);

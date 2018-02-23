@@ -25,15 +25,17 @@ import java.util.Random;
 
 import static minicp.cp.Factory.*;
 import static minicp.cp.Heuristics.firstFail;
+import static minicp.search.Selector.branch;
+import static minicp.search.Selector.selectMin;
 
 public class QAPLNS {
 
     public static void main(String[] args) throws InconsistencyException {
         
         // ---- read the instance -----
-
-        InputReader reader = new InputReader("data/qap.txt");
-        // InputReader reader = new InputReader("data/chr25a.txt");
+        // 5968
+//        InputReader reader = new InputReader("data/qap.txt");
+         InputReader reader = new InputReader("data/chr25a.txt");
 
         int n = reader.getInt();
         // Weights
@@ -58,7 +60,65 @@ public class QAPLNS {
 
         cp.post(allDifferent(x));
 
-        DFSearch dfs = makeDfs(cp,firstFail(x));
+//        DFSearch dfs = makeDfs(cp,firstFail(x));
+        DFSearch dfs = makeDfs(cp,
+                selectMin(x,
+                        xi -> xi.getSize() > 1, // filter,
+                        xi -> {
+                            int max = Integer.MIN_VALUE;
+                            int[] values = new int[xi.getSize()];
+                            int size = xi.fillArray(values);
+
+                            for (int i = 0; i < size; ++i) {
+                                int valuei = values[i];
+                                for (int j = 0; j < n; ++j) {
+                                    IntVar xj = x[j];
+                                    int[] valuesj = new int[xj.getSize()];
+                                    int sizej = xj.fillArray(valuesj);
+                                    for (int k = 0; k < sizej; ++k) {
+                                        int valuej = valuesj[k];
+                                        int weight = w[valuei][valuej];
+                                        if (weight > max) {
+                                            max = weight;
+                                        }
+                                    }
+                                }
+                            }
+
+
+                            return -max;
+                        },
+                        xi -> {
+                            int min = Integer.MAX_VALUE;
+
+                            int[] values = new int[xi.getSize()];
+                            int size = xi.fillArray(values);
+
+                            int bestLocation = xi.getMin(); // fallback
+
+                            for (int i = 0; i < size; ++i) {
+                                int location = values[i];
+                                for (int j = 0; j < n; ++j) {
+                                    IntVar xj = x[j];
+                                    int[] valuesj = new int[xj.getSize()];
+                                    int sizej = xj.fillArray(valuesj);
+                                    for (int k = 0; k < sizej; ++k) {
+                                        int valuej = valuesj[k];
+                                        int distance = d[location][valuej];
+                                        if (distance < min) {
+                                            min = distance;
+                                        }
+                                    }
+                                }
+                            }
+
+                            return branch(
+                                    () -> equal(xi, bestLocation),
+                                    () -> notEqual(xi, bestLocation)
+                            );
+                        }
+                )
+        );
 
 
         // build the objective function
@@ -94,23 +154,31 @@ public class QAPLNS {
         int nRestarts = 1000;
         int failureLimit = 50;
         Random rand = new java.util.Random(0);
-
+        int relax = 70;
         for (int i = 0; i < nRestarts; i++) {
-            System.out.println("restart number #"+i);
+            try {
+    //            System.out.println("restart number #"+i);
 
-            // Record the state such that the fragment constraints can be cancelled
-            cp.push();
+                // Record the state such that the fragment constraints can be cancelled
+                cp.push();
 
-            // Assign the fragment 5% of the variables randomly chosen
-            for (int j = 0; j < n; j++) {
-                if (rand.nextInt(100) < 5) {
-                    equal(x[j],xBest[j]);
+                // Assign the fragment 5% of the variables randomly chosen
+                for (int j = 0; j < n; j++) {
+                    if (rand.nextInt(100) < relax) {
+                        equal(x[j],xBest[j]);
+                    }
+                }
+                dfs.start(statistics -> statistics.nFailures >= failureLimit);
+
+                // cancel all the fragment constraints
+                cp.pop();
+            } catch(InconsistencyException e) {
+                cp.pop();
+                relax = Math.max(relax - 5, 10);
+                if (relax == 10) {
+                    relax = 80;
                 }
             }
-            dfs.start(statistics -> statistics.nFailures >= failureLimit);
-
-            // cancel all the fragment constraints
-            cp.pop();
         }
 
     }
