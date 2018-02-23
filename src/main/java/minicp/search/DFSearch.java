@@ -90,7 +90,7 @@ public class DFSearch {
 //        }
 //        else {
 //            for (Alternative alt : alternatives) {
-//                state.push();
+//                trail.push();
 //                try {
 //                    statistics.nNodes++;
 //                    alt.call();
@@ -99,7 +99,7 @@ public class DFSearch {
 //                    notifyFailure();
 //                    statistics.nFailures++;
 //                }
-//                state.pop();
+//                trail.pop();
 //            }
 //        }
 //    }

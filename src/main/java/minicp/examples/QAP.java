@@ -33,7 +33,8 @@ public class QAP {
 
         // ---- read the instance -----
 
-        InputReader reader = new InputReader("data/qap.txt");
+        // 9552
+        InputReader reader = new InputReader("data/chr25a.txt");
 
         int n = reader.getInt();
         // Weights
@@ -68,23 +69,55 @@ public class QAP {
                     }
 
                     int max = Integer.MIN_VALUE;
-                    for (int j = 0; j < n; ++j) {
-                        try {
-                            IntVar z = element(w, xi, x[j]);
-                            max = z.getMax();
-                        } catch (InconsistencyException e) {}
+                    int[] values = new int[xi.getSize()];
+                    int size = xi.fillArray(values);
+
+                    for (int i = 0; i < size; ++i) {
+                        int valuei = values[i];
+                        for (int j = 0; j < n; ++j) {
+                            IntVar xj = x[j];
+                            int[] valuesj = new int[xj.getSize()];
+                            int sizej = xj.fillArray(valuesj);
+                            for (int k = 0; k < sizej; ++k) {
+                                int valuej = valuesj[k];
+                                int weight = w[valuei][valuej];
+                                if (weight > max) {
+                                    max = weight;
+                                }
+                            }
+                        }
                     }
+
 
                     return -max;
                 },
                 xi -> {
                     int min = Integer.MAX_VALUE;
 
+                    int[] values = new int[xi.getSize()];
+                    int size = xi.fillArray(values);
 
-                    int v = xi.getMin(); // value selector (TODO)
+                    int bestLocation = xi.getMin(); // fallback
+
+                    for (int i = 0; i < size; ++i) {
+                        int location = values[i];
+                        for (int j = 0; j < n; ++j) {
+                            IntVar xj = x[j];
+                            int[] valuesj = new int[xj.getSize()];
+                            int sizej = xj.fillArray(valuesj);
+                            for (int k = 0; k < sizej; ++k) {
+                                int valuej = valuesj[k];
+                                int distance = d[location][valuej];
+                                if (distance < min) {
+                                    min = distance;
+                                }
+                            }
+                        }
+                    }
+
                     return branch(
-                            () -> equal(xi, v),
-                            () -> notEqual(xi, v)
+                            () -> equal(xi, bestLocation),
+                            () -> notEqual(xi, bestLocation)
                     );
                 }
             )
