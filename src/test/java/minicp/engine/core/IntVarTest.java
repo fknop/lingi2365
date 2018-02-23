@@ -368,4 +368,128 @@ public class IntVarTest {
             e.print();
         }
     }
+
+    @Test
+    public void testFillArray(){
+        Solver cp = new Solver();
+
+        IntVar x = makeIntVar(cp,-3,4);
+        int[] domain = {-3,-2,-1,0,1,2,3,4};
+
+        int size = x.getSize();
+        int[] a = new int[size];
+
+        size = x.fillArray(a);
+        assertEquals(8, size);
+
+        for(int i = 0 ; i < size ; i++) {
+            assertEquals(domain[i], a[i]);
+        }
+
+    }
+
+    @Test
+    public void testFillArrayRemove(){
+        Solver cp = new Solver();
+
+        IntVar x = makeIntVar(cp,-3,4);
+        int[] domain = {-3,-2,-1,4,3,2};
+        try {
+            x.remove(0);
+            x.remove(1);
+        } catch (InconsistencyException e) {
+            fail("should not fail");
+        }
+        int size = x.getSize();
+        int[] a = new int[size];
+
+        size = x.fillArray(a);
+        for(int i = 0 ; i < size ; i++) {
+            assertEquals(domain[i], a[i]);
+        }
+
+    }
+
+
+
+    @Test
+    public void testFillArrayOffset(){
+        Solver cp = new Solver();
+
+        IntVar x = plus(makeIntVar(cp,-3,4),3);
+        int[] domain = {0,1,2,3,4,5,6,7};
+
+        int size = x.getSize();
+        int[] a = new int[size];
+
+        size = x.fillArray(a);
+        for(int i = 0 ; i < size ; i++) {
+            assertEquals(domain[i], a[i]);
+        }
+    }
+
+    @Test
+    public void testFillArrayOffsetRemove(){
+        Solver cp = new Solver();
+
+        IntVar x = plus(makeIntVar(cp,-3,4),3);
+        int[] domain = {0,1,2,7,4,5};
+
+        try {
+            x.remove(3);
+            x.remove(6);
+        } catch (InconsistencyException e) {
+            fail("should not fail");
+        }
+
+        int size = x.getSize();
+        int[] a = new int[size];
+
+        size = x.fillArray(a);
+        for(int i = 0 ; i < size ; i++) {
+            assertEquals(domain[i], a[i]);
+        }
+    }
+
+    @Test
+    public void testFillArrayMul(){
+        Solver cp = new Solver();
+
+        IntVar x = mul(mul(makeIntVar(cp,-3,4),-3),-1);
+        int[] domain = {-9,-6,-3,0,3,6,9,12};
+
+
+        int size = x.getSize();
+        int[] a = new int[size];
+
+        size = x.fillArray(a);
+        for(int i = 0 ; i < size ; i++) {
+            assertEquals(domain[i], a[i]);
+    }
+
+    }
+
+    @Test
+    public void testFillArrayMulRemove(){
+        Solver cp = new Solver();
+
+        IntVar x = mul(mul(makeIntVar(cp,-3,4),-3),-1);
+        int[] domain = {-9,12,-3,0,9,6};
+
+        try {
+            x.remove(-6);
+            x.remove(3);
+        } catch (InconsistencyException e) {
+            fail("should not fail");
+        }
+
+        int size = x.getSize();
+        int[] a = new int[size];
+
+        size = x.fillArray(a);
+        for(int i = 0 ; i < size ; i++) {
+            assertEquals(domain[i], a[i]);
+        }
+
+    }
 }

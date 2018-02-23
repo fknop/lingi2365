@@ -106,6 +106,11 @@ public class SparseSetDomain extends IntDomain {
 
     @Override
     public int fillArray(int[] dest) {
-        return domain.fillArray(dest);
+        int size = domain.fillArray(dest);
+        for(int i = 0 ; i < size ; i++) {
+            dest[i] += this.offset;
+        }
+        
+        return size;
     }
 }

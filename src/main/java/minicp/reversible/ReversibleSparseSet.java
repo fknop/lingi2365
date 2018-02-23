@@ -19,7 +19,7 @@ import minicp.util.NotImplementedException;
 
 import java.util.NoSuchElementException;
 
-public class ReversibleSparseSet {
+public class    ReversibleSparseSet {
 
     private int [] values;
     private int [] indexes;
@@ -93,12 +93,6 @@ public class ReversibleSparseSet {
     public int fillArray(int [] dest) {
         int s = size.getValue();
         System.arraycopy(values, 0, dest, 0, s);
-
-        if (n != 0) {
-            for (int i = 0; i < s; ++i) {
-                values[i] += n;
-            }
-        }
 
         return s;
     }

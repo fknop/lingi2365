@@ -129,4 +129,5 @@ public interface IntVar {
      */
     int removeAbove(int v) throws InconsistencyException;
 
+
 }
