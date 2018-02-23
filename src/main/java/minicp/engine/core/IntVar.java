@@ -127,4 +127,11 @@ public interface IntVar {
      */
     int removeAbove(int v) throws InconsistencyException;
 
+    /**
+     * Return the number of values contained in dest after the call
+     * @param dest
+     * @return
+     */
+    public int fillArray(int [] dest);
+
 }

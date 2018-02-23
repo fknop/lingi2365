@@ -88,6 +88,7 @@ public class IntVarImpl implements IntVar {
      * @param values
      */
     public IntVarImpl(Solver cp, Set<Integer> values) {
+
         throw new NotImplementedException();
     }
 
@@ -158,6 +159,9 @@ public class IntVarImpl implements IntVar {
 
     public int removeAbove(int v) throws InconsistencyException {
         return domain.removeAbove(v, domListener);
+    }
+
+    public int fillArray(int [] dest)){
     }
 
 }
