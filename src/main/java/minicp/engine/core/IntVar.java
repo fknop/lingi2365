@@ -67,6 +67,8 @@ public interface IntVar {
      */
     void propagateOnBoundChange(Constraint c);
 
+    int fillArray(int [] dest);
+
     /**
      * Return the minimum of the domain of the variable
      * @return the minimum of the domain of the variable
@@ -127,11 +129,5 @@ public interface IntVar {
      */
     int removeAbove(int v) throws InconsistencyException;
 
-    /**
-     * Return the number of values contained in dest after the call
-     * @param dest
-     * @return
-     */
-    public int fillArray(int [] dest);
 
 }

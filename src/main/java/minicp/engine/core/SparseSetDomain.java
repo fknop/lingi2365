@@ -103,4 +103,9 @@ public class SparseSetDomain extends IntDomain {
         if (domain.getSize() == 0) throw INCONSISTENCY;
         else return domain.getMax() + offset;
     }
+
+    @Override
+    public int fillArray(int[] dest) {
+        return domain.fillArray(dest);
+    }
 }

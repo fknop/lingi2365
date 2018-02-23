@@ -50,12 +50,6 @@ public class MaximizeTest {
 
                 cp.post(maximize(y,dfs));
 
-                dfs.onNode(() -> {
-                    System.out.println(y.getMin() + " " + y.getMax());
-                });
-
-
-
                 SearchStatistics stats = dfs.start();
 
                 assertEquals(stats.nSolutions,11);

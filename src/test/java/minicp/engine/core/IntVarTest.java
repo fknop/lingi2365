@@ -74,6 +74,38 @@ public class IntVarTest {
     }
 
     @Test
+    public void testIntVarView() {
+        Solver cp  = makeSolver();
+
+        IntVar x = plus(mul(plus(makeIntVar(cp,10),1),2),-1); // 2*(x+1)-1 = 2x+1 D(x)= {1,3,5,...,19}
+        IntVar y = plus(minus(mul(plus(makeIntVar(cp,10),-1),2)),-1); // (-2*(x-1))-1 = -2x+1 D(x)= {-17,-15,..,1}
+
+        cp.getTrail().push();
+
+
+        try {
+
+            assertFalse(x.isBound());
+            assertEquals(x.getMin(),1);
+            assertEquals(x.getMax(),19);
+            assertFalse(x.contains(2));
+            x.remove(5);
+            assertFalse(x.contains(5));
+
+            assertFalse(y.isBound());
+            assertEquals(y.getMin(),-17);
+            assertEquals(y.getMax(),1);
+            assertFalse(x.contains(-2));
+            x.remove(-5);
+            assertFalse(x.contains(-5));
+
+        } catch(InconsistencyException e) { fail("should not fail here");}
+
+
+
+    }
+
+    @Test
     public void onDomainChangeOnBind() {
         propagateCalled = false;
         Solver cp  = makeSolver();
@@ -341,13 +373,15 @@ public class IntVarTest {
     public void testFillArray(){
         Solver cp = new Solver();
 
-        IntVar x = makeIntVar(cp,-3,4)
+        IntVar x = makeIntVar(cp,-3,4);
         int[] domain = {-3,-2,-1,0,1,2,3,4};
 
         int size = x.getSize();
         int[] a = new int[size];
 
         size = x.fillArray(a);
+        assertEquals(8, size);
+
         for(int i = 0 ; i < size ; i++) {
             assertEquals(domain[i], a[i]);
         }

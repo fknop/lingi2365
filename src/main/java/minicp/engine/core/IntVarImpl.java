@@ -78,10 +78,6 @@ public class IntVarImpl implements IntVar {
         onBounds = new ReversibleStack<>(cp.getTrail());
     }
 
-    public Solver getSolver() {
-        return cp;
-    }
-
     /**
      * Create a variable with values as initial domain
      * @param cp
@@ -89,8 +85,43 @@ public class IntVarImpl implements IntVar {
      */
     public IntVarImpl(Solver cp, Set<Integer> values) {
 
-        throw new NotImplementedException();
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+
+        for (int value : values) {
+            if (value < min) {
+                min = value;
+            }
+
+            if (value > max) {
+                max = value;
+            }
+        }
+
+        this.cp = cp;
+        cp.registerVar(this);
+        onDomain = new ReversibleStack<>(cp.getTrail());
+        onBind  = new ReversibleStack<>(cp.getTrail());
+        onBounds = new ReversibleStack<>(cp.getTrail());
+        domain = new SparseSetDomain(cp.getTrail(), min, max);
+
+        for (int i = min; i <= max; ++i) {
+            if (!values.contains(i)) {
+                try {
+                    domain.remove(i, domListener);
+                } catch (InconsistencyException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
+
+
+    public Solver getSolver() {
+        return cp;
+    }
+
 
 
     public boolean isBound() {
@@ -123,6 +154,11 @@ public class IntVarImpl implements IntVar {
     }
 
     public void propagateOnBoundChange(Constraint c) { onBounds.push(c);}
+
+    @Override
+    public int fillArray(int[] dest) {
+        return domain.fillArray(dest);
+    }
 
     private void scheduleAll(ReversibleStack<Constraint> constraints) {
         for (int i = 0; i < constraints.size(); i++)
@@ -159,9 +195,6 @@ public class IntVarImpl implements IntVar {
 
     public int removeAbove(int v) throws InconsistencyException {
         return domain.removeAbove(v, domListener);
-    }
-
-    public int fillArray(int [] dest)){
     }
 
 }
