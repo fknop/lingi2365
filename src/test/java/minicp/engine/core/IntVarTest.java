@@ -393,7 +393,7 @@ public class IntVarTest {
         Solver cp = new Solver();
 
         IntVar x = makeIntVar(cp,-3,4);
-        int[] domain = {-3,-2,-1,2,3,4};
+        int[] domain = {-3,-2,-1,4,3,2};
         try {
             x.remove(0);
             x.remove(1);
@@ -433,7 +433,7 @@ public class IntVarTest {
         Solver cp = new Solver();
 
         IntVar x = plus(makeIntVar(cp,-3,4),3);
-        int[] domain = {0,1,2,4,5,7};
+        int[] domain = {0,1,2,7,4,5};
 
         try {
             x.remove(3);
@@ -456,14 +456,8 @@ public class IntVarTest {
         Solver cp = new Solver();
 
         IntVar x = mul(mul(makeIntVar(cp,-3,4),-3),-1);
-        int[] domain = {-9,-3,0,6,9,12};
+        int[] domain = {-9,-6,-3,0,3,6,9,12};
 
-        try {
-            x.remove(-6);
-            x.remove(3);
-        } catch (InconsistencyException e) {
-            fail("should not fail");
-        }
 
         int size = x.getSize();
         int[] a = new int[size];
@@ -471,7 +465,7 @@ public class IntVarTest {
         size = x.fillArray(a);
         for(int i = 0 ; i < size ; i++) {
             assertEquals(domain[i], a[i]);
-        }
+    }
 
     }
 
@@ -480,8 +474,14 @@ public class IntVarTest {
         Solver cp = new Solver();
 
         IntVar x = mul(mul(makeIntVar(cp,-3,4),-3),-1);
-        int[] domain = {-9,-6,-3,0,3,6,9,12};
+        int[] domain = {-9,12,-3,0,9,6};
 
+        try {
+            x.remove(-6);
+            x.remove(3);
+        } catch (InconsistencyException e) {
+            fail("should not fail");
+        }
 
         int size = x.getSize();
         int[] a = new int[size];

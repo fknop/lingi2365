@@ -94,12 +94,6 @@ public class    ReversibleSparseSet {
         int s = size.getValue();
         System.arraycopy(values, 0, dest, 0, s);
 
-        if (n != 0) {
-            for (int i = 0; i < s; ++i) {
-                values[i] += n;
-            }
-        }
-
         return s;
     }
 
