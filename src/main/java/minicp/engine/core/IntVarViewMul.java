@@ -66,6 +66,16 @@ public class IntVarViewMul implements IntVar {
     }
 
     @Override
+    public int fillArray(int[] dest) {
+        int size = x.fillArray(dest);
+        for (int i = 0; i < size; ++i) {
+            dest[i] *= a;
+        }
+
+        return size;
+    }
+
+    @Override
     public int getMin() {
         return a * x.getMin();
     }

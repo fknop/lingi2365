@@ -27,8 +27,8 @@ public class DFSearch {
     private Choice choice;
     private Trail trail;
 
-    private List<SolutionListener> solutionListeners = new LinkedList<SolutionListener>();
-    private List<FailListener> failListeners = new LinkedList<FailListener>();
+    private List<SolutionListener> solutionListeners = new LinkedList<>();
+    private List<FailListener> failListeners = new LinkedList<>();
 
     @FunctionalInterface
     public interface SolutionListener {
@@ -165,7 +165,6 @@ public class DFSearch {
                 if (alt.length > 1) {
                     alternatives.add(new Pair<>(level, alt[1]));
                 }
-
                 alternatives.add(new Pair<>(level, alt[0]));
             }
 

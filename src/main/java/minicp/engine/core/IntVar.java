@@ -67,6 +67,8 @@ public interface IntVar {
      */
     void propagateOnBoundChange(Constraint c);
 
+    int fillArray(int [] dest);
+
     /**
      * Return the minimum of the domain of the variable
      * @return the minimum of the domain of the variable

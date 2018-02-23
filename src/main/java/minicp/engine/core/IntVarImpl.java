@@ -154,6 +154,11 @@ public class IntVarImpl implements IntVar {
 
     public void propagateOnBoundChange(Constraint c) { onBounds.push(c);}
 
+    @Override
+    public int fillArray(int[] dest) {
+        return domain.fillArray(dest);
+    }
+
     private void scheduleAll(ReversibleStack<Constraint> constraints) {
         for (int i = 0; i < constraints.size(); i++)
             cp.schedule(constraints.get(i));

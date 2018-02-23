@@ -39,14 +39,16 @@ public class MaximizeTest {
                 IntVar y = makeIntVar(cp, 10,20);
 
                 IntVar[] x = new IntVar[]{y};
-                DFSearch dfs = makeDfs(cp,() -> y.isBound() ? TRUE : branch(() -> equal(y,y.getMin()),() -> notEqual(y,y.getMin())));
+                DFSearch dfs = makeDfs(cp,() -> y.isBound() ? TRUE : branch(
+                        () -> {
+                            System.out.println("equal");
+                            equal(y, y.getMin());
+                        },
+                        () -> {System.out.println("not equal"); notEqual(y, y.getMin());}
+                    )
+                );
 
                 cp.post(maximize(y,dfs));
-
-                dfs.onSolution(() -> {
-                    System.out.println("y bound");
-                    System.out.println(y.getMin());
-                });
 
                 SearchStatistics stats = dfs.start();
 
