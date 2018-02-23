@@ -61,64 +61,62 @@ public class QAP {
 
 //        DFSearch dfs = makeDfs(cp,firstFail(x));
         DFSearch dfs = makeDfs(cp,
-            selectMin(x,
-                xi -> xi.getSize() > 1, // filter,
-                xi -> {
-                    int max = Integer.MIN_VALUE;
-                    int[] values = new int[xi.getSize()];
-                    int size = xi.fillArray(values);
+                selectMin(x,
+                        xi -> xi.getSize() > 1, // filter,
+                        xi -> {
+                            int max = Integer.MIN_VALUE;
 
-                    for (int i = 0; i < size; ++i) {
-                        int valuei = values[i];
-                        for (int j = 0; j < n; ++j) {
-                            IntVar xj = x[j];
-                            int[] valuesj = new int[xj.getSize()];
-                            int sizej = xj.fillArray(valuesj);
-                            for (int k = 0; k < sizej; ++k) {
-                                int valuej = valuesj[k];
-                                int weight = w[valuei][valuej];
-                                if (weight > max) {
-                                    max = weight;
+                            int[] values = new int[xi.getSize()];
+                            int[] valuesj = new int[n];
+                            int size = xi.fillArray(values);
+
+                            for (int i = 0; i < size; ++i) {
+                                int valuei = values[i];
+                                for (int j = 0; j < n; ++j) {
+                                    int sizej = x[j].fillArray(valuesj);
+                                    for (int k = 0; k < sizej; ++k) {
+                                        int valuej = valuesj[k];
+                                        int weight = w[valuei][valuej];
+                                        if (weight > max) {
+                                            max = weight;
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
 
+                            return -max;
+                        },
+                        xi -> {
+                            int min = Integer.MAX_VALUE;
 
-                    return -max;
-                },
-                xi -> {
-                    int min = Integer.MAX_VALUE;
+                            int[] values = new int[xi.getSize()];
+                            int[] valuesj = new int[n];
 
-                    int[] values = new int[xi.getSize()];
-                    int size = xi.fillArray(values);
+                            int size = xi.fillArray(values);
 
-                    int bestLocation = xi.getMin(); // fallback
+                            int bestLocation = xi.getMin(); // fallback
 
-                    for (int i = 0; i < size; ++i) {
-                        int location = values[i];
-                        for (int j = 0; j < n; ++j) {
-                            IntVar xj = x[j];
-                            int[] valuesj = new int[xj.getSize()];
-                            int sizej = xj.fillArray(valuesj);
-                            for (int k = 0; k < sizej; ++k) {
-                                int valuej = valuesj[k];
-                                int distance = d[location][valuej];
-                                if (distance < min) {
-                                    min = distance;
+                            for (int i = 0; i < size; ++i) {
+                                int location = values[i];
+                                for (int j = 0; j < n; ++j) {
+                                    int sizej = x[j].fillArray(valuesj);
+                                    for (int k = 0; k < sizej; ++k) {
+                                        int valuej = valuesj[k];
+                                        int distance = d[location][valuej];
+                                        if (distance < min) {
+                                            min = distance;
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
 
-                    return branch(
-                            () -> equal(xi, bestLocation),
-                            () -> notEqual(xi, bestLocation)
-                    );
-                }
-            )
+                            return branch(
+                                    () -> equal(xi, bestLocation),
+                                    () -> notEqual(xi, bestLocation)
+                            );
+                        }
+                )
         );
-
         // build the objective function
         IntVar[] weightedDist = new IntVar[n*n];
         int ind = 0;

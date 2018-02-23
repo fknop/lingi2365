@@ -106,6 +106,7 @@ public class DFSearch {
             });
         }
 
+        // Push right to left on the stack so that left is first
         for (int i = alts.length - 1; i >= 0; i--) {
             Alternative alt = alts[i];
 

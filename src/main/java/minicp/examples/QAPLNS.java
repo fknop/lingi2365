@@ -33,7 +33,7 @@ public class QAPLNS {
     public static void main(String[] args) throws InconsistencyException {
         
         // ---- read the instance -----
-        // 5968
+        // 4630
 //        InputReader reader = new InputReader("data/qap.txt");
          InputReader reader = new InputReader("data/chr25a.txt");
 
@@ -66,15 +66,15 @@ public class QAPLNS {
                         xi -> xi.getSize() > 1, // filter,
                         xi -> {
                             int max = Integer.MIN_VALUE;
+
                             int[] values = new int[xi.getSize()];
+                            int[] valuesj = new int[n];
                             int size = xi.fillArray(values);
 
                             for (int i = 0; i < size; ++i) {
                                 int valuei = values[i];
                                 for (int j = 0; j < n; ++j) {
-                                    IntVar xj = x[j];
-                                    int[] valuesj = new int[xj.getSize()];
-                                    int sizej = xj.fillArray(valuesj);
+                                    int sizej = x[j].fillArray(valuesj);
                                     for (int k = 0; k < sizej; ++k) {
                                         int valuej = valuesj[k];
                                         int weight = w[valuei][valuej];
@@ -85,13 +85,14 @@ public class QAPLNS {
                                 }
                             }
 
-
                             return -max;
                         },
                         xi -> {
                             int min = Integer.MAX_VALUE;
 
                             int[] values = new int[xi.getSize()];
+                            int[] valuesj = new int[n];
+
                             int size = xi.fillArray(values);
 
                             int bestLocation = xi.getMin(); // fallback
@@ -99,9 +100,7 @@ public class QAPLNS {
                             for (int i = 0; i < size; ++i) {
                                 int location = values[i];
                                 for (int j = 0; j < n; ++j) {
-                                    IntVar xj = x[j];
-                                    int[] valuesj = new int[xj.getSize()];
-                                    int sizej = xj.fillArray(valuesj);
+                                    int sizej = x[j].fillArray(valuesj);
                                     for (int k = 0; k < sizej; ++k) {
                                         int valuej = valuesj[k];
                                         int distance = d[location][valuej];
@@ -154,7 +153,7 @@ public class QAPLNS {
         int nRestarts = 1000;
         int failureLimit = 50;
         Random rand = new java.util.Random(0);
-        int relax = 70;
+        int percentage = 20;
         for (int i = 0; i < nRestarts; i++) {
             try {
     //            System.out.println("restart number #"+i);
@@ -164,20 +163,21 @@ public class QAPLNS {
 
                 // Assign the fragment 5% of the variables randomly chosen
                 for (int j = 0; j < n; j++) {
-                    if (rand.nextInt(100) < relax) {
+                    if (rand.nextInt(100) < percentage) {
                         equal(x[j],xBest[j]);
                     }
+                }
+
+                if (i % 3 == 0) {
+                    percentage += 5;
                 }
                 dfs.start(statistics -> statistics.nFailures >= failureLimit);
 
                 // cancel all the fragment constraints
                 cp.pop();
             } catch(InconsistencyException e) {
+                percentage = 20;
                 cp.pop();
-                relax = Math.max(relax - 5, 10);
-                if (relax == 10) {
-                    relax = 80;
-                }
             }
         }
 
