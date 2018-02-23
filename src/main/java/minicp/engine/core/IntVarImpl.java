@@ -85,6 +85,10 @@ public class IntVarImpl implements IntVar {
      */
     public IntVarImpl(Solver cp, Set<Integer> values) {
 
+        if (values.isEmpty()) {
+            throw new InvalidParameterException("The values must not be an empty set");
+        }
+
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
 
@@ -110,7 +114,7 @@ public class IntVarImpl implements IntVar {
                 try {
                     domain.remove(i, domListener);
                 } catch (InconsistencyException e) {
-                    e.printStackTrace();
+                    assert(false);
                 }
             }
         }

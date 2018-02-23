@@ -24,6 +24,8 @@ import minicp.util.InputReader;
 
 import static minicp.cp.Factory.*;
 import static minicp.cp.Heuristics.firstFail;
+import static minicp.search.Selector.branch;
+import static minicp.search.Selector.selectMin;
 
 public class QAP {
 
@@ -56,8 +58,37 @@ public class QAP {
 
         cp.post(allDifferent(x));
 
-        DFSearch dfs = makeDfs(cp,firstFail(x));
+//        DFSearch dfs = makeDfs(cp,firstFail(x));
+        DFSearch dfs = makeDfs(cp,
+            selectMin(x,
+                xi -> xi.getSize() > 1, // filter,
+                xi -> {
+                    if (xi.isBound()) {
+                        return Integer.MAX_VALUE;
+                    }
 
+                    int max = Integer.MIN_VALUE;
+                    for (int j = 0; j < n; ++j) {
+                        try {
+                            IntVar z = element(w, xi, x[j]);
+                            max = z.getMax();
+                        } catch (InconsistencyException e) {}
+                    }
+
+                    return -max;
+                },
+                xi -> {
+                    int min = Integer.MAX_VALUE;
+
+
+                    int v = xi.getMin(); // value selector (TODO)
+                    return branch(
+                            () -> equal(xi, v),
+                            () -> notEqual(xi, v)
+                    );
+                }
+            )
+        );
 
         // build the objective function
         IntVar[] weightedDist = new IntVar[n*n];
