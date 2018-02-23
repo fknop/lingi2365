@@ -18,19 +18,17 @@ package minicp.search;
 import minicp.reversible.ReversibleInt;
 import minicp.reversible.Trail;
 import minicp.util.InconsistencyException;
+import minicp.util.NotImplementedException;
 
 import java.util.*;
 
 public class DFSearch {
 
     private Choice choice;
-    private Trail state;
+    private Trail trail;
 
     private List<SolutionListener> solutionListeners = new LinkedList<SolutionListener>();
     private List<FailListener> failListeners = new LinkedList<FailListener>();
-
-
-
 
     @FunctionalInterface
     public interface SolutionListener {
@@ -60,17 +58,21 @@ public class DFSearch {
     }
 
     public DFSearch(Trail state, Choice branching) {
-        this.state = state;
+        this.trail = state;
         this.choice = branching;
     }
 
     public SearchStatistics start(SearchLimit limit) {
         SearchStatistics statistics = new SearchStatistics();
-        int level = state.getLevel();
+        int level = trail.getLevel();
         try {
             dfs(statistics,limit);
-        } catch (StopSearchException e) {}
-        state.popUntil(level);
+        }
+        catch (StopSearchException e) {}
+        catch (StackOverflowError e) {
+            throw new NotImplementedException("dfs with explicit stack needed");
+        }
+        trail.popUntil(level);
         return statistics;
     }
 
@@ -133,7 +135,7 @@ public class DFSearch {
             }
 
             if (alternatives.size() > 0) {
-                state.push();
+                trail.push();
                 try {
                     level++;
                     Alternative alternative = alternatives.pop().getValue();
@@ -141,31 +143,84 @@ public class DFSearch {
                     statistics.nNodes++;
                 }
                 catch (InconsistencyException e) {
-
-                    e.printStackTrace();
                     statistics.nFailures++;
                     notifyFailure();
                     level = alternatives.size() > 0 ? alternatives.peek().getKey() : -1;
-                    state.popUntil(level);
+                    trail.popUntil(level);
                     continue;
                 }
             }
 
             Alternative[] alt = choice.call();
+
+
             if (alt.length == 0) {
                 statistics.nSolutions++;
                 notifySolutionFound();
 
                 level = alternatives.size() > 0 ? alternatives.peek().getKey() : -1;
-                state.popUntil(level);
+                trail.popUntil(level);
             }
             else {
-                for (Alternative alternative : alt) {
-                    alternatives.push(new Pair<>(level, alternative));
+                if (alt.length > 1) {
+                    alternatives.add(new Pair<>(level, alt[1]));
                 }
+
+                alternatives.add(new Pair<>(level, alt[0]));
             }
+
         } while(alternatives.size() > 0);
     }
+
+//    public void dfs(SearchStatistics statistics, SearchLimit limit) {
+//        Stack<Alternative> alternatives = new Stack<>();
+//        expandNode(alternatives, statistics);
+//
+//        while(!alternatives.isEmpty()) {
+//            if (limit.stopSearch(statistics)) throw new StopSearchException();
+//            try {
+//                alternatives.pop().call();
+//                statistics.nNodes++;
+//            }
+//            catch (InconsistencyException e) {
+//                notifyFailure();
+//                statistics.nFailures++;
+//            }
+//        }
+//     }
+//
+//     private void expandNode(Stack<Alternative> alternatives, SearchStatistics statistics) {
+//        Alternative[] alts = choice.call();
+//
+//        if (alts.length == 0) {
+//            alternatives.push(() -> {
+//                trail.pop();
+//            });
+//
+//            alternatives.push(() -> {
+//                statistics.nSolutions++;
+//                notifySolutionFound();
+//            });
+//        }
+//
+//        for (int i = alts.length - 1; i >= 0; i--) {
+//            Alternative alt = alts[i];
+//
+//            alternatives.push(() -> {
+//                expandNode(alternatives, statistics);
+//            });
+//
+//            alternatives.push(() -> {
+//                trail.pop();
+//            });
+//
+//            alternatives.push(alt);
+//
+//            alternatives.push(() -> {
+//                trail.push();
+//            });
+//        }
+//     }
 }
 
 
