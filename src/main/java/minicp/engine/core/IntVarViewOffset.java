@@ -18,6 +18,7 @@ package minicp.engine.core;
 
 
 import minicp.util.InconsistencyException;
+import minicp.util.NotImplementedException;
 
 public class IntVarViewOffset implements IntVar {
 
@@ -88,6 +89,7 @@ public class IntVarViewOffset implements IntVar {
     public int getSize() {
         return x.getSize();
     }
+
 
     @Override
     public boolean isBound() {

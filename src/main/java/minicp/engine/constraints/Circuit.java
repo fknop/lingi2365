@@ -42,8 +42,8 @@ public class Circuit extends Constraint {
         orig = new ReversibleInt[x.length];
         lengthToDest = new ReversibleInt[x.length];
         for (int i = 0; i < x.length; i++) {
-            dest[i] = new ReversibleInt(cp.getTrail(),i);
-            orig[i] = new ReversibleInt(cp.getTrail(),i);
+            dest[i] = new ReversibleInt(cp.getTrail(), i);
+            orig[i] = new ReversibleInt(cp.getTrail(), i);
             lengthToDest[i] = new ReversibleInt(cp.getTrail(),0);
         }
     }
@@ -52,13 +52,70 @@ public class Circuit extends Constraint {
     @Override
     public void post() throws InconsistencyException {
         cp.post(allDifferent(x));
-        throw new NotImplementedException("Circuit");
-        // TODO
-        // Hint: use x[i].whenBind(...) to call the bind
+
+        for (int i = 0; i < x.length; ++i) {
+            int k = i;
+            x[i].whenBind(() -> this.bind(k));
+            x[i].propagateOnBind(this);
+
+            if (x[i].isBound()) {
+                bind(i);
+            }
+            // remove bounds
+            x[i].removeBelow(0);
+            x[i].removeAbove(x.length - 1);
+
+            // remove selfloops
+            if (x.length > 1) {
+                x[i].remove(i);
+            }
+        }
+
+        for (int i = 0; i < x.length;  ++i) {
+            System.out.println(dest[i]);
+            System.out.println(orig[i]);
+            System.out.println(lengthToDest[i]);
+        }
+        System.out.println("end");
     }
 
 
     private void bind(int i) throws InconsistencyException {
-        throw new NotImplementedException("Circuit");
+        int succ = x[i].getMin();
+
+//        lengthToDest[i].setValue(1 + lengthToDest[succ].getValue());
+
+        for (int j = 0; j < x.length; ++j) {
+            if (dest[j].getValue() == i) {
+                dest[j].setValue(dest[succ].getValue());
+                orig[i].setValue(orig[j].getValue());
+                lengthToDest[j].setValue(lengthToDest[succ].getValue() + lengthToDest[j].getValue());
+            }
+        }
+    }
+
+    @Override
+    public void propagate() throws InconsistencyException {
+
+        System.out.println("propagate");
+
+        boolean allBound = true;
+        int j = 0;
+        while (allBound && j < x.length) {
+            if (!x[j].isBound()) {
+                allBound = false;
+            }
+            j++;
+        }
+
+        if (allBound) {
+            if (x.length == 1 && lengthToDest[0].getValue() != 0) {
+                throw new InconsistencyException();
+            }
+
+            if (x.length > 1 && lengthToDest[0].getValue() != x.length) {
+                throw new InconsistencyException();
+            }
+        }
     }
 }

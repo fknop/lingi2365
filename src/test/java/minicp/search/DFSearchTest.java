@@ -30,6 +30,7 @@ import minicp.util.NotImplementedException;
 import org.junit.Test;
 import static minicp.search.Selector.*;
 import static minicp.cp.Factory.*;
+import static org.junit.Assert.assertEquals;
 
 
 public class DFSearchTest {
@@ -235,6 +236,39 @@ public class DFSearchTest {
             e.print();
         }
 
+    }
+
+
+	@Test
+    public void testStopExpandWhenFailure() {
+        // ensures that when some constraints fail on a given node, we do not visit corresponding child nodes
+        Trail tr = new Trail();
+        ReversibleInt i = new ReversibleInt(tr,0);
+        boolean [] values = new boolean[2];
+
+        DFSearch dfs = new DFSearch(tr,() -> {
+            if (i.getValue() >= values.length || i.getValue() < 0) {
+                return branch(() -> {throw new InconsistencyException();});
+            }
+            else return branch (
+                    ()-> {
+                        // left branch
+                        values[i.getValue()] = false;
+//                        i.decrement();
+                        i.setValue(-1);
+                    },
+                    ()-> {
+                        // right branch
+                        values[i.getValue()] = true;
+                        i.increment();
+                    }
+            );
+        });
+        SearchStatistics stats = dfs.start(stat -> stat.nNodes >= 8);
+
+        // if we do not search deeper when there is a failure, 7 nodes only must be visited
+        assertEquals(7, stats.nNodes);
+//        assert(stats.nNodes == 7);
     }
 
 

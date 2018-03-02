@@ -18,6 +18,7 @@ package minicp.engine.core;
 
 
 import minicp.util.InconsistencyException;
+import minicp.util.NotImplementedException;
 
 public class IntVarViewMul implements IntVar {
 
@@ -89,6 +90,8 @@ public class IntVarViewMul implements IntVar {
     public int getSize() {
         return x.getSize();
     }
+
+
 
     @Override
     public boolean isBound() {

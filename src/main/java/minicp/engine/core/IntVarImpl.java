@@ -84,7 +84,6 @@ public class IntVarImpl implements IntVar {
      * @param values
      */
     public IntVarImpl(Solver cp, Set<Integer> values) {
-
         if (values.isEmpty()) {
             throw new InvalidParameterException("The values must not be an empty set");
         }
@@ -118,7 +117,6 @@ public class IntVarImpl implements IntVar {
                 }
             }
         }
-
     }
 
 
