@@ -90,8 +90,8 @@ public class DFSearch {
                 alternatives.pop().call();
             }
             catch (InconsistencyException e) {
-                notifyFailure();
                 statistics.nFailures++;
+                notifyFailure();
             }
         }
      }
@@ -115,9 +115,11 @@ public class DFSearch {
             });
 
             alternatives.push(() -> {
-                alt.call();
-                expandNode(alternatives, statistics);
                 statistics.nNodes++;
+                alt.call();
+
+                // This not does get called if InconsistencyException
+                expandNode(alternatives, statistics);
             });
 
             alternatives.push(() -> {
