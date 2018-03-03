@@ -34,8 +34,20 @@ public class Selector {
     }
 
     @FunctionalInterface
+    public interface ValueFunIndexed<T> {
+        float call(T x, int i);
+    }
+
+
+
+    @FunctionalInterface
     public interface BranchOn<T> {
         Alternative[] call(T x);
+    }
+
+    @FunctionalInterface
+    public interface BranchOnIndexed<T> {
+        Alternative[] call(T x, int i);
     }
 
     public static <T> Choice selectMin(T[] x, Filter<T> p, ValueFun<T> f, BranchOn<T> body) {
@@ -53,6 +65,31 @@ public class Selector {
             }
         };
     }
+
+    public static <T> Choice selectMinIndexed(T[] x, Filter<T> p, ValueFunIndexed<T> f, BranchOnIndexed<T> body) {
+        return () -> {
+            T sel = null;
+            float best = Float.MAX_VALUE;
+            int selIndex = 0;
+
+            for (int i = 0; i < x.length; ++i) {
+                if (p.call(x[i])) {
+                    float value = f.call(x[i], i);
+                    if (value < best) {
+                        best = value;
+                        sel = x[i];
+                        selIndex = i;
+                    }
+                }
+            }
+            if (sel == null) {
+                return TRUE;
+            } else {
+                return body.call(sel, selIndex);
+            }
+        };
+    }
+
 
 
 }

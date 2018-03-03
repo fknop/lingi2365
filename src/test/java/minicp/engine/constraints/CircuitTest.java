@@ -75,6 +75,7 @@ public class CircuitTest {
                 Solver cp = new Solver();
                 cp.post(new Circuit(instanciate(cp,circuit1ok)));
             } catch (InconsistencyException e) {
+                e.printStackTrace();
                 fail("should not fail");
             }
 

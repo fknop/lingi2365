@@ -56,7 +56,6 @@ public class Circuit extends Constraint {
         for (int i = 0; i < x.length; ++i) {
             int k = i;
             x[i].whenBind(() -> this.bind(k));
-            x[i].propagateOnBind(this);
 
             if (x[i].isBound()) {
                 bind(i);
@@ -70,52 +69,37 @@ public class Circuit extends Constraint {
                 x[i].remove(i);
             }
         }
-
-        for (int i = 0; i < x.length;  ++i) {
-            System.out.println(dest[i]);
-            System.out.println(orig[i]);
-            System.out.println(lengthToDest[i]);
-        }
-        System.out.println("end");
     }
 
 
     private void bind(int i) throws InconsistencyException {
+
+        // Successor of bound variable
         int succ = x[i].getMin();
 
-//        lengthToDest[i].setValue(1 + lengthToDest[succ].getValue());
+        // Destination of successor of bound variable
+        int d = dest[succ].getValue();
 
-        for (int j = 0; j < x.length; ++j) {
-            if (dest[j].getValue() == i) {
-                dest[j].setValue(dest[succ].getValue());
-                orig[i].setValue(orig[j].getValue());
-                lengthToDest[j].setValue(lengthToDest[succ].getValue() + lengthToDest[j].getValue());
-            }
-        }
-    }
+        // Origin of bound variable
+        // Might be itself
+        int origin = orig[i].getValue();
 
-    @Override
-    public void propagate() throws InconsistencyException {
+        // The destination of the origin becomes the destination of the successor
+        dest[origin].setValue(d);
 
-        System.out.println("propagate");
+        // The origin of the destination becomes the origin of the bound variable
+        orig[d].setValue(origin);
 
-        boolean allBound = true;
-        int j = 0;
-        while (allBound && j < x.length) {
-            if (!x[j].isBound()) {
-                allBound = false;
-            }
-            j++;
-        }
+        // The total length from the origin to the new destination
+        // Current length from origin to i + the length from succ to its destination + the length from i to succ (1)
+        lengthToDest[origin].setValue(lengthToDest[origin].getValue() + lengthToDest[succ].getValue() + 1);
 
-        if (allBound) {
-            if (x.length == 1 && lengthToDest[0].getValue() != 0) {
-                throw new InconsistencyException();
-            }
+        int length = lengthToDest[origin].getValue();
 
-            if (x.length > 1 && lengthToDest[0].getValue() != x.length) {
-                throw new InconsistencyException();
-            }
+        // If the path is not yet a circuit, we remove the origin as potential destination to avoid
+        // subtours
+        if (length < x.length - 1) {
+            x[d].remove(origin);
         }
     }
 }

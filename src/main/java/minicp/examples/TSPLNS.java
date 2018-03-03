@@ -17,25 +17,22 @@ package minicp.examples;
 
 import minicp.engine.constraints.Circuit;
 import minicp.engine.constraints.Element1D;
-import minicp.engine.constraints.Element2D;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
-import minicp.search.Choice;
 import minicp.search.DFSearch;
-import minicp.search.SearchStatistics;
 import minicp.util.InconsistencyException;
+import minicp.util.InputReader;
 
-import java.util.Arrays;
+import java.util.Random;
 
 import static minicp.cp.Factory.*;
-import static minicp.cp.Heuristics.firstFail;
+import static minicp.examples.TSP.tspHeuristic;
 import static minicp.search.Selector.branch;
 import static minicp.search.Selector.selectMin;
-import static minicp.search.Selector.selectMinIndexed;
 
-public class TSP {
+public class TSPLNS {
+
     public static void main(String[] args) throws InconsistencyException {
-
 
         // instance gr17 https://people.sc.fsu.edu/~jburkardt/datasets/tsp/gr17_d.txt
         int[][] distanceMatrix = new int[][]{{0, 633, 257, 91, 412, 150, 80, 134, 259, 505, 353, 324, 70, 211, 268, 246, 121},
@@ -93,76 +90,49 @@ public class TSP {
         DFSearch dfs = makeDfs(cp, tspHeuristic(succ, distanceMatrix));
         cp.post(minimize(totalDist, dfs));
 
-        dfs.onSolution(() ->
-            System.out.println(totalDist)
-        );
+        // --- Large Neighborhood Search ---
 
-        // take a while (optimum = 291)
-        SearchStatistics stats = dfs.start();
+        // Current best solution
+        int[] xBest = new int[n];
+        for (int i = 0; i < n; i++) {
+            xBest[i] = i;
+        }
 
-        System.out.println(stats);
-    }
+        dfs.onSolution(() -> {
+            // Update the current best solution
+            for (int i = 0; i < n; i++) {
+                xBest[i] = succ[i].getMin();
+            }
+            System.out.println("objective:"+ totalDist.getMin());
+        });
 
-    /*
-    	#choice: 11696
-	#fail: 5840
-	#sols : 9
 
+        int nRestarts = 1000;
+        int failureLimit = 1000;
+        Random rand = new Random(0);
+        int percentage = 10;
+        for (int i = 0; i < nRestarts; i++) {
+            try {
+    //            System.out.println("restart number #"+i);
 
-#choice: 3234908
-	#fail: 1617446
-	#sols : 9
-     */
-    public static Choice tspHeuristic(IntVar[] x, int[][] matrix) {
-        int n = x.length;
-        return selectMinIndexed(x,
-                (xi) -> xi.getSize() > 1,
-                (xi, i) -> {
+                // Record the state such that the fragment constraints can be cancelled
+                cp.push();
 
-                    int[] domain = new int[n];
-                    int size = x[i].fillArray(domain);
-
-                    int first = Integer.MAX_VALUE;
-                    int second = Integer.MAX_VALUE;
-
-                    for (int j = 0; j < size; ++j) {
-                        int distance = matrix[i][domain[j]];
-                        if (distance < first) {
-                            second = first;
-                            first = distance;
-                        }
-                        else if (distance < second) {
-                            second = distance;
-                        }
+                // Assign the fragment 5% of the variables randomly chosen
+                for (int j = 0; j < n; j++) {
+                    if (rand.nextInt(100) < percentage) {
+                        equal(succ[j],xBest[j]);
                     }
-
-                    return -Math.abs(second - first);
-                },
-                (xi, i) -> {
-                    int[] domain = new int[n];
-                    int domainSize = xi.fillArray(domain);
-
-                    int min = Integer.MAX_VALUE;
-                    int closest = domain[0];
-                    for (int j = 0; j < domainSize; ++j) {
-                        int distance = matrix[i][domain[j]];
-                        if (distance < min) {
-                            min = distance;
-                            closest = domain[j];
-                        }
-                    }
-
-                    int best = closest;
-                    return branch(
-                            () -> {
-                                equal(xi, best);
-                            },
-                            () -> {
-                                notEqual(xi, best);
-                            }
-                    );
                 }
-        );
-    }
 
+                dfs.start(statistics -> statistics.nFailures >= failureLimit);
+
+                // cancel all the fragment constraints
+                cp.pop();
+            } catch(InconsistencyException e) {
+                cp.pop();
+            }
+        }
+
+    }
 }
