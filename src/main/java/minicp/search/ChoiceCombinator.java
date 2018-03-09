@@ -36,7 +36,6 @@ public class ChoiceCombinator implements Choice {
             }
         }
 
-        System.out.println(alternatives.length);
         return alternatives;
     }
 }

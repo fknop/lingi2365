@@ -39,7 +39,7 @@ public class Eternity {
         return Arrays.stream(x).flatMap(Arrays::stream).toArray(IntVar[]::new);
     }
 
-    public static int[][] generatePossibilities(int[][] pieces, int i) {
+    public static int[][] generatePermutations(int[][] pieces, int i) {
         int[][] possibilities = new int[4][4];
 
         for (int j = 0; j < 4; ++j) {
@@ -58,7 +58,7 @@ public class Eternity {
 
         // Read the data
 
-        InputReader reader = new InputReader("data/eternity7x7.txt");
+        InputReader reader = new InputReader("data/eternity8x8.txt");
 
         int n = reader.getInt();
         int m = reader.getInt();
@@ -82,24 +82,16 @@ public class Eternity {
         int [][] table = new int[4 * n * m][5];
 
         for (int j = 0; j < n * m; ++j) {
-            int[][] p = generatePossibilities(pieces, j);
-            for (int i = 0; i < 4; ++i) {
-                table[j * i][0] = j;
-                for (int k = 1; k < 5; ++k) {
-                    table[j * i][k] = p[i][k - 1];
+            int[][] permutations = generatePermutations(pieces, j);
+            int start = j * 4;
+            int end = ((j + 1) * 4) - 1;
+            for (int i = start; i <= end; ++i) {
+                table[i][0] = j;
+                for (int k = 0; k < 4; ++k) {
+                    table[i][k + 1] = permutations[i % 4][k];
                 }
             }
         }
-
-        System.out.println(Arrays.deepToString(table));
-        // TODO: create the table where each line correspond to one possible rotation of a piece
-        // For instance if the line piece[6] = [2,3,5,1]
-        // the four lines created in the table are
-        // [6,2,3,5,1] // rotation of 0°
-        // [6,3,5,1,2] // rotation of 90°
-        // [6,5,1,2,3] // rotation of 180°
-        // [6,1,2,3,5] // rotation of 270°
-
 
         Solver cp = makeSolver();
 
@@ -149,10 +141,9 @@ public class Eternity {
         // TODO: State the constraints of the problem
 
         // Constraint1: all the pieces placed are different
-        allDifferent(flatten(id));
+        cp.post(allDifferent(flatten(id)));
 
         // Constraint2: all the pieces placed are valid ones i.e. one of the given mxn pieces possibly rotated
-
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < m; ++j) {
                 IntVar[] tuple = {id[i][j], u[i][j], r[i][j], d[i][j], l[i][j]};
@@ -175,8 +166,10 @@ public class Eternity {
 
         SearchStatistics stats = makeDfs(cp,
                 /* TODO: continue, are you branching on all the variables ? */
-                and(firstFail(flatten((id))),
-                    firstFail(flatten(u))
+                and(
+                    firstFail(flatten((id))),
+                    firstFail(flatten(u)),
+                    firstFail(flatten(l))
                 )
         ).onSolution(() -> {
             // Pretty Print
