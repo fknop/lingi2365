@@ -15,6 +15,7 @@
 
 package minicp.examples;
 
+import minicp.engine.constraints.TableCT;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.search.SearchStatistics;
@@ -65,6 +66,10 @@ public class Eternity {
 
         int [][] table = new int[4*n*m][5];
 
+        for (int j = 0; j < n * m;  ++j) {
+            table[j][0] = j;
+            System.arraycopy(pieces[j], 0, table[j], 1, 4);
+        }
         // TODO: create the table where each line correspond to one possible rotation of a piece
         // For instance if the line piece[6] = [2,3,5,1]
         // the four lines created in the table are
@@ -115,21 +120,38 @@ public class Eternity {
             }
         }
 
+
         // TODO: State the constraints of the problem
 
         // Constraint1: all the pieces placed are different
+        allDifferent(flatten(id));
 
         // Constraint2: all the pieces placed are valid ones i.e. one of the given mxn pieces possibly rotated
 
-        // Constraint3: place "0" one all external side of the border (gray color)
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                IntVar[] tuple = {id[i][j], u[i][j], r[i][j], d[i][j], l[i][j]};
+                cp.post(new TableCT(tuple, table));
+            }
+        }
 
+        // Constraint3: place "0" one all external side of the border (gray color)
+        for (int i = 0; i < m; ++i) {
+            u[0][i].assign(0);
+            d[n - 1][i].assign(0);
+        }
+
+        for (int i = 0; i < n; ++i) {
+            l[i][0].assign(0);
+            r[i][m - 1].assign(0);
+        }
 
         // The search using the and combinator
 
         SearchStatistics stats = makeDfs(cp,
+                /* TODO: continue, are you branching on all the variables ? */
                 and(firstFail(flatten((id))),
-                        firstFail(flatten(u))
-                        /* TODO: continue, are you branching on all the variables ? */
+                    firstFail(flatten(u))
                 )
         ).onSolution(() -> {
             // Pretty Print

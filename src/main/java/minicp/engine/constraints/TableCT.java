@@ -77,24 +77,33 @@ public class TableCT extends Constraint {
         BitSet supportedTuples = new BitSet(table.length);
         supportedTuples.flip(0,table.length);
 
-        // TODO 1: compute supportedTuples as
+
+
         //       supportedTuples = (supports[0][x[0].getMin()] | ... | supports[0][x[0].getMax()] ) & ... &
         //                         (supports[x.length][x[0].getMin()] | ... | supports[x.length][x[0].getMax()] )
-        // "|" is the bitwise "or" method on BitSet
-        // "&" is bitwise "and" method on BitSet
+        for (int i = 0; i < x.length; ++i) {
+            BitSet xi = new BitSet(x[i].getSize());
+            for (int v = x[i].getMin(); v <= x[i].getMax(); ++v) {
+                if (x[i].contains(v)) {
+                    xi.or(supports[i][v]);
+                }
+            }
 
-
+            supportedTuples.and(xi);
+        }
 
         // TODO 2
         for (int i = 0; i < x.length; i++) {
             for (int v = x[i].getMin(); v <= x[i].getMax(); v++) {
                 if (x[i].contains(v)) {
+                    boolean intersects = supportedTuples.intersects(supports[i][v]);
+                    if (!intersects) {
+                        x[i].remove(v);
+                    }
                     // TODO 2: the condition for removing the value v from x[i] is to check if
                     //         there is no intersection between supportedTuples and the support[i][v]
                 }
             }
         }
-
-        throw new NotImplementedException("TableCT");
     }
 }
