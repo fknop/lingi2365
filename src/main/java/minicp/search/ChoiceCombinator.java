@@ -27,18 +27,16 @@ public class ChoiceCombinator implements Choice {
     @Override
     public Alternative[] call() {
 
-        Alternative[] alternatives = new Alternative[choices.length];
-
-        for (int i = 0; i < choices.length; ++i) {
-            int j = i;
-            alternatives[i] = () -> {
-                Alternative[] alts = choices[j].call();
-                for (Alternative alt : alts) {
-                    alt.call();
-                }
-            };
+        Alternative[] alternatives = Selector.TRUE;
+        for (Choice choice : choices) {
+            Alternative[] alts = choice.call();
+            if (alts.length > 0) {
+                alternatives = alts;
+                break;
+            }
         }
 
+        System.out.println(alternatives.length);
         return alternatives;
     }
 }

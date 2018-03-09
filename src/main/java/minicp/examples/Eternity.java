@@ -39,6 +39,21 @@ public class Eternity {
         return Arrays.stream(x).flatMap(Arrays::stream).toArray(IntVar[]::new);
     }
 
+    public static int[][] generatePossibilities(int[][] pieces, int i) {
+        int[][] possibilities = new int[4][4];
+
+        for (int j = 0; j < 4; ++j) {
+            possibilities[j] = new int[4];
+            for (int k = 0; k < pieces[k].length; ++k) {
+                possibilities[j][k] = pieces[i][(j + k) % 4];
+            }
+        }
+
+        return possibilities;
+    }
+
+
+
     public static void main(String[] args) throws InconsistencyException {
 
         // Read the data
@@ -64,12 +79,19 @@ public class Eternity {
 
         // Table with all pieces and for each their 4 possible rotations
 
-        int [][] table = new int[4*n*m][5];
+        int [][] table = new int[4 * n * m][5];
 
-        for (int j = 0; j < n * m;  ++j) {
-            table[j][0] = j;
-            System.arraycopy(pieces[j], 0, table[j], 1, 4);
+        for (int j = 0; j < n * m; ++j) {
+            int[][] p = generatePossibilities(pieces, j);
+            for (int i = 0; i < 4; ++i) {
+                table[j * i][0] = j;
+                for (int k = 1; k < 5; ++k) {
+                    table[j * i][k] = p[i][k - 1];
+                }
+            }
         }
+
+        System.out.println(Arrays.deepToString(table));
         // TODO: create the table where each line correspond to one possible rotation of a piece
         // For instance if the line piece[6] = [2,3,5,1]
         // the four lines created in the table are
@@ -100,19 +122,22 @@ public class Eternity {
 
 
         for (int i = 0; i < n; i++) {
-            u[i] = makeIntVarArray(cp,m,j -> makeIntVar(cp,0,max));
-            id[i] = makeIntVarArray(cp,m,n*m);
+            u[i] = makeIntVarArray(cp, m, j -> makeIntVar(cp,0, max));
+            id[i] = makeIntVarArray(cp, m,n*m);
         }
+
         for (int k = 0; k < n; k++) {
             final int i = k;
             if (i < n-1) d[i] = makeIntVarArray(cp,m,j -> u[i+1][j]);
             else d[i] = makeIntVarArray(cp,m,j -> makeIntVar(cp,0,max));
         }
+
         for (int j = 0; j < m; j++) {
             for (int i = 0; i < n; i++) {
                 l[i][j] = makeIntVar(cp,0,max);
             }
         }
+
         for (int j = 0; j < m; j++) {
             for (int i = 0; i < n; i++) {
                 if (j < m-1) r[i][j] = l[i][j+1];
