@@ -508,7 +508,7 @@ Example
 As an example, consider that variable `x[0]` has domain `{0, 1, 3}`. Here are some values for `supports`:
 `supports[0][0] = {1, 2}`
 `supports[0][1] = {}`
-`supports[0][2] = {3}`
+`supports[0][3] = {4,5}`
 
 We can infer two things from this example: first, value `1` does not support any tuples, so it can be removed safely
 from the domain of `x[0]`. Moreover, the tuples supported by `x[0]` is the union of the tuples supported by its values;
@@ -589,12 +589,53 @@ Eternity Problem
 Fill in all the gaps in order to solve the Eternity II problem.
 
 Your task is to terminate the implementation in
-`Eternity.java <https://bitbucket.org/pschaus/minicp/src/HEAD/src/main/java/minicp/exemples/Eternity.java?at=master>`_.
+`Eternity.java <https://bitbucket.org/pschaus/minicp/src/HEAD/src/main/java/minicp/examples/Eternity.java?at=master>`_.
 
 * Create the table 
 * Model the problem using table constraints
 * Search for a feasible solution using branching combinators
 
+
+Element constraint with array of variables
+==================================================
+
+Implement `Element1DVar.java <https://bitbucket.org/pschaus/minicp/src/HEAD/src/main/java/minicp/engine/constraints/Element1DVar.java?at=master>`_
+
+
+We have already seen the element constraint to index an array of integers `T` by an index variable `x` and link the result with a variable `z`: `T[x]=z`.
+This time the constraint more general since `T` is an array of variables. 
+
+We ask you to imagine and implement the filtering algorithm for `Element1DVar` constraint.
+This filtering algorithm is not trivial, at least if you want to do it efficiently.
+Two directions of implementation are
+
+1. The domain consistent version
+2. The hybrid domain-bound consistent one, assuming the domain of `z` is a full range but not the domain of `x` in which you can create holes (you can start with this one, easier than the full domain consistent one).
+
+
+Check that your implementation passes the tests `Element1DVarTest.java <https://bitbucket.org/pschaus/minicp/src/HEAD/src/test/java/minicp/engine/constraints/Element1DVarTest.java?at=master>`_
+Those tests are not checking that the filtering is domain-consistent. Write additional tests to check the domain consistency.
+
+The stable mariage problem
+===========================
+
+Complete the partial model `StableMariage.java <https://bitbucket.org/pschaus/minicp/src/HEAD/src/main/java/minicp/examples/StableMariage.java?at=master>`_
+This model makes use of the `Element1DVar` constraint you have just implemented and is also a good example of manipulation of logical and reified constraints.
+Check that you discover the 6 solutions.
+
+The absolute value constraint
+==============================
+
+Implement `Absolute.java <https://bitbucket.org/pschaus/minicp/src/HEAD/src/main/java/minicp/engine/constraints/Absolute.java?at=master>`_
+
+
+Again you will realize that several directions of implementation are possible
+
+1. The full domain consistent version
+2. An hybrid domain-bound consistent one
+
+
+Check that your implementation passes the tests `AbsoluteTest.java <https://bitbucket.org/pschaus/minicp/src/HEAD/src/test/java/minicp/engine/constraints/AbsoluteTest.java?at=master>`_
 
 Cumulative Constraint: Decomposition
 ====================================
@@ -795,7 +836,7 @@ activity (if needed) to the earliest slot when it can be executed without violat
             if (!start[i].isBound()) {
                 // j is the index of the profile rectangle overlapping t
                 int j = profile.rectangleIndex(start[i].getMin());
-                // TODO 3: push j to the right
+                // TODO 3: push i to the right
                 // hint:
                 // You need to check that at every-point on the interval
                 // [start[i].getMin() ... start[i].getMin()+duration[i]-1] there is enough space.

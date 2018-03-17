@@ -17,6 +17,7 @@ package minicp.engine.constraints;
 
 
 import minicp.util.NotImplementedException;
+import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -76,7 +77,7 @@ public class ProfileTest {
                 assert(checkProfile(r1,r2,r3));
 
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -91,7 +92,7 @@ public class ProfileTest {
             assert(checkProfile(r1,r2,r3));
 
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -114,7 +115,7 @@ public class ProfileTest {
             }
 
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 

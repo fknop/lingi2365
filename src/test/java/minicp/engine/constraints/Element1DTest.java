@@ -21,6 +21,7 @@ import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
+import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 
 import static minicp.cp.Factory.makeIntVar;
@@ -61,10 +62,11 @@ public class Element1DTest {
 
             assertEquals(7, z.getMax());
             assertEquals(6, z.getMin());
-
-
         } catch (InconsistencyException e) {
             fail("should not fail");
+        } catch (NotImplementedException e) {
+            NotImplementedExceptionAssume.fail(e);
+
         }
 
     }
@@ -91,10 +93,13 @@ public class Element1DTest {
 
             assertEquals(5, stats.nSolutions);
 
+
         } catch (InconsistencyException e) {
             fail("should not fail");
         }
-
+        catch (NotImplementedException e) {
+            NotImplementedExceptionAssume.fail(e);
+        }
     }
 
     @Test
@@ -115,12 +120,14 @@ public class Element1DTest {
 
             cp.fixPoint();
 
+
             assertEquals(6, z.getMin());
             assertEquals(8, z.getMax());
         } catch (InconsistencyException e) {
             fail("should not fail");
+        } catch (NotImplementedException e) {
+            NotImplementedExceptionAssume.fail(e);
         }
-
     }
 
     @Test
@@ -140,10 +147,13 @@ public class Element1DTest {
             z.remove(5); //new min is 6
             cp.fixPoint();
 
+
             assertFalse(y.contains(0));
             assertFalse(y.contains(3));
         } catch (InconsistencyException e) {
-            fail("should not fail");
+                fail("should not fail");
+        } catch (NotImplementedException e) {
+            NotImplementedExceptionAssume.fail(e);
         }
 
     }

@@ -17,6 +17,7 @@ package minicp.engine.core;
 
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
+import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
@@ -188,7 +189,7 @@ public class IntVarTest {
 
 
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -233,7 +234,7 @@ public class IntVarTest {
 
 
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -319,7 +320,7 @@ public class IntVarTest {
             }
 
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -366,7 +367,7 @@ public class IntVarTest {
             }
 
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -513,7 +514,7 @@ public class IntVarTest {
             assertEquals(expectedDom, dom);
 
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 }

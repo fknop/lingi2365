@@ -24,6 +24,7 @@ import static minicp.cp.Factory.*;
 
 import java.util.BitSet;
 
+// TODO: build incremental version
 public class TableCT extends Constraint {
     private IntVar[] x; //variables
     private int[][] table; //the table

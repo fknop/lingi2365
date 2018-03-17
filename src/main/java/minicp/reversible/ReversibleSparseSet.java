@@ -19,7 +19,7 @@ import minicp.util.NotImplementedException;
 
 import java.util.NoSuchElementException;
 
-public class    ReversibleSparseSet {
+public class ReversibleSparseSet {
 
     private int [] values;
     private int [] indexes;
@@ -27,6 +27,7 @@ public class    ReversibleSparseSet {
     private ReversibleInt min;
     private ReversibleInt max;
     private int n;
+    private int offset = 0;
 
     /**
      * Creates a ReversibleSparseSet containing the elements {0,...,n-1}.
@@ -53,12 +54,28 @@ public class    ReversibleSparseSet {
      * @param max >= min
      */
     public ReversibleSparseSet(Trail rs, int min, int max) {
-        throw new NotImplementedException();
+
+        this.n = max - min + 1;
+        this.offset = min;
+        this.size = new ReversibleInt(rs, n);
+        this.min = new ReversibleInt(rs, 0);
+        this.max = new ReversibleInt(rs, n - 1);
+        values = new int[n];
+        indexes = new int[n];
+
+        for (int i = 0; i < n; ++i) {
+            values[i] = i;
+            indexes[i] = i;
+        }
     }
 
     private void exchangePositions(int val1, int val2) {
         assert(checkVal(val1));
         assert(checkVal(val2));
+
+        val1 = offsetValue(val1);
+        val2 = offsetValue(val2);
+
         int v1 = val1;
         int v2 = val2;
         int i1 = indexes[v1];
@@ -70,7 +87,7 @@ public class    ReversibleSparseSet {
     }
 
     private boolean checkVal(int val) {
-        assert(val <= values.length-1);
+        assert(offsetValue(val) < n);
         return true;
     }
 
@@ -92,7 +109,10 @@ public class    ReversibleSparseSet {
      */
     public int fillArray(int [] dest) {
         int s = size.getValue();
-        System.arraycopy(values, 0, dest, 0, s);
+
+        for (int i = 0; i < s; ++i) {
+            dest[i] = realValue(values[i]);
+        }
 
         return s;
     }
@@ -114,7 +134,7 @@ public class    ReversibleSparseSet {
      */
     public int getMin() {
         if (isEmpty()) throw new NoSuchElementException();
-        return min.getValue();
+        return realValue(min.getValue());
     }
 
     /**
@@ -122,7 +142,7 @@ public class    ReversibleSparseSet {
      */
     public int getMax() {
         if (isEmpty()) throw new NoSuchElementException();
-        else return max.getValue();
+        else return realValue(max.getValue());
     }
 
     private void updateBoundsValRemoved(int val) {
@@ -131,11 +151,11 @@ public class    ReversibleSparseSet {
     }
 
     private void updateMaxValRemoved(int val) {
-        if (!isEmpty() && max.getValue() == val) {
+        if (!isEmpty() && getMax() == val) {
             assert(!contains(val));
             //the maximum was removed, search the new one
-            for (int v = val-1; v >= min.getValue(); v--) {
-                if (contains(v)) {
+            for (int v = offsetValue(val) - 1; v >= min.getValue(); v--) {
+                if (contains(realValue(v))) {
                     max.setValue(v);
                     return;
                 }
@@ -144,11 +164,12 @@ public class    ReversibleSparseSet {
     }
 
     private void updateMinValRemoved(int val) {
-        if (!isEmpty() && min.getValue() == val) {
+        if (!isEmpty() && getMin() == val) {
             assert(!contains(val));
             //the minimum was removed, search the new one
-            for (int v = val+1; v <= max.getValue(); v++) {
-                if (contains(v)) {
+            for (int v = offsetValue(val) + 1; v <= max.getValue(); v++) {
+                if (contains(realValue(v))) {
+
                     min.setValue(v);
                     return;
                 }
@@ -163,9 +184,12 @@ public class    ReversibleSparseSet {
      */
     public boolean remove(int val) {
         assert(checkVal(val));
-        if (!contains(val)) return false; //the value has already been removed
+        if (!contains(val))
+            return false; //the value has already been removed
+
         int s = getSize();
-        exchangePositions(val, values[s-1]);
+
+        exchangePositions(val, realValue(values[s - 1]));
         size.decrement();
         updateBoundsValRemoved(val);
         return true;
@@ -177,8 +201,18 @@ public class    ReversibleSparseSet {
      * @return
      */
     public boolean contains(int val) {
-        if (val < 0 || val >= n) return false;
-        return indexes[val] < getSize();
+        if (offsetValue(val) < 0 || offsetValue(val) >= n)
+            return false;
+
+        return indexes[offsetValue(val)] < getSize();
+    }
+
+    private int offsetValue(int val) {
+        return val - offset;
+    }
+
+    private int realValue(int val) {
+        return val + offset;
     }
 
     /**
@@ -189,14 +223,15 @@ public class    ReversibleSparseSet {
         // we only have to put in first position this value and set the size to 1
         assert(checkVal(v));
         assert(contains(v));
+
         int val = values[0];
-        int index = indexes[v];
-        indexes[v] = 0;
-        values[0] = v;
+        int index = indexes[offsetValue(v)];
+        indexes[offsetValue(v)] = 0;
+        values[0] = offsetValue(v);
         indexes[val] = index;
         values[index] = val;
-        min.setValue(v);
-        max.setValue(v);
+        min.setValue(offsetValue(v));
+        max.setValue(offsetValue(v));
         size.setValue(1);
     }
 

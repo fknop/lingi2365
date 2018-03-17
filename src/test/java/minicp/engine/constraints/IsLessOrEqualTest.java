@@ -22,6 +22,7 @@ import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
+import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 
 import static minicp.cp.Factory.*;
@@ -57,7 +58,7 @@ public class IsLessOrEqualTest {
                 fail("should not fail");
             }
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -87,7 +88,7 @@ public class IsLessOrEqualTest {
                 fail("should not fail");
             }
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -114,7 +115,7 @@ public class IsLessOrEqualTest {
                 fail("should not fail");
             }
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -145,7 +146,7 @@ public class IsLessOrEqualTest {
                 fail("should not fail");
             }
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -176,7 +177,7 @@ public class IsLessOrEqualTest {
                 fail("should not fail");
             }
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 }

@@ -20,6 +20,7 @@ import minicp.engine.core.Solver;
 import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
 import minicp.util.NotImplementedException;
+import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -50,7 +51,7 @@ public class SumTest {
                 fail("should not fail");
             }
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
 
     }
@@ -73,7 +74,7 @@ public class SumTest {
                 fail("should not fail");
             }
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
@@ -103,7 +104,7 @@ public class SumTest {
                 fail("should not fail");
             }
         } catch (NotImplementedException e) {
-            e.print();
+            NotImplementedExceptionAssume.fail(e);
         }
     }
 
