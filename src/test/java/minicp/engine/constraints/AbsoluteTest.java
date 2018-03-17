@@ -23,8 +23,7 @@ import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 
 import static minicp.cp.Factory.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class AbsoluteTest {
 
@@ -51,6 +50,10 @@ public class AbsoluteTest {
                 x.removeBelow(-4);
                 cp.fixPoint();
 
+
+                assertEquals(3, x.getSize());
+                assertEquals(-2, x.getMax());
+                assertEquals(-4, x.getMin());
                 assertEquals(4,y.getMax());
 
             } catch (InconsistencyException e) {
@@ -85,6 +88,52 @@ public class AbsoluteTest {
             NotImplementedExceptionAssume.fail(e);
         }
     }
+
+    @Test
+    public void simpleTestDomainConsistent1() {
+        try {
+            try {
+                Solver cp = makeSolver();
+                IntVar x = makeIntVar(cp,-5,5);
+                IntVar y = makeIntVar(cp,-10,10);
+
+                cp.post(new Absolute(x,y, Absolute.Consistency.DOMAIN));
+
+                assertEquals(0,y.getMin());
+                assertEquals(5,y.getMax());
+                assertEquals(11,x.getSize());
+
+                y.remove(3);
+                cp.fixPoint();
+
+                assertEquals(9, x.getSize());
+                assertFalse(x.contains(3));
+                assertFalse(x.contains(-3));
+                assertEquals(-5, x.getMin());
+                assertEquals(5, x.getMax());
+
+                x.remove(-4);
+                cp.fixPoint();
+
+                assertEquals(0, y.getMin());
+                assertEquals(5, y.getMax());
+                assertTrue(y.contains(4));
+
+                x.remove(4);
+                cp.fixPoint();
+
+                assertEquals(0, y.getMin());
+                assertEquals(5, y.getMax());
+                assertFalse(y.contains(4));
+
+            } catch (InconsistencyException e) {
+                fail("should not fail");
+            }
+        } catch (NotImplementedException e) {
+            NotImplementedExceptionAssume.fail(e);
+        }
+    }
+
 
 
 }

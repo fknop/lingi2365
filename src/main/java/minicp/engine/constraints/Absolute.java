@@ -17,13 +17,25 @@ package minicp.engine.constraints;
 
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
+import minicp.reversible.ReversibleInt;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
+import java.util.HashMap;
+
 public class Absolute extends Constraint {
+
+    enum Consistency {
+        BOUND,
+        DOMAIN
+    }
 
     private IntVar x;
     private IntVar y;
+    private Consistency consistency;
+
+    private int[] yDomain;
+    private int[] xDomain;
 
     /**
      * Build a constraint y = |x|
@@ -32,21 +44,73 @@ public class Absolute extends Constraint {
      * @param y
      */
     public Absolute(IntVar x, IntVar y) {
+        this(x, y, Consistency.BOUND);
+    }
+
+    public Absolute(IntVar x, IntVar y, Consistency consistency) {
         super(x.getSolver());
         this.x = x;
         this.y = y;
+        this.yDomain = new int[y.getSize()];
+        this.xDomain = new int[x.getSize()];
+        this.consistency = consistency;
     }
 
     @Override
     public void post() throws InconsistencyException {
-        // TODO
-        throw new NotImplementedException();
+
+        y.removeBelow(0);
+
+        y.propagateOnDomainChange(this);
+        x.propagateOnDomainChange(this);
+
+        propagate();
     }
+
+
 
     @Override
     public void propagate() throws InconsistencyException {
-        // TODO
-        throw new NotImplementedException();
+
+        // Remove value in y not in |x|
+        int size = y.fillArray(yDomain);
+        for (int i = 0; i < size; ++i) {
+            int value = yDomain[i];
+
+            if (!x.contains(value) && !x.contains(-value)) {
+                y.remove(value);
+            }
+        }
+
+        if (this.consistency == Consistency.BOUND) {
+            // Filter bounds of y
+            int min = y.getMin();
+            int max = y.getMax();
+
+            if (min != 0) {
+                for (int i = -min + 1; i < min; ++i) {
+                    x.remove(i);
+                }
+            }
+
+            if (max != 0) {
+                x.removeAbove(max);
+                x.removeBelow(-max);
+            }
+        }
+
+
+        // Naive implementation: looping over domain of x
+        if (this.consistency == Consistency.DOMAIN) {
+            int xSize = x.fillArray(xDomain);
+
+            for (int i = 0; i < xSize; ++i) {
+                int value = xDomain[i];
+                if (!y.contains(Math.abs(value))) {
+                    x.remove(value);
+                }
+            }
+        }
     }
 
 }
