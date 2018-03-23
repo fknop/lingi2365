@@ -126,6 +126,12 @@ public class AbsoluteTest {
                 assertEquals(5, y.getMax());
                 assertFalse(y.contains(4));
 
+                y.assign(2);
+                cp.fixPoint();
+                assertEquals(-2, x.getMin());
+                assertEquals(2, x.getMax());
+                assertEquals(2, x.getSize());
+
             } catch (InconsistencyException e) {
                 fail("should not fail");
             }

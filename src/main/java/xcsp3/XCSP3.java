@@ -133,7 +133,7 @@ public class XCSP3 implements XCallbacks2 {
             }
             minicp.fixPoint();
             //TODO student: use other table implementation
-            minicp.post(new TableDecomp(trVars(list), tuples));
+            minicp.post(new TableCT(trVars(list), tuples));
         } catch (InconsistencyException e) {
             hasFailed = true;
         }

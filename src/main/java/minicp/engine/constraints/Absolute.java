@@ -73,12 +73,18 @@ public class Absolute extends Constraint {
     public void propagate() throws InconsistencyException {
 
         // Remove value in y not in |x|
-        int size = y.fillArray(yDomain);
-        for (int i = 0; i < size; ++i) {
-            int value = yDomain[i];
 
-            if (!x.contains(value) && !x.contains(-value)) {
-                y.remove(value);
+        if (x.isBound()) {
+            y.assign(Math.abs(x.getMin()));
+        }
+        else {
+            int size = y.fillArray(yDomain);
+            for (int i = 0; i < size; ++i) {
+                int value = yDomain[i];
+
+                if (!x.contains(value) && !x.contains(-value)) {
+                    y.remove(value);
+                }
             }
         }
 
@@ -102,12 +108,28 @@ public class Absolute extends Constraint {
 
         // Naive implementation: looping over domain of x
         if (this.consistency == Consistency.DOMAIN) {
-            int xSize = x.fillArray(xDomain);
 
-            for (int i = 0; i < xSize; ++i) {
-                int value = xDomain[i];
-                if (!y.contains(Math.abs(value))) {
-                    x.remove(value);
+            if (y.isBound()) {
+                x.removeBelow(-y.getMin());
+                x.removeAbove(y.getMin());
+
+                int xSize = x.fillArray(xDomain);
+
+                for (int i = 0; i < xSize; ++i) {
+                    int value = xDomain[i];
+                    if (Math.abs(value) != y.getMin()) {
+                        x.remove(value);
+                    }
+                }
+            }
+            else {
+                int xSize = x.fillArray(xDomain);
+
+                for (int i = 0; i < xSize; ++i) {
+                    int value = xDomain[i];
+                    if (!y.contains(Math.abs(value))) {
+                        x.remove(value);
+                    }
                 }
             }
         }
