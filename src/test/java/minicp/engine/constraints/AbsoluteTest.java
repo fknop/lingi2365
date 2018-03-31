@@ -50,15 +50,11 @@ public class AbsoluteTest {
                 x.removeBelow(-4);
                 cp.fixPoint();
 
-<<<<<<< HEAD
 
                 assertEquals(3, x.getSize());
                 assertEquals(-2, x.getMax());
                 assertEquals(-4, x.getMin());
                 assertEquals(4,y.getMax());
-=======
-                assertEquals(4, y.getMax());
->>>>>>> 1bbd0ff3fece09df25f6bef30d02889b1211645f
 
             } catch (InconsistencyException e) {
                 fail("should not fail");
@@ -94,19 +90,18 @@ public class AbsoluteTest {
     }
 
     @Test
-<<<<<<< HEAD
     public void simpleTestDomainConsistent1() {
         try {
             try {
                 Solver cp = makeSolver();
-                IntVar x = makeIntVar(cp,-5,5);
-                IntVar y = makeIntVar(cp,-10,10);
+                IntVar x = makeIntVar(cp, -5, 5);
+                IntVar y = makeIntVar(cp, -10, 10);
 
-                cp.post(new Absolute(x,y, Absolute.Consistency.DOMAIN));
+                cp.post(new Absolute(x, y, Absolute.Consistency.DOMAIN));
 
-                assertEquals(0,y.getMin());
-                assertEquals(5,y.getMax());
-                assertEquals(11,x.getSize());
+                assertEquals(0, y.getMin());
+                assertEquals(5, y.getMax());
+                assertEquals(11, x.getSize());
 
                 y.remove(3);
                 cp.fixPoint();
@@ -136,7 +131,15 @@ public class AbsoluteTest {
                 assertEquals(-2, x.getMin());
                 assertEquals(2, x.getMax());
                 assertEquals(2, x.getSize());
-=======
+
+            } catch (InconsistencyException e) {
+                fail("should not fail");
+            }
+        } catch (NotImplementedException e) {
+            NotImplementedExceptionAssume.fail(e);
+        }
+    }
+
     public void simpleTest2() {
         try {
             try {
@@ -214,7 +217,6 @@ public class AbsoluteTest {
                 assertTrue(x.isBound());
                 assertTrue(y.isBound());
 
->>>>>>> 1bbd0ff3fece09df25f6bef30d02889b1211645f
 
             } catch (InconsistencyException e) {
                 fail("should not fail");
@@ -223,10 +225,4 @@ public class AbsoluteTest {
             NotImplementedExceptionAssume.fail(e);
         }
     }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 1bbd0ff3fece09df25f6bef30d02889b1211645f
-
 }

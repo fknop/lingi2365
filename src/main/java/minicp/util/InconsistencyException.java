@@ -28,3 +28,15 @@ public class InconsistencyException extends Throwable {
 //        return this;
 //    }
 }
+
+enum ReturnStatus {
+    Failure,
+    Ok
+}
+
+class ReturnValue<T> {
+
+    public ReturnValue(T value, ReturnStatus status) {
+        
+    }
+}
