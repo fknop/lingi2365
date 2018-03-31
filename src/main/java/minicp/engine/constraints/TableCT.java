@@ -17,12 +17,16 @@ package minicp.engine.constraints;
 
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
+import minicp.reversible.ReversibleSparseBitSet;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
 import static minicp.cp.Factory.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
 
 // TODO: build incremental version
 public class TableCT extends Constraint {
@@ -30,6 +34,9 @@ public class TableCT extends Constraint {
     private int[][] table; //the table
     //supports[i][v] is the set of tuples supported by x[i]=v
     private BitSet[][] supports;
+    private int[][] residues;
+
+    private ReversibleSparseBitSet supportedTuples;
 
     /**
      * Table constraint.
@@ -42,15 +49,28 @@ public class TableCT extends Constraint {
     public TableCT(IntVar[] x, int[][] table) {
         super(x[0].getSolver());
         this.x = new IntVar[x.length];
+        List<Integer> initial = new ArrayList<>();
+        for (int i = 0; i < table.length; i++) {
+            initial.add(i);
+        }
+
+        this.supportedTuples = new ReversibleSparseBitSet(x[0].getSolver().getTrail(), table.length, initial);
         this.table = table;
 
-        // Allocate supports
+        // Allocate supports and residues
         supports = new BitSet[x.length][];
+        residues = new int[x.length][];
+
         for (int i = 0; i < x.length; i++) {
             this.x[i] = minus(x[i],x[i].getMin()); // map the variables domain to start at 0
-            supports[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
-            for (int j = 0; j < supports[i].length; j++)
-                supports[i][j] = new BitSet();
+
+            supports[i] = new BitSet[x[i].getSize()];
+            residues[i] = new int[x[i].getSize()];
+
+            for (int j = 0; j < x[i].getSize(); j++) {
+                residues[i][j] = 0;
+                supports[i][j] = new BitSet(table.length);
+            }
         }
 
         // Set values in supports, which contains all the tuples supported by each var-val pair
@@ -74,37 +94,30 @@ public class TableCT extends Constraint {
     public void propagate() throws InconsistencyException {
 
 
-        // Bit-set of tuple indices all set to 0
-        BitSet supportedTuples = new BitSet(table.length);
-        supportedTuples.flip(0,table.length);
-
-        //       supportedTuples = (supports[0][x[0].getMin()] | ... | supports[0][x[0].getMax()] ) & ... &
-        //                         (supports[x.length][x[0].getMin()] | ... | supports[x.length][x[0].getMax()] )
         for (int i = 0; i < x.length; ++i) {
-            BitSet xi = new BitSet(x[i].getSize());
+            supportedTuples.clearMask();
             for (int v = x[i].getMin(); v <= x[i].getMax(); ++v) {
+                System.out.println(v);
                 if (x[i].contains(v)) {
-                    xi.or(supports[i][v]);
+                    supportedTuples.addToMask(supports[i][v]);
                 }
             }
 
-            supportedTuples.and(xi);
+            supportedTuples.intersectWithMask();
+
+            if (supportedTuples.isEmpty()) {
+                throw new InconsistencyException();
+            }
         }
 
-        //   (supports[x.length-1][x[x.length-1].getMin()] | ... | supports[x.length-1][x[x.length-1].getMax()] )
-        // "|" is the bitwise "or" method on BitSet
-        // "&" is bitwise "and" method on BitSet
-
-
+        // Filter domains
         for (int i = 0; i < x.length; i++) {
             for (int v = x[i].getMin(); v <= x[i].getMax(); v++) {
                 if (x[i].contains(v)) {
-                    boolean intersects = supportedTuples.intersects(supports[i][v]);
-                    if (!intersects) {
+                    int index = supportedTuples.intersectIndex(supports[i][v]);
+                    if (index == -1) {
                         x[i].remove(v);
                     }
-                    // TODO 2: the condition for removing the value v from x[i] is to check if
-                    //         there is no intersection between supportedTuples and the support[i][v]
                 }
             }
         }

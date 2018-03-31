@@ -24,9 +24,7 @@ import minicp.util.NotImplementedException;
 import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiFunction;
 
 import static minicp.cp.Factory.*;
@@ -55,6 +53,7 @@ public class TableTest {
 
     @Test
     public void simpleTest1() {
+
         try {
             try {
                 Solver cp = makeSolver();
@@ -84,6 +83,86 @@ public class TableTest {
             // pass
         }
     }
+
+    @Test
+    public void testImpossibleTuple() {
+
+        try {
+            try {
+                Solver cp = makeSolver();
+                IntVar[] x = makeIntVarArray(cp, 3, 12);
+                int[][] table = new int[][]{{0, 0, 2},
+                        {3, 5, 7},
+                        {6, 9, 10},
+                        {1, 2, 3},
+                        {13, 3, 4}
+            };
+
+                cp.post(new TableCT(x, table));
+
+                assertEquals(4, x[0].getSize());
+                assertEquals(4, x[1].getSize());
+                assertEquals(4, x[2].getSize());
+
+                assertEquals(0,x[0].getMin());
+                assertEquals(6,x[0].getMax());
+                assertEquals(0,x[1].getMin());
+                assertEquals(9,x[1].getMax());
+                assertEquals(2,x[2].getMin());
+                assertEquals(10,x[2].getMax());
+
+
+            } catch (InconsistencyException e) {
+                fail("should not fail");
+            }
+        } catch (NotImplementedException e) {
+            // pass
+        }
+    }
+
+
+    @Test
+    public void testNegativeDomain() {
+
+        try {
+            try {
+                Solver cp = makeSolver();
+                IntVar[] x = makeIntVarArray(cp, 3, (i) -> makeIntVar(cp, -10, 10));
+                int[][] table = new int[][]{
+                        {0, 0, 2},
+                        {3, 5, 7},
+                        {6, 9, 10},
+                        {1, 2, 3},
+                        {-5, 3, 4},
+                        {5, 4, -2},
+                        {6, -3, 6}
+                };
+
+                cp.post(new TableCT(x, table));
+
+                assertEquals(6, x[0].getSize());
+                assertEquals(7, x[1].getSize());
+                assertEquals(7, x[2].getSize());
+
+                assertEquals(-5, x[0].getMin());
+                assertEquals(6,x[0].getMax());
+
+                assertEquals(-3,x[1].getMin());
+                assertEquals(9,x[1].getMax());
+
+                assertEquals(-2,x[2].getMin());
+                assertEquals(10,x[2].getMax());
+
+
+            } catch (InconsistencyException e) {
+                fail("should not fail");
+            }
+        } catch (NotImplementedException e) {
+            // pass
+        }
+    }
+
+
 
     @Test
     public void randomTest() {
