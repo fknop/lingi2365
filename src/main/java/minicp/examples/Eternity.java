@@ -170,6 +170,8 @@ public class Eternity {
                     firstFail(flatten((id))),
                     firstFail(flatten(u)),
                     firstFail(flatten(l))
+//                    firstFail(flatten(r)),
+//                    firstFail(flatten(d))
                 )
         ).onSolution(() -> {
             // Pretty Print
@@ -192,6 +194,7 @@ public class Eternity {
             }
             System.out.println(line);
 
+        }).onFail(() -> {
         }).start(statistics -> statistics.nSolutions == 1);
 
         System.out.format("#Solutions: %s\n", stats.nSolutions);

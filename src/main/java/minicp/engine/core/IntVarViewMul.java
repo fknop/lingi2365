@@ -20,6 +20,8 @@ package minicp.engine.core;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
+import static minicp.util.InconsistencyException.INCONSISTENCY;
+
 public class IntVarViewMul implements IntVar {
 
     private final int a;
@@ -115,7 +117,7 @@ public class IntVarViewMul implements IntVar {
         if (v % a == 0) {
             x.assign(v / a);
         } else {
-            throw new InconsistencyException();
+            throw INCONSISTENCY;
         }
     }
 

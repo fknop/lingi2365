@@ -24,6 +24,8 @@ import minicp.util.InconsistencyException;
 
 import java.util.Arrays;
 
+import static minicp.util.InconsistencyException.INCONSISTENCY;
+
 public class Sum extends Constraint {
 
     private  int[] unBounds;
@@ -97,7 +99,7 @@ public class Sum extends Constraint {
             sumMin += x[idx].getMin();
         }
         if (sumMin > 0 || sumMax < 0)
-            throw new InconsistencyException();
+            throw INCONSISTENCY;
         for (int i = nU - 1; i >= 0; i--) {
             int idx = unBounds[i];
             x[idx].removeAbove(-(sumMin-x[idx].getMin()));

@@ -14,21 +14,12 @@
  */
 
 package minicp.engine.constraints;
-
-import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
-import minicp.util.InconsistencyException;
-import minicp.util.NotImplementedException;
-
 import java.util.BitSet;
 
-import static minicp.cp.Factory.minus;
-
-public class ShortTableCT extends Constraint {
-    private IntVar[] x; //variables
-    private int[][] table; //the table
-    //supports[i][v] is the set of tuples supported by x[i]=v
-    private BitSet[][] supports;
+public class ShortTableCT extends TableCT {
+    private BitSet[][] supportsStar;
+    private int star;
 
     /**
      * Table constraint. Assignment of x_0=v_0, x_1=v_1,... only valid if there exists a
@@ -39,35 +30,51 @@ public class ShortTableCT extends Constraint {
      * @param star the symbol representing "any" value in the table
      */
     public ShortTableCT(IntVar[] x, int[][] table, int star) {
-        super(x[0].getSolver());
-        this.x = x;
-        this.x = new IntVar[x.length];
-        this.table = table;
+        super(x, table, false);
 
-        // Allocate supports
-        supports = new BitSet[x.length][];
+        this.star = star;
+
+        supportsStar = new BitSet[x.length][];
+
         for (int i = 0; i < x.length; i++) {
-            this.x[i] = minus(x[i],x[i].getMin()); // map the variables domain to start at 0
-            supports[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
-            for (int j = 0; j < supports[i].length; j++)
-                supports[i][j] = new BitSet();
+            supportsStar[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
+
+            for (int j = 0; j < supports[i].length; j++) {
+                supportsStar[i][j] = new BitSet();
+            }
         }
 
-        // Set values in supportedByVarVal, which contains all the tuples supported by each var-val pair
-        // TODO: compute the supports (be careful, take into account the star value)
-        throw new NotImplementedException("ShortTableCT");
+        setupSupports(x, table);
     }
 
     @Override
-    public void post() throws InconsistencyException {
-        for (IntVar var : x)
-            var.propagateOnDomainChange(this);
-        propagate();
+    public void setupSupports(IntVar[] x, int[][] table) {
+        for (int i = 0; i < table.length; i++) { //i is the index of the tuple (in table)
+            for (int j = 0; j < x.length; j++) { //j is the index of the current variable (in x)
+                if (table[i][j] == star) {
+                    // Set all tuple i for all supports of variable j
+                    for (int k = this.x[j].getMin(); k <= this.x[j].getMax(); ++k) {
+                        if (this.x[j].contains(k)) {
+                            supports[j][k].set(i);
+                        }
+                    }
+                }
+                else if (x[j].contains(table[i][j])) {
+                    supports[j][table[i][j] - x[j].getMin()].set(i);
+                    supportsStar[j][table[i][j] - x[j].getMin()].set(i);
+                }
+            }
+        }
     }
 
-    @Override
-    public void propagate() throws InconsistencyException {
-        // TODO: implement the filtering
-        throw new NotImplementedException("ShortTableCT");
+    protected void incrementalUpdate(int i, int[] delta) {
+        for (int v: delta) {
+            supportedTuples.addToMask(supportsStar[i][v]);
+        }
+
+        if (delta.length > 0) {
+            supportedTuples.reverseMask();
+            supportedTuples.intersectWithMask();
+        }
     }
 }

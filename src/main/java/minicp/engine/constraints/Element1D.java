@@ -26,6 +26,8 @@ import minicp.util.NotImplementedException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static minicp.util.InconsistencyException.INCONSISTENCY;
+
 public class Element1D extends Constraint {
 
     int[] T;
@@ -98,7 +100,7 @@ public class Element1D extends Constraint {
             l++;
 
             if (l > u) {
-                throw new InconsistencyException();
+                throw INCONSISTENCY;
             }
         }
 
@@ -108,7 +110,8 @@ public class Element1D extends Constraint {
 
             u--;
 
-            if (l > u) throw new InconsistencyException();
+            if (l > u)
+                throw INCONSISTENCY;
         }
 
 

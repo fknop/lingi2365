@@ -21,6 +21,8 @@ import minicp.util.InconsistencyException;
 import java.util.Stack;
 import java.util.Vector;
 
+import static minicp.util.InconsistencyException.INCONSISTENCY;
+
 public class Solver {
 
     private Trail trail = new Trail();
@@ -55,7 +57,8 @@ public class Solver {
                 }
             }
         }
-        if (failed) throw new InconsistencyException();
+        if (failed)
+            throw INCONSISTENCY;
     }
 
     public void post(Constraint c) throws InconsistencyException {

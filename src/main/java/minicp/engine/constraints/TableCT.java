@@ -24,25 +24,28 @@ import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
 import static minicp.cp.Factory.*;
+import static minicp.util.InconsistencyException.INCONSISTENCY;
 
 import java.util.*;
 
 // TODO: build incremental version
 public class TableCT extends Constraint {
-    private IntVar[] x; //variables
-    private int[][] table; //the table
+    protected IntVar[] x; //variables
     //supports[i][v] is the set of tuples supported by x[i]=v
-    private BitSet[][] supports;
-    private int[][] residues;
-    private boolean firstPropagate = true;
+    protected BitSet[][] supports;
 
-    private ReversibleInt[] lastSizes;
-
-    private ReversibleSparseBitSet supportedTuples;
+    protected int[][] residues;
+    protected boolean firstPropagate = true;
+    protected ReversibleInt[] lastSizes;
+    protected ReversibleSparseBitSet supportedTuples;
 
     // Array to store domains of variables (avoid allocating multiple times)
-    private int domains[][];
+    protected int domains[][];
 
+
+    public TableCT(IntVar[] x, int[][] table) {
+        this(x, table, true);
+    }
     /**
      * Table constraint.
      * Assignment of x_0=v_0, x_1=v_1,... only valid if there exists a
@@ -51,7 +54,7 @@ public class TableCT extends Constraint {
      * @param x     variables to constraint. x.length must be > 0.
      * @param table array of valid solutions (second dimension must be of same size as the array x)
      */
-    public TableCT(IntVar[] x, int[][] table) {
+    protected TableCT(IntVar[] x, int[][] table, boolean setupSupports) {
         super(x[0].getSolver());
         this.x = new IntVar[x.length];
         List<Integer> initial = new ArrayList<>();
@@ -61,19 +64,17 @@ public class TableCT extends Constraint {
 
         this.domains = new int[x.length][];
         this.supportedTuples = new ReversibleSparseBitSet(x[0].getSolver().getTrail(), table.length, initial);
-        this.table = table;
 
         // Allocate supports and residues
         supports = new BitSet[x.length][];
         residues = new int[x.length][];
         lastSizes = new ReversibleInt[x.length];
 
-
         for (int i = 0; i < x.length; i++) {
             this.x[i] = minus(x[i], x[i].getMin()); // map the variables domain to start at 0
-            lastSizes[i] = new ReversibleInt(x[i].getSolver().getTrail(), x[i].getSize());
             supports[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
             residues[i] = new int[x[i].getMax() - x[i].getMin() + 1];
+            lastSizes[i] = new ReversibleInt(x[i].getSolver().getTrail(), x[i].getSize());
 
             for (int j = 0; j < supports[i].length; j++) {
                 residues[i][j] = 0;
@@ -81,6 +82,12 @@ public class TableCT extends Constraint {
             }
         }
 
+        if (setupSupports) {
+            setupSupports(x, table);
+        }
+    }
+
+    protected void setupSupports(IntVar[] x, int[][] table) {
         // Set values in supports, which contains all the tuples supported by each var-val pair
         for (int i = 0; i < table.length; i++) { //i is the index of the tuple (in table)
             for (int j = 0; j < x.length; j++) { //j is the index of the current variable (in x)
@@ -103,7 +110,6 @@ public class TableCT extends Constraint {
     public void propagate() throws InconsistencyException {
 
         // Store domains to iterate over them twice.
-
         updateTuples();
         filterDomains();
         this.firstPropagate = false;
@@ -117,42 +123,50 @@ public class TableCT extends Constraint {
         return x[i].fillArray(domains[i]);
     }
 
-    private void updateTuples() throws InconsistencyException {
+    protected void incrementalUpdate(int i, int[] delta) {
+        for (int v: delta) {
+            supportedTuples.addToMask(supports[i][v]);
+        }
+
+        if (delta.length > 0) {
+            supportedTuples.reverseMask();
+            supportedTuples.intersectWithMask();
+        }
+    }
+
+    protected void resetUpdate(int i) {
+        for (int j = 0; j < x[i].getSize(); ++j) {
+            int v = domains[i][j];
+            supportedTuples.addToMask(supports[i][v]);
+        }
+
+        supportedTuples.intersectWithMask();
+    }
+
+    protected void updateTuples() throws InconsistencyException {
         for (int i = 0; i < x.length; ++i) {
             supportedTuples.clearMask();
-            int size = updateDomain(i);
+            updateDomain(i);
 
             int[] delta = x[i].delta(lastSizes[i].getValue());
             if (delta.length < x[i].getSize() && !firstPropagate) {
-                for (int v: delta) {
-                    supportedTuples.addToMask(supports[i][v]);
-                }
-
-                if (delta.length > 0) {
-                    supportedTuples.reverseMask();
-                    supportedTuples.intersectWithMask();
-                }
+                incrementalUpdate(i, delta);
             }
             else {
-                for (int j = 0; j < size; ++j) {
-                    int v = domains[i][j];
-                    supportedTuples.addToMask(supports[i][v]);
-                }
-
-                supportedTuples.intersectWithMask();
+                resetUpdate(i);
             }
 
             lastSizes[i].setValue(x[i].getSize());
 
             if (supportedTuples.isEmpty()) {
-                throw new InconsistencyException();
+                throw INCONSISTENCY;
             }
         }
     }
 
     private void filterDomains() throws InconsistencyException {
         for (int i = 0; i < x.length; i++) {
-            for (int j = 0; j < domains[i].length; j++) {
+            for (int j = 0; j < x[i].getSize(); j++) {
                 int v = domains[i][j];
                 int index = supportedTuples.intersectIndex(supports[i][v]);
                 if (index == -1) {

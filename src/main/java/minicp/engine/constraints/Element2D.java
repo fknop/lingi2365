@@ -24,6 +24,8 @@ import minicp.util.InconsistencyException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static minicp.util.InconsistencyException.INCONSISTENCY;
+
 public class Element2D extends Constraint {
 
 
@@ -122,12 +124,12 @@ public class Element2D extends Constraint {
         while (xyz.get(l).z < zMin || !x.contains(xyz.get(l).x) || !y.contains(xyz.get(l).y)) {
             updateSupports(l);
             l++;
-            if (l > u) throw new InconsistencyException();
+            if (l > u) throw INCONSISTENCY;
         }
         while (xyz.get(u).z > zMax || !x.contains(xyz.get(u).x) || !y.contains(xyz.get(u).y)) {
             updateSupports(u);
             u--;
-            if (l > u) throw new InconsistencyException();
+            if (l > u) throw INCONSISTENCY;
         }
         z.removeBelow(xyz.get(l).z);
         z.removeAbove(xyz.get(u).z);

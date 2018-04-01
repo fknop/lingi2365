@@ -21,6 +21,9 @@ import minicp.engine.core.IntVar;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public class Maximum extends Constraint {
 
     private final IntVar[] x;
@@ -41,13 +44,36 @@ public class Maximum extends Constraint {
 
     @Override
     public void post() throws InconsistencyException {
-        // TODO
-        throw new NotImplementedException("Maximum");
+
+        for (IntVar var: x) {
+            // Bound consistency
+            var.propagateOnBoundChange(this);
+        }
+
+        propagate();
     }
 
     @Override
     public void propagate() throws InconsistencyException {
-        // TODO
-        throw new NotImplementedException("Maximum");
+        for (IntVar var: x) {
+            var.removeAbove(y.getMax());
+            var.removeBelow(y.getMin());
+        }
+
+        Optional<Integer> max = Arrays.stream(x).map(IntVar::getMax).max(Integer::compareTo);
+        Optional<Integer> min = Arrays.stream(x).map(IntVar::getMin).min(Integer::compareTo);
+        if (max.isPresent()) {
+            y.removeAbove(max.get());
+            boolean allBound = Arrays.stream(x).allMatch(IntVar::isBound);
+            if (allBound) {
+                y.assign(max.get());
+            }
+        }
+
+        if (min.isPresent()) {
+            y.removeBelow(min.get());
+        }
+
+
     }
 }

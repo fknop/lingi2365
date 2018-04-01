@@ -31,6 +31,7 @@ import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 import static minicp.search.Selector.*;
 import static minicp.cp.Factory.*;
+import static minicp.util.InconsistencyException.INCONSISTENCY;
 import static org.junit.Assert.assertEquals;
 
 
@@ -175,7 +176,7 @@ public class DFSearchTest {
 
         DFSearch dfs = new DFSearch(tr,() -> {
             if (i.getValue() >= values.length) {
-                return branch(() -> {throw new InconsistencyException();});
+                return branch(() -> {throw INCONSISTENCY;});
             }
             else return branch (
                     ()-> {
@@ -249,7 +250,7 @@ public class DFSearchTest {
 
         DFSearch dfs = new DFSearch(tr,() -> {
             if (i.getValue() >= values.length || i.getValue() < 0) {
-                return branch(() -> {throw new InconsistencyException();});
+                return branch(() -> {throw INCONSISTENCY;});
             }
             else return branch (
                     ()-> {
