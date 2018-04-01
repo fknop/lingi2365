@@ -40,6 +40,9 @@ public class TableCT extends Constraint {
 
     private ReversibleSparseBitSet supportedTuples;
 
+    // Array to store domains of variables (avoid allocating multiple times)
+    private int domains[][];
+
     /**
      * Table constraint.
      * Assignment of x_0=v_0, x_1=v_1,... only valid if there exists a
@@ -56,6 +59,7 @@ public class TableCT extends Constraint {
             initial.add(i);
         }
 
+        this.domains = new int[x.length][];
         this.supportedTuples = new ReversibleSparseBitSet(x[0].getSolver().getTrail(), table.length, initial);
         this.table = table;
 
@@ -94,17 +98,29 @@ public class TableCT extends Constraint {
         propagate();
     }
 
+
     @Override
     public void propagate() throws InconsistencyException {
 
         // Store domains to iterate over them twice.
-        int domains[][] = new int[x.length][];
 
+        updateTuples();
+        filterDomains();
+        this.firstPropagate = false;
+    }
+
+    private int updateDomain(int i) {
+        if (domains[i] == null || domains[i].length < x[i].getSize()) {
+            domains[i] = new int[x[i].getSize()];
+        }
+
+        return x[i].fillArray(domains[i]);
+    }
+
+    private void updateTuples() throws InconsistencyException {
         for (int i = 0; i < x.length; ++i) {
             supportedTuples.clearMask();
-
-            domains[i] = new int[x[i].getSize()];
-            int size = x[i].fillArray(domains[i]);
+            int size = updateDomain(i);
 
             int[] delta = x[i].delta(lastSizes[i].getValue());
             if (delta.length < x[i].getSize() && !firstPropagate) {
@@ -132,9 +148,9 @@ public class TableCT extends Constraint {
                 throw new InconsistencyException();
             }
         }
+    }
 
-
-
+    private void filterDomains() throws InconsistencyException {
         for (int i = 0; i < x.length; i++) {
             for (int j = 0; j < domains[i].length; j++) {
                 int v = domains[i][j];
@@ -147,7 +163,5 @@ public class TableCT extends Constraint {
                 }
             }
         }
-
-        this.firstPropagate = false;
     }
 }
