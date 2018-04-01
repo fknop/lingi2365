@@ -66,13 +66,12 @@ public class TableCT extends Constraint {
 
 
         for (int i = 0; i < x.length; i++) {
-            this.x[i] = minus(x[i],x[i].getMin()); // map the variables domain to start at 0
-
+            this.x[i] = minus(x[i], x[i].getMin()); // map the variables domain to start at 0
             lastSizes[i] = new ReversibleInt(x[i].getSolver().getTrail(), x[i].getSize());
-            supports[i] = new BitSet[x[i].getSize()];
-            residues[i] = new int[x[i].getSize()];
+            supports[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
+            residues[i] = new int[x[i].getMax() - x[i].getMin() + 1];
 
-            for (int j = 0; j < x[i].getSize(); j++) {
+            for (int j = 0; j < supports[i].length; j++) {
                 residues[i][j] = 0;
                 supports[i][j] = new BitSet(table.length);
             }

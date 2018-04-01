@@ -297,6 +297,9 @@ public class ReversibleSparseSet {
     public int[] delta(int oldSize) {
 
         int size = oldSize - getSize();
+
+        assert(size >= 0);
+
         int[] delta = new int[size];
 
         for (int i = 0; i < size; ++i) {
