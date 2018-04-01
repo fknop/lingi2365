@@ -62,6 +62,7 @@ public class Maximum extends Constraint {
 
         Optional<Integer> max = Arrays.stream(x).map(IntVar::getMax).max(Integer::compareTo);
         Optional<Integer> min = Arrays.stream(x).map(IntVar::getMin).min(Integer::compareTo);
+
         if (max.isPresent()) {
             y.removeAbove(max.get());
             boolean allBound = Arrays.stream(x).allMatch(IntVar::isBound);

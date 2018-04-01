@@ -18,25 +18,52 @@ package minicp.engine.constraints;
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
+import minicp.reversible.ReversibleInt;
 import minicp.util.InconsistencyException;
 
 public class AllDifferentBinary extends Constraint {
 
     private IntVar [] x;
+    private ReversibleInt limit;
 
     public AllDifferentBinary(IntVar ... x) {
         super(x[0].getSolver());
-        this.x = x;
+        this.x = new IntVar[x.length];
+        this.limit = new ReversibleInt(x[0].getSolver().getTrail(), x.length);
+        System.arraycopy(x, 0, this.x, 0, x.length);
     }
 
     @Override
     public void post() throws InconsistencyException {
-        Solver cp = x[0].getSolver();
-        for (int i = 0; i < x.length; i++) {
-            for (int j = i+1; j < x.length; j++) {
-                cp.post(new NotEqual(x[i],x[j]),false);
-            }
+//        Solver cp = x[0].getSolver();
+//        for (int i = 0; i < x.length; i++) {
+//            for (int j = i+1; j < x.length; j++) {
+//                cp.post(new NotEqual(x[i],x[j]),false);
+//            }
+//        }
+        for (IntVar var: x) {
+            var.propagateOnBind(this);
         }
     }
 
+    @Override
+    public void propagate() throws InconsistencyException {
+
+        for (int i = 0; i < limit.getValue();) {
+            if (x[i].isBound()) {
+                IntVar xi = x[i];
+                x[i] = x[limit.getValue() - 1];
+                x[limit.getValue() - 1] = xi;
+                limit.decrement();
+
+
+                for (int j = 0; j < limit.getValue(); ++j) {
+                    x[j].remove(xi.getMin());
+                }
+            }
+            else {
+                ++i;
+            }
+        }
+    }
 }
