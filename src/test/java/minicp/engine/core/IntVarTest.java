@@ -494,6 +494,8 @@ public class IntVarTest {
         }
 
     }
+
+    @Test
     public void fillArray() {
 
         try {
@@ -515,6 +517,25 @@ public class IntVarTest {
 
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
+        }
+    }
+
+
+    @Test
+    public void testDelta() {
+        Solver solver = makeSolver();
+        IntVar x = makeIntVar(solver, 10);
+        try {
+            x.remove(7);
+            x.remove(3);
+
+            int[] delta = x.delta(10);
+
+            assertEquals(3, delta[0]);
+            assertEquals(7, delta[1]);
+
+        } catch (InconsistencyException e) {
+            fail("should not fail");
         }
     }
 }

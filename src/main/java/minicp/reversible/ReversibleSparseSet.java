@@ -17,6 +17,7 @@ package minicp.reversible;
 
 import minicp.util.NotImplementedException;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class ReversibleSparseSet {
@@ -293,6 +294,16 @@ public class ReversibleSparseSet {
     }
 
 
+    public int[] delta(int oldSize) {
 
+        int size = oldSize - getSize();
+        int[] delta = new int[size];
+
+        for (int i = 0; i < size; ++i) {
+            delta[i] = realValue(values[getSize() + i]);
+        }
+
+        return delta;
+    }
 }
 

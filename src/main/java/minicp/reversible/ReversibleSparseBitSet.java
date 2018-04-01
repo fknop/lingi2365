@@ -129,6 +129,9 @@ public class ReversibleSparseBitSet {
         return -1;
     }
 
+    public long get(int index) {
+        return words[index].getValue();
+    }
 
     @Override
     public String toString() {

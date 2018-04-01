@@ -129,6 +129,16 @@ public class IntVarViewMul implements IntVar {
         return (x.removeAbove(floorDiv(v, a))) * a;
     }
 
+    @Override
+    public int[] delta(int oldSize) {
+        int[] delta = x.delta(oldSize);
+        for (int i = 0; i < delta.length; ++i) {
+            delta[i] *= a;
+        }
+
+        return delta;
+    }
+
 
     // Java's division always rounds to the integer closest to zero, but we need flooring/ceiling versions.
     private int floorDiv(int a, int b) {

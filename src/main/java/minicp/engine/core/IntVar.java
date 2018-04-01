@@ -53,6 +53,7 @@ public interface IntVar {
      */
     void propagateOnDomainChange(Constraint c);
 
+
     /**
      * Ask that c.propagate() is called whenever the domain
      * of this variable is reduced to a single value
@@ -135,5 +136,6 @@ public interface IntVar {
      */
     int removeAbove(int v) throws InconsistencyException;
 
+    int[] delta(int oldSize);
 
 }

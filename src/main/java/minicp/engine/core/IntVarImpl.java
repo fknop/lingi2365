@@ -20,6 +20,7 @@ import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
 import java.security.InvalidParameterException;
+import java.util.Iterator;
 import java.util.Set;
 
 public class IntVarImpl implements IntVar {
@@ -199,4 +200,7 @@ public class IntVarImpl implements IntVar {
         return domain.removeAbove(v, domListener);
     }
 
+    public int[] delta(int oldSize) {
+        return ((SparseSetDomain) domain).delta(oldSize);
+    }
 }

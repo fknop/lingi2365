@@ -18,6 +18,9 @@ package minicp.engine.core;
 import minicp.reversible.Trail;
 import minicp.reversible.ReversibleSparseSet;
 import minicp.util.InconsistencyException;
+
+import java.util.Iterator;
+
 import static minicp.util.InconsistencyException.INCONSISTENCY;
 
 
@@ -112,5 +115,9 @@ public class SparseSetDomain extends IntDomain {
         }
         
         return size;
+    }
+
+    public int[] delta(int oldSize) {
+        return domain.delta(oldSize);
     }
 }

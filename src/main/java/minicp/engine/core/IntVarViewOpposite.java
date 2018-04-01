@@ -119,4 +119,14 @@ public class IntVarViewOpposite implements IntVar {
         return - x.removeBelow(-v);
     }
 
+    @Override
+    public int[] delta(int oldSize) {
+        int[] delta = x.delta(oldSize);
+        for (int i = 0; i < delta.length; ++i) {
+            delta[i] = -delta[i];
+        }
+
+        return delta;
+    }
+
 }

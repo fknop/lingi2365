@@ -121,4 +121,14 @@ public class IntVarViewOffset implements IntVar {
         return x.removeAbove(v - o);
     }
 
+    @Override
+    public int[] delta(int oldSize) {
+        int[] delta = x.delta(oldSize);
+        for (int i = 0; i < delta.length; ++i) {
+            delta[i] += o;
+        }
+
+        return delta;
+    }
+
 }
