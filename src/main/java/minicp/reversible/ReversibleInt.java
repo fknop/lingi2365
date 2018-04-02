@@ -24,6 +24,7 @@ public class ReversibleInt implements RevInt {
         }
         public void restore()       { ReversibleInt.this.v = v;}
     }
+
     private Trail trail;
     private int v;
     private Long lastMagic = -1L;

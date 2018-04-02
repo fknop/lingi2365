@@ -15,6 +15,8 @@
 
 package minicp.engine.constraints;
 import minicp.engine.core.IntVar;
+import minicp.engine.core.delta.DeltaInt;
+
 import java.util.BitSet;
 
 public class ShortTableCT extends TableCT {
@@ -67,12 +69,13 @@ public class ShortTableCT extends TableCT {
         }
     }
 
-    protected void incrementalUpdate(int i, int[] delta) {
-        for (int v: delta) {
-            supportedTuples.addToMask(supportsStar[i][v]);
-        }
+    protected void incrementalUpdate(int i) {
+        DeltaInt delta = deltas[i];
+        if (delta.deltaSize() > 0) {
+            for (int v: delta.values()) {
+                supportedTuples.addToMask(supportsStar[i][v]);
+            }
 
-        if (delta.length > 0) {
             supportedTuples.reverseMask();
             supportedTuples.intersectWithMask();
         }

@@ -17,6 +17,8 @@
 package minicp.engine.core;
 
 
+import minicp.engine.core.delta.DeltaInt;
+import minicp.reversible.ReversibleDeltaInt;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
@@ -56,6 +58,14 @@ public class IntVarViewMul implements IntVar {
     @Override
     public void propagateOnDomainChange(Constraint c) {
         x.propagateOnDomainChange(c);
+    }
+
+    @Override
+    public DeltaInt propagateOnDomainChangeWithDelta(Constraint c) {
+        DeltaInt delta = new ReversibleDeltaInt(getSolver().getTrail(), this);
+        c.registerDelta(delta);
+        x.propagateOnDomainChange(c);
+        return delta;
     }
 
     @Override

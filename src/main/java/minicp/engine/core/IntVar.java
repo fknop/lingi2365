@@ -15,6 +15,7 @@
 
 package minicp.engine.core;
 
+import minicp.engine.core.delta.DeltaInt;
 import minicp.util.InconsistencyException;
 
 public interface IntVar {
@@ -52,6 +53,8 @@ public interface IntVar {
      * @param c
      */
     void propagateOnDomainChange(Constraint c);
+
+    DeltaInt propagateOnDomainChangeWithDelta(Constraint c);
 
 
     /**

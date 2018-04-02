@@ -14,8 +14,12 @@
  */
 
 package minicp.engine.core;
+import minicp.engine.core.delta.Delta;
 import minicp.reversible.ReversibleBool;
 import minicp.util.InconsistencyException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Constraint {
 
@@ -23,9 +27,22 @@ public abstract class Constraint {
     protected boolean scheduled = false;
     protected final ReversibleBool active;
 
+    private List<Delta> deltas = new ArrayList<>();
+
     public Constraint(Solver cp) {
         this.cp = cp;
         active = new ReversibleBool(cp.getTrail(),true);
+    }
+
+    void registerDelta(Delta delta) {
+        deltas.add(delta);
+        delta.update();
+    }
+
+    private void updateDeltas() {
+        for (Delta d: deltas) {
+            d.update();
+        }
     }
 
     public boolean isActive() {
@@ -38,4 +55,11 @@ public abstract class Constraint {
 
     public abstract void post() throws InconsistencyException;
     public void propagate() throws InconsistencyException {}
+
+
+
+    void execute() throws InconsistencyException {
+        propagate();
+        updateDeltas();
+    }
 }

@@ -50,31 +50,42 @@ public class Maximum extends Constraint {
             var.propagateOnBoundChange(this);
         }
 
+        y.propagateOnBoundChange(this);
+
         propagate();
     }
 
     @Override
     public void propagate() throws InconsistencyException {
+
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+
         for (IntVar var: x) {
             var.removeAbove(y.getMax());
-            var.removeBelow(y.getMin());
-        }
 
-        Optional<Integer> max = Arrays.stream(x).map(IntVar::getMax).max(Integer::compareTo);
-        Optional<Integer> min = Arrays.stream(x).map(IntVar::getMin).min(Integer::compareTo);
+            if (var.getMax() >= y.getMin()) {
+                var.removeBelow(y.getMin());
 
-        if (max.isPresent()) {
-            y.removeAbove(max.get());
-            boolean allBound = Arrays.stream(x).allMatch(IntVar::isBound);
-            if (allBound) {
-                y.assign(max.get());
+                if (var.getMin() < min) {
+                    min = var.getMin();
+                }
+
+                if (var.getMax() > max) {
+                    max = var.getMax();
+                }
             }
         }
 
-        if (min.isPresent()) {
-            y.removeBelow(min.get());
-        }
 
+        y.removeAbove(max);
+        y.removeBelow(min);
+
+        boolean allBound = Arrays.stream(x).allMatch(IntVar::isBound);
+        if (allBound) {
+            y.assign(max);
+            this.deactivate();
+        }
 
     }
 }

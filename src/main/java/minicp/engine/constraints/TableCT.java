@@ -17,30 +17,31 @@ package minicp.engine.constraints;
 
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
-import minicp.engine.core.IntVarImpl;
-import minicp.reversible.ReversibleInt;
+import minicp.engine.core.delta.DeltaInt;
 import minicp.reversible.ReversibleSparseBitSet;
 import minicp.util.InconsistencyException;
-import minicp.util.NotImplementedException;
 
-import static minicp.cp.Factory.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
+
+import static minicp.cp.Factory.minus;
 import static minicp.util.InconsistencyException.INCONSISTENCY;
-
-import java.util.*;
 
 // TODO: build incremental version
 public class TableCT extends Constraint {
     protected IntVar[] x; //variables
+    protected DeltaInt[] deltas;
     //supports[i][v] is the set of tuples supported by x[i]=v
     protected BitSet[][] supports;
 
     protected int[][] residues;
     protected boolean firstPropagate = true;
-    protected ReversibleInt[] lastSizes;
     protected ReversibleSparseBitSet supportedTuples;
 
     // Array to store domains of variables (avoid allocating multiple times)
     protected int domains[][];
+
 
 
     public TableCT(IntVar[] x, int[][] table) {
@@ -57,6 +58,8 @@ public class TableCT extends Constraint {
     protected TableCT(IntVar[] x, int[][] table, boolean setupSupports) {
         super(x[0].getSolver());
         this.x = new IntVar[x.length];
+        this.deltas = new DeltaInt[x.length];
+
         List<Integer> initial = new ArrayList<>();
         for (int i = 0; i < table.length; i++) {
             initial.add(i);
@@ -68,13 +71,11 @@ public class TableCT extends Constraint {
         // Allocate supports and residues
         supports = new BitSet[x.length][];
         residues = new int[x.length][];
-        lastSizes = new ReversibleInt[x.length];
 
         for (int i = 0; i < x.length; i++) {
             this.x[i] = minus(x[i], x[i].getMin()); // map the variables domain to start at 0
             supports[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
             residues[i] = new int[x[i].getMax() - x[i].getMin() + 1];
-            lastSizes[i] = new ReversibleInt(x[i].getSolver().getTrail(), x[i].getSize());
 
             for (int j = 0; j < supports[i].length; j++) {
                 residues[i][j] = 0;
@@ -100,8 +101,10 @@ public class TableCT extends Constraint {
 
     @Override
     public void post() throws InconsistencyException {
-        for (IntVar var : x)
-            var.propagateOnDomainChange(this);
+        for (int i = 0; i < x.length; ++i) {
+            deltas[i] = x[i].propagateOnDomainChangeWithDelta(this);
+        }
+
         propagate();
     }
 
@@ -123,12 +126,13 @@ public class TableCT extends Constraint {
         return x[i].fillArray(domains[i]);
     }
 
-    protected void incrementalUpdate(int i, int[] delta) {
-        for (int v: delta) {
-            supportedTuples.addToMask(supports[i][v]);
-        }
+    protected void incrementalUpdate(int i) {
+        DeltaInt delta = deltas[i];
+        if (delta.deltaSize() > 0) {
+            for (int v: delta.values()) {
+                supportedTuples.addToMask(supports[i][v]);
+            }
 
-        if (delta.length > 0) {
             supportedTuples.reverseMask();
             supportedTuples.intersectWithMask();
         }
@@ -148,15 +152,16 @@ public class TableCT extends Constraint {
             supportedTuples.clearMask();
             updateDomain(i);
 
-            int[] delta = x[i].delta(lastSizes[i].getValue());
-            if (delta.length < x[i].getSize() && !firstPropagate) {
-                incrementalUpdate(i, delta);
+            int deltaSize = deltas[i].deltaSize();
+            if (deltaSize < x[i].getSize() && !firstPropagate) {
+                incrementalUpdate(i);
             }
+//            int[] delta = x[i].delta(lastSizes[i].getValue());
+//            if (delta.length < x[i].getSize() && !firstPropagate) {
+//            }
             else {
                 resetUpdate(i);
             }
-
-            lastSizes[i].setValue(x[i].getSize());
 
             if (supportedTuples.isEmpty()) {
                 throw INCONSISTENCY;
