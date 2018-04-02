@@ -93,6 +93,7 @@ public class Eternity {
             }
         }
 
+
         Solver cp = makeSolver();
 
         // Create the variables making sure that common edges share the same instance variable)
@@ -167,9 +168,9 @@ public class Eternity {
         SearchStatistics stats = makeDfs(cp,
                 /* TODO: continue, are you branching on all the variables ? */
                 and(
-                    firstFail(flatten((id))),
-                    firstFail(flatten(u)),
-                    firstFail(flatten(l))
+                    firstFail(flatten((id)))
+//                    firstFail(flatten(u)),
+//                    firstFail(flatten(l))
 //                    firstFail(flatten(r)),
 //                    firstFail(flatten(d))
                 )

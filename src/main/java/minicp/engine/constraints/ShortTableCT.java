@@ -73,11 +73,11 @@ public class ShortTableCT extends TableCT {
         DeltaInt delta = deltas[i];
         if (delta.deltaSize() > 0) {
             for (int v: delta.values()) {
-                supportedTuples.addToMask(supportsStar[i][v]);
+                validTuples.addToMask(supportsStar[i][v]);
             }
 
-            supportedTuples.reverseMask();
-            supportedTuples.intersectWithMask();
+            validTuples.reverseMask();
+            validTuples.intersectWithMask();
         }
     }
 }
