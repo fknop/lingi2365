@@ -21,15 +21,13 @@ import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 
 import static minicp.cp.Factory.minus;
+import static minicp.util.InconsistencyException.INCONSISTENCY;
 
-public class NegTableCT extends Constraint {
-    private IntVar[] x; //variables
-    private int[][] table; //the table
-    // conficts[i][v] is the set of tuples such that x[i]=v
-    private BitSet[][] conflicts;
+public class NegTableCT extends TableCT {
 
     /**
      * Negative Table constraint.
@@ -40,9 +38,7 @@ public class NegTableCT extends Constraint {
      * @param table array of forbidden solutions (second dimension must be of same size as the array x)
      */
     public NegTableCT(IntVar[] x, int[][] table) {
-        super(x[0].getSolver());
-        this.x = new IntVar[x.length];
-
+        super(x, table, false);
 
         // remove duplicate (the negative ct algo does not support it)
         ArrayList<int[]> tableList = new ArrayList<>();
@@ -63,34 +59,77 @@ public class NegTableCT extends Constraint {
                 }
             }
         }
-        this.table = tableList.toArray(new int[0][]);
 
-        // Allocate conflicts
-        conflicts = new BitSet[x.length][];
+        setupSupports(x, tableList.toArray(new int[0][]));
+    }
+
+
+    @Override
+    protected void filterDomains() throws InconsistencyException {
+
+        int domainSizesProduct = computeDomainSizeProduct();
         for (int i = 0; i < x.length; i++) {
-            // map the variables domain to start at index 0
-            this.x[i] = minus(x[i],x[i].getMin());
-            conflicts[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
-            for (int j = 0; j < conflicts[i].length; j++)
-                conflicts[i][j] = new BitSet();
-        }
+//            if (!x[i].isBound()) {
+            int domainSizesWithoutI = domainSizesProduct / x[i].getSize();
+            int size = x[i].getSize();
+            for (int j = 0; j < size; j++) {
+                int v = domains[i][j];
 
-        for (int i = 0; i < this.table.length; i++) { //i is the index of the tuple (in table)
-            for (int j = 0; j < x.length; j++) { //j is the index of the current variable (in x)
-                if (x[j].contains(this.table[i][j])) {
-                    conflicts[j][this.table[i][j] - x[j].getMin()].set(i);
+                long[] bitset = validTuples.convert(supports[i][v]);
+                if (numberBits1(validTuples.intersection(bitset)) == domainSizesWithoutI) {
+                    x[i].remove(v);
+
+                    validTuples.addToMask(bitset);
+                    validTuples.reverseMask();
+                    validTuples.intersectWithMask();
+                    domainSizesProduct = computeDomainSizeProduct();
+                    domainSizesWithoutI = domainSizesProduct / x[i].getSize();
                 }
             }
+//            }
         }
     }
 
-    @Override
-    public void post() throws InconsistencyException {
-        throw new NotImplementedException("NegTableCT");
-    }
 
     @Override
-    public void propagate() throws InconsistencyException {
-        throw new NotImplementedException("NegTableCT");
+    protected void updateTuples() throws InconsistencyException {
+        for (int i = 0; i < x.length; ++i) {
+            validTuples.clearMask();
+            updateDomain(i);
+
+            int deltaSize = deltas[i].deltaSize();
+            if (deltaSize < x[i].getSize() && !firstPropagate) {
+                incrementalUpdate(i);
+            }
+            else {
+                resetUpdate(i);
+            }
+        }
+
+        int domainSizesProduct = computeDomainSizeProduct();
+        if (numberBits1(validTuples.getWords()) == domainSizesProduct) {
+            throw INCONSISTENCY;
+        }
+    }
+
+    private int numberBits1(BitSet set) {
+        return set.cardinality();
+    }
+
+    private int numberBits1(long[] set) {
+        int cpt = 0;
+        for (int i = 0; i < set.length; ++i) {
+            cpt += Long.bitCount(set[i]);
+        }
+
+        return cpt;
+    }
+
+    private int computeDomainSizeProduct() {
+        int product = 1;
+        for (IntVar var : x) {
+            product *= var.getSize();
+        }
+        return product;
     }
 }

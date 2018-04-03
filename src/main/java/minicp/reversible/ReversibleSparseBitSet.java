@@ -61,6 +61,15 @@ public class ReversibleSparseBitSet {
         }
     }
 
+    public long[] getWords() {
+        long[] words = new long[this.words.length];
+        for (int i = 0; i < words.length; ++i) {
+            words[i] = this.words[i].getValue();
+        }
+
+        return words;
+    }
+
     public boolean isEmpty() {
         return limit.getValue() == -1;
     }
@@ -119,7 +128,7 @@ public class ReversibleSparseBitSet {
     }
 
     public int intersectIndex(long[] m) {
-        for (int i = 0; i <= limit.getValue(); ++i) {
+        for (int i = limit.getValue(); i >= 0; --i) {
             int offset = indices[i];
             if ((words[offset].getValue() & m[offset]) != 0L) {
                 return offset;
@@ -127,6 +136,15 @@ public class ReversibleSparseBitSet {
         }
 
         return -1;
+    }
+
+    public long[] intersection(long[] bs) {
+        long[] intersection = new long[nWords];
+        for (int i = 0; i < nWords; ++i) {
+            intersection[i] = this.words[i].getValue() & bs[i];
+        }
+
+        return intersection;
     }
 
     public long get(int index) {

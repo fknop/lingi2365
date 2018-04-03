@@ -124,6 +124,7 @@ public class NegTableTest {
                 IntVar[] x = makeIntVarArray(cp, 3, 2);
                 int[][] table = new int[][]{{1,1,1}};
                 cp.post(new NegTableCT(x, table));
+
                 DFSearch dfs = makeDfs(cp,firstFail(x));
                 SearchStatistics stats = dfs.start();
                 assertEquals(7,stats.nSolutions);

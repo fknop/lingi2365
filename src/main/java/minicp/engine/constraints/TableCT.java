@@ -112,7 +112,7 @@ public class TableCT extends Constraint {
         this.firstPropagate = false;
     }
 
-    private int updateDomain(int i) {
+    protected int updateDomain(int i) {
         if (domains[i] == null || domains[i].length < x[i].getSize()) {
             domains[i] = new int[x[i].getSize()];
         }
@@ -160,16 +160,23 @@ public class TableCT extends Constraint {
         }
     }
 
-    private void filterDomains() throws InconsistencyException {
+    protected void filterDomains() throws InconsistencyException {
         for (int i = 0; i < x.length; i++) {
-            for (int j = 0; j < x[i].getSize(); j++) {
-                int v = domains[i][j];
-                int index = validTuples.intersectIndex(supports[i][v]);
-                if (index == -1) {
-                    x[i].remove(v);
-                }
-                else {
-                    residues[i][v] = index;
+            if (!x[i].isBound()) {
+                for (int j = 0; j < x[i].getSize(); j++) {
+                    int v = domains[i][j];
+
+                    int residue = residues[i][v];
+                    long[] bitset = validTuples.convert(supports[i][v]);
+                    if ((validTuples.get(residue) & bitset[residue]) == 0L) {
+                        int index = validTuples.intersectIndex(bitset);
+                        if (index == -1) {
+                            x[i].remove(v);
+                        }
+                        else {
+                            residues[i][v] = index;
+                        }
+                    }
                 }
             }
         }
