@@ -27,55 +27,55 @@ import java.util.ArrayList;
 public class AllDifferentBinary extends Constraint {
 
     private IntVar [] x;
-//    private int[] indices;
+    private int[] indices;
 
-//    private ReversibleSparseSet set;
+    private ReversibleSparseSet set;
 
     public AllDifferentBinary(IntVar ... x) {
         super(x[0].getSolver());
         this.x = x;
-//        set = new ReversibleSparseSet(cp.getTrail(), x.length);
-//        indices = new int[x.length];
+        set = new ReversibleSparseSet(cp.getTrail(), x.length);
+        indices = new int[x.length];
     }
 
     @Override
     public void post() throws InconsistencyException {
-        Solver cp = x[0].getSolver();
-        for (int i = 0; i < x.length; i++) {
-            for (int j = i+1; j < x.length; j++) {
-                cp.post(new NotEqual(x[i],x[j]),false);
-            }
-        }
-
-
-//        for (int i = 0; i < x.length; ++i) {
-//            final int j = i;
-//            x[i].whenBind(() -> {
-//                onBind(j);
-//            });
-//
-//            if (x[i].isBound()) {
-//                onBind(i);
+//        Solver cp = x[0].getSolver();
+//        for (int i = 0; i < x.length; i++) {
+//            for (int j = i+1; j < x.length; j++) {
+//                cp.post(new NotEqual(x[i],x[j]),false);
 //            }
 //        }
-//    }
-//
-//    private void onBind(int i) throws InconsistencyException {
-//
-//        assert(x[i].isBound());
-//
-//        IntVar xi = x[i];
-//        set.remove(i);
-//
-//        int remaining = set.fillArray(indices);
-//
-//        for (int j = 0; j < remaining; ++j) {
-//            int k = indices[j];
-//            x[k].remove(xi.getMin());
-//        }
-//
-//        if (set.isEmpty()) {
-//            this.deactivate();
-//        }
+
+
+        for (int i = 0; i < x.length; ++i) {
+            final int j = i;
+            x[i].whenBind(() -> {
+                onBind(j);
+            });
+
+            if (x[i].isBound()) {
+                onBind(i);
+            }
+        }
+    }
+
+    private void onBind(int i) throws InconsistencyException {
+
+        assert(x[i].isBound());
+
+        IntVar xi = x[i];
+        set.remove(i);
+
+        int remaining = set.fillArray(indices);
+
+        for (int j = 0; j < remaining; ++j) {
+            int k = indices[j];
+            x[k].remove(xi.getMin());
+        }
+
+        if (set.isEmpty()) {
+            this.deactivate();
+        }
     }
 }
