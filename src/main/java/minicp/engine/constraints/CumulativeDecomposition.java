@@ -37,6 +37,10 @@ public class CumulativeDecomposition extends Constraint {
 
     public CumulativeDecomposition(IntVar[] start, int[] duration, int[] demand, int capa) throws InconsistencyException {
         super(start[0].getSolver());
+
+
+        registerVariable(start);
+
         this.start = start;
         this.duration = duration;
         this.end = makeIntVarArray(cp,start.length, i -> plus(start[i],duration[i]));

@@ -64,6 +64,8 @@ public class Element2D extends Constraint {
     public Element2D(int[][] T, IntVar x, IntVar y, IntVar z) {
         super(x.getSolver());
 
+        registerVariable(x, y, z);
+
         this.T = T;
         this.x = x;
         this.y = y;

@@ -37,6 +37,9 @@ public class Circuit extends Constraint {
      */
     public Circuit(IntVar [] x) {
         super(x[0].getSolver());
+
+        registerVariable(x);
+
         this.x = x;
         dest = new ReversibleInt[x.length];
         orig = new ReversibleInt[x.length];

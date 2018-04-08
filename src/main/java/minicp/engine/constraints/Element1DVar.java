@@ -41,7 +41,9 @@ public class Element1DVar extends Constraint {
 
     public Element1DVar(IntVar[] T, IntVar x, IntVar y, Consistency consistency) {
         super(y.getSolver());
-        System.out.println("Element1DVar");
+
+        registerVariable(x, y);
+
         this.T = T;
         this.n = T.length;
         this.x = x;

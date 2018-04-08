@@ -26,12 +26,17 @@ public class NotEqual extends Constraint {
 
     public NotEqual(IntVar x, IntVar y) { // x != z
         super(x.getSolver());
+
+        registerVariable(x, y);
+
         this.x = x;
         this.y = y;
         this.c = 0;
     }
     public NotEqual(IntVar x, IntVar y, int c) { // x != z + c
         super(x.getSolver());
+        registerVariable(x, y);
+
         this.x = x;
         this.y = y;
         this.c = c;

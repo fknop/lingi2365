@@ -26,6 +26,9 @@ public class LessOrEqual extends Constraint { // x <= z
 
     public LessOrEqual(IntVar x, IntVar y) {
         super(x.getSolver());
+
+        registerVariable(x, y);
+
         this.x = x;
         this.y = y;
     }

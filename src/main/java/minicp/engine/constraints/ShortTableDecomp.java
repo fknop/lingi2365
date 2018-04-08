@@ -35,6 +35,9 @@ public class ShortTableDecomp extends Constraint {
      */
     public ShortTableDecomp(IntVar[] x, int[][] table, int star) {
         super(x[0].getSolver());
+
+        registerVariable(x);
+
         this.x = x;
         this.table = table;
         this.star = star;

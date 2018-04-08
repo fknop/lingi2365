@@ -58,6 +58,8 @@ public class Element1D extends Constraint {
     public Element1D(int[] T, IntVar x, IntVar z) {
         super(z.getSolver());
 
+        registerVariable(x, z);
+
         this.T = T;
         this.x = x;
         this.z = z;

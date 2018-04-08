@@ -18,8 +18,13 @@ package minicp.cp;
 
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
+import minicp.search.Alternative;
 import minicp.search.Choice;
 import minicp.search.ChoiceCombinator;
+import minicp.search.Selector;
+
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static minicp.search.Selector.branch;
 import static minicp.search.Selector.selectMin;
@@ -28,23 +33,40 @@ import static minicp.cp.Factory.*;
 public class Heuristics {
 
     public static Choice firstFail(IntVar... x) {
-        Solver cp = x[0].getSolver();
-        return selectMin(x,
-                xi -> xi.getSize() > 1,
-                xi -> xi.getSize(),
-                xi -> {
-                    int v = xi.getMin();
-                    return branch(
-                            () -> {
-                                equal(xi,v);
-                            },
-                            () -> {
-                                notEqual(xi,v);
-                            }
-                    );
-                }
+        return buildHeuristic(x,
+                domSizeHeuristic,
+                branchHeuristic
         );
     }
+
+    public static Choice buildHeuristic(IntVar[] x, Selector.ValueFun<IntVar> value, Selector.BranchOn<IntVar> branch) {
+        return selectMin(x,
+            filterUnbound,
+            value,
+            branch
+        );
+    }
+
+    public static Selector.ValueFun<IntVar> domDivDegreeHeuristic = (IntVar xi) -> xi.getSize() / xi.getDegree();
+    public static Selector.ValueFun<IntVar> domPlusDegreeHeuristic = (IntVar xi) -> xi.getSize() + xi.getDegree();
+    public static Selector.ValueFun<IntVar> domPlusWeightedDegreeHeuristic = (IntVar xi) -> xi.getSize() + xi.getWeightedDegree();
+    public static Selector.ValueFun<IntVar> domSizeHeuristic = IntVar::getSize;
+
+    public static Selector.Filter<IntVar> filterUnbound = (IntVar xi) -> xi.getSize() > 1;
+
+    public static Selector.BranchOn<IntVar> branchHeuristic = (IntVar xi) -> {
+        int v = xi.getMin();
+        return branch(
+                () -> {
+                    equal(xi,v);
+                },
+                () -> {
+                    notEqual(xi,v);
+                }
+        );
+    };
+
+
 
     /**
      *

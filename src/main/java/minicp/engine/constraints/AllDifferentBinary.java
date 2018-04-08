@@ -33,6 +33,9 @@ public class AllDifferentBinary extends Constraint {
 
     public AllDifferentBinary(IntVar ... x) {
         super(x[0].getSolver());
+
+        registerVariable(x);
+
         this.x = x;
         set = new ReversibleSparseSet(cp.getTrail(), x.length);
         indices = new int[x.length];
@@ -40,14 +43,6 @@ public class AllDifferentBinary extends Constraint {
 
     @Override
     public void post() throws InconsistencyException {
-//        Solver cp = x[0].getSolver();
-//        for (int i = 0; i < x.length; i++) {
-//            for (int j = i+1; j < x.length; j++) {
-//                cp.post(new NotEqual(x[i],x[j]),false);
-//            }
-//        }
-
-
         for (int i = 0; i < x.length; ++i) {
             final int j = i;
             x[i].whenBind(() -> {

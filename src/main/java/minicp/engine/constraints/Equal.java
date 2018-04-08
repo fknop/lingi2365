@@ -32,6 +32,9 @@ public class Equal extends Constraint {
 
     public Equal(IntVar x, IntVar y) {
         super(x.getSolver());
+
+        registerVariable(x, y);
+
         this.x = x;
         this.y = y;
         deltaValues = new int[Math.max(x.getSize(), y.getSize())];

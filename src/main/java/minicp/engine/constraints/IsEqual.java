@@ -28,6 +28,9 @@ public class IsEqual extends Constraint { // b <=> x == c
 
     public IsEqual(BoolVar b, IntVar x, int c) {
         super(x.getSolver());
+
+        registerVariable(b, x);
+
         this.b = b;
         this.x = x;
         this.c = c;

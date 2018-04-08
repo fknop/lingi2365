@@ -58,6 +58,8 @@ public class TableCT extends Constraint {
     protected TableCT(IntVar[] x, int[][] table, boolean setupSupports) {
         super(x[0].getSolver());
 
+        registerVariable(x);
+
         this.x = new IntVar[x.length];
         this.deltas = new DeltaInt[x.length];
         this.domains = new int[x.length][];

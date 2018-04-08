@@ -28,6 +28,9 @@ public abstract class Constraint {
     protected final ReversibleBool active;
 
     private List<Delta> deltas = new ArrayList<>();
+    private List<Var> variables = new ArrayList<>();
+
+    private int failureCount = 0;
 
     public Constraint(Solver cp) {
         this.cp = cp;
@@ -39,10 +42,29 @@ public abstract class Constraint {
         delta.update();
     }
 
+    protected void registerVariable(Var var) {
+        this.variables.add(var);
+        var.register(this);
+    }
+
+    protected void registerVariable(Var... vars) {
+        for (Var var: vars) {
+            registerVariable(var);
+        }
+    }
+
     protected void updateDeltas() {
         for (Delta d: deltas) {
             d.update();
         }
+    }
+
+    public void notifyFailure() {
+        this.failureCount++;
+    }
+
+    public int getFailureCount() {
+        return this.failureCount;
     }
 
     public boolean isActive() {

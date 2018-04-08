@@ -37,6 +37,8 @@ public class Sum extends Constraint {
     public Sum(IntVar [] x, IntVar y) {
         this(Arrays.copyOf(x, x.length + 1));
         this.x[x.length] = Factory.minus(y);
+
+        registerVariable(y);
     }
 
 
@@ -52,6 +54,11 @@ public class Sum extends Constraint {
      */
     public Sum(IntVar [] x) {
         super(x[0].getSolver());
+
+        for (int i = 0; i < x.length - 1; ++i) {
+            registerVariable(x[i]);
+        }
+
         this.x = x;
         this.n = x.length;
         nUnBounds = new ReversibleInt(cp.getTrail(),n);

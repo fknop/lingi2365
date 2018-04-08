@@ -32,6 +32,9 @@ public class TableDecomp extends Constraint {
      */
     public TableDecomp(IntVar[] x, int[][] table) {
         super(x[0].getSolver());
+
+        registerVariable(x);
+
         this.x = x;
         this.table = table;
     }

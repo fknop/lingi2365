@@ -18,7 +18,7 @@ package minicp.engine.core;
 import minicp.engine.core.delta.DeltaInt;
 import minicp.util.InconsistencyException;
 
-public interface IntVar {
+public interface IntVar extends Var {
 
     /**
      * Return the solver in which this variable was created
