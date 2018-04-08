@@ -142,4 +142,15 @@ public class IntVarViewOffset implements IntVar {
         return delta;
     }
 
+    @Override
+    public int fillDelta(int[] values, int oldSize) {
+        int size = x.fillDelta(values, oldSize);
+        for (int i = 0; i < size; ++i) {
+            values[i] += o;
+        }
+
+        return size;
+    }
+
+
 }

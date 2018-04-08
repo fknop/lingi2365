@@ -44,6 +44,13 @@ public class ReversibleDeltaIntTest {
             assertEquals(6, delta.values()[0]);
             assertEquals(5, delta.values()[1]);
 
+            int[] values = new int[10];
+            int size = delta.fillArray(values);
+            assertEquals(2, size);
+            assertEquals(6, values[0]);
+            assertEquals(5, values[1]);
+
+
             delta.update();
 
             assertFalse(delta.changed());

@@ -122,4 +122,7 @@ public class SparseSetDomain extends IntDomain {
     public int[] delta(int oldSize) {
         return domain.delta(oldSize);
     }
+    public int fillDelta(int[] values, int oldSize) {
+        return domain.fillDelta(values, oldSize);
+    }
 }

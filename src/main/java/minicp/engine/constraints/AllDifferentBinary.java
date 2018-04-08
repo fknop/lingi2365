@@ -19,17 +19,23 @@ import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.reversible.ReversibleInt;
+import minicp.reversible.ReversibleSparseSet;
 import minicp.util.InconsistencyException;
+
+import java.util.ArrayList;
 
 public class AllDifferentBinary extends Constraint {
 
     private IntVar [] x;
-    private ReversibleInt limit;
+//    private int[] indices;
+
+//    private ReversibleSparseSet set;
 
     public AllDifferentBinary(IntVar ... x) {
         super(x[0].getSolver());
         this.x = x;
-//        System.arraycopy(x, 0, this.x, 0, x.length);
+//        set = new ReversibleSparseSet(cp.getTrail(), x.length);
+//        indices = new int[x.length];
     }
 
     @Override
@@ -40,33 +46,36 @@ public class AllDifferentBinary extends Constraint {
                 cp.post(new NotEqual(x[i],x[j]),false);
             }
         }
-//        for (IntVar var: x) {
-//            var.propagateOnBind(this);
-//        }
-    }
 
-//    @Override
-//    public void propagate() throws InconsistencyException {
+
+//        for (int i = 0; i < x.length; ++i) {
+//            final int j = i;
+//            x[i].whenBind(() -> {
+//                onBind(j);
+//            });
 //
-//        for (int i = 0; i < limit.getValue();) {
 //            if (x[i].isBound()) {
-//                IntVar xi = x[i];
-//                x[i] = x[limit.getValue() - 1];
-//                x[limit.getValue() - 1] = xi;
-//                limit.decrement();
-//
-//
-//                for (int j = 0; j < limit.getValue(); ++j) {
-//                    x[j].remove(xi.getMin());
-//                }
+//                onBind(i);
 //            }
-//            else {
-//                ++i;
-//            }
-//        }
-//
-//        if (limit.getValue() == 0) {
-//            this.deactivate();
 //        }
 //    }
+//
+//    private void onBind(int i) throws InconsistencyException {
+//
+//        assert(x[i].isBound());
+//
+//        IntVar xi = x[i];
+//        set.remove(i);
+//
+//        int remaining = set.fillArray(indices);
+//
+//        for (int j = 0; j < remaining; ++j) {
+//            int k = indices[j];
+//            x[k].remove(xi.getMin());
+//        }
+//
+//        if (set.isEmpty()) {
+//            this.deactivate();
+//        }
+    }
 }

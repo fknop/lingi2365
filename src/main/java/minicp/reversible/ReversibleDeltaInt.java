@@ -85,6 +85,9 @@ public class ReversibleDeltaInt implements DeltaInt {
         return x.delta(oldSize);
     }
 
+    public int fillArray(int[] values) {
+        return x.fillDelta(values, oldSize);
+    }
 
 
 }

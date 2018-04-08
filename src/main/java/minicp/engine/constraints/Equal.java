@@ -17,32 +17,77 @@ package minicp.engine.constraints;
 
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
+import minicp.engine.core.delta.DeltaInt;
 import minicp.util.InconsistencyException;
 
-public class Equal extends Constraint { // x <= z
+public class Equal extends Constraint {
 
     private final IntVar x;
     private final IntVar y;
+
+    private DeltaInt deltaX;
+    private DeltaInt deltaY;
+
+    private int[] deltaValues;
 
     public Equal(IntVar x, IntVar y) {
         super(x.getSolver());
         this.x = x;
         this.y = y;
+        deltaValues = new int[Math.max(x.getSize(), y.getSize())];
     }
 
     @Override
     public void post() throws InconsistencyException {
-        x.propagateOnBoundChange(this);
-        y.propagateOnBoundChange(this);
+        if (x.isBound()) {
+            y.assign(x.getMin());
+        }
+        else if (y.isBound()) {
+            x.assign(y.getMin());
+        }
+        else {
+            int[] domainX = new int[x.getSize()];
+            int[] domainY = new int[y.getSize()];
+            int xSize = x.fillArray(domainX);
+            for (int i = 0; i < xSize; ++i) {
+                int v = domainX[i];
+                if (!y.contains(v)) {
+                    x.remove(v);
+                }
+            }
+
+            int ySize = x.fillArray(domainY);
+            for (int i = 0; i < ySize; ++i) {
+                int v = domainY[i];
+                if (!x.contains(v)) {
+                    y.remove(v);
+                }
+            }
+        }
+
+
+        deltaX = x.propagateOnDomainChangeWithDelta(this);
+        deltaY = y.propagateOnDomainChangeWithDelta(this);
+
         propagate();
     }
 
     @Override
     public void propagate() throws InconsistencyException {
-        x.removeAbove(y.getMax());
-        y.removeBelow(x.getMin());
-        if (x.getMax() <= y.getMin()) {
+        filter(x, y, deltaX);
+        filter(y, x, deltaY);
+    }
+
+    private void filter(IntVar a, IntVar b, DeltaInt delta) throws InconsistencyException {
+        if (a.isBound()) {
+            b.assign(a.getMin());
             this.deactivate();
+        }
+        else if (delta.changed()) {
+            int size = delta.fillArray(deltaValues);
+            for (int i = 0; i < size; ++i) {
+                b.remove(deltaValues[i]);
+            }
         }
     }
 }

@@ -40,6 +40,7 @@ public abstract class IntDomain {
 
     public abstract int fillArray(int [] dest);
 
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();

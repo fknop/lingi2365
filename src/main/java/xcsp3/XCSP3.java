@@ -138,9 +138,6 @@ public class XCSP3 implements XCallbacks2 {
                     minicp.post(new TableCT(trVars(list), tuples));
                 }
             }
-//            minicp.fixPoint();
-//            //TODO student: use other table implementation
-//            minicp.post(new TableCT(trVars(list), tuples));
         } catch (InconsistencyException e) {
             hasFailed = true;
         }
@@ -188,8 +185,9 @@ public class XCSP3 implements XCallbacks2 {
             switch (operator) {
                 case EQ:
                     // TODO: implement equal
-                    minicp.post(new LessOrEqual(x, y));
-                    minicp.post(new LessOrEqual(y,x));
+                    minicp.post(new Equal(x, y));
+//                    minicp.post(new LessOrEqual(x, y));
+//                    minicp.post(new LessOrEqual(y,x));
                     break;
                 case GE:
                     minicp.post(new LessOrEqual(y,x));

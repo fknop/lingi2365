@@ -6,4 +6,5 @@ public interface DeltaInt extends Delta {
     boolean minChanged();
     boolean maxChanged();
     int[] values();
+    int fillArray(int[] values);
 }

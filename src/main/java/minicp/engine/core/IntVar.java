@@ -140,5 +140,5 @@ public interface IntVar {
     int removeAbove(int v) throws InconsistencyException;
 
     int[] delta(int oldSize);
-
+    int fillDelta(int[] values, int oldSize);
 }

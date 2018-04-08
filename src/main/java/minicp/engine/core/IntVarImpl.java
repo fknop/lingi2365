@@ -212,4 +212,7 @@ public class IntVarImpl implements IntVar {
     public int[] delta(int oldSize) {
         return ((SparseSetDomain) domain).delta(oldSize);
     }
+    public int fillDelta(int[] values, int oldSize) {
+        return ((SparseSetDomain) domain).fillDelta(values, oldSize);
+    }
 }

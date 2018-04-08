@@ -308,5 +308,17 @@ public class ReversibleSparseSet {
 
         return delta;
     }
+
+    public int fillDelta(int[] delta, int oldSize) {
+        int size = oldSize - getSize();
+        assert(size >= 0);
+        assert(delta.length >= size);
+
+        for (int i = 0; i < size; ++i) {
+            delta[i] = realValue(values[getSize() + i]);
+        }
+
+        return size;
+    }
 }
 
