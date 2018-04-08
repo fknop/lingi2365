@@ -147,6 +147,27 @@ public class ReversibleSparseBitSet {
         return (words[index].getValue() & word) == 0L;
     }
 
+    public int intersectionCardinality(long[] bitset) {
+        int cardinality = 0;
+        for (int i = 0; i <= limit.getValue(); ++i) {
+            int offset = indices[i];
+            long w = words[offset].getValue() & bitset[offset];
+            cardinality += Long.bitCount(w);
+        }
+
+        return cardinality;
+    }
+
+    public int cardinality() {
+        int cardinality = 0;
+        for (int i = 0; i <= limit.getValue(); ++i) {
+            int offset = indices[i];
+            cardinality += Long.bitCount(words[offset].getValue());
+        }
+
+        return cardinality;
+    }
+
     public void intersection(long[] bs, long[] intersection) {
         for (int i = 0; i < nWords; ++i) {
             intersection[i] = this.words[i].getValue() & bs[i];

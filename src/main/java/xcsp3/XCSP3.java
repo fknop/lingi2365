@@ -138,9 +138,9 @@ public class XCSP3 implements XCallbacks2 {
                     minicp.post(new TableCT(trVars(list), tuples));
                 }
             }
-            minicp.fixPoint();
-            //TODO student: use other table implementation
-            minicp.post(new TableCT(trVars(list), tuples));
+//            minicp.fixPoint();
+//            //TODO student: use other table implementation
+//            minicp.post(new TableCT(trVars(list), tuples));
         } catch (InconsistencyException e) {
             hasFailed = true;
         }

@@ -29,7 +29,6 @@ import static minicp.util.InconsistencyException.INCONSISTENCY;
 
 public class NegTableCT extends TableCT {
 
-    private long[] intersection;
     private long[] bitset;
 
     /**
@@ -42,7 +41,7 @@ public class NegTableCT extends TableCT {
      */
     public NegTableCT(IntVar[] x, int[][] table) {
         super(x, table, false);
-        intersection = new long[validTuples.numberWords()];
+
         bitset = new long[validTuples.numberWords()];
 
 
@@ -76,31 +75,27 @@ public class NegTableCT extends TableCT {
         int domainSizesProduct = computeDomainSizeProduct();
         int[] sizes = new int[x.length];
         for (int i = 0; i < x.length; i++) {
-            sizes[i] = domainSizesProduct / x[i].getSize();
             if (!x[i].isBound()) {
-                validTuples.clearMask();
+                sizes[i] = domainSizesProduct / x[i].getSize();
 
-                boolean deleted = false;
                 int size = x[i].getSize();
                 for (int j = 0; j < size; j++) {
 
-
                     int v = domains[i][j];
-
                     validTuples.convert(supports[i][v], bitset);
-                    validTuples.intersection(bitset, intersection);
-                    if (numberBits1(intersection) == sizes[i]) {
+
+                    if (validTuples.intersectionCardinality(bitset) == sizes[i]) {
+
                         x[i].remove(v);
-                        deleted = true;
+
+                        validTuples.clearMask();
                         validTuples.addToMask(bitset);
+                        validTuples.reverseMask();
+                        validTuples.intersectWithMask();
 
                         domainSizesProduct = computeDomainSizeProduct();
                         sizes[i] = domainSizesProduct / x[i].getSize();
                     }
-                }
-                if (deleted) {
-                    validTuples.reverseMask();
-                    validTuples.intersectWithMask();
                 }
             }
         }
@@ -109,23 +104,30 @@ public class NegTableCT extends TableCT {
 
     @Override
     protected void updateTuples() throws InconsistencyException {
+
+
         for (int i = 0; i < x.length; ++i) {
             validTuples.clearMask();
             updateDomain(i);
 
-            if (deltas[i].changed()) {
-                int deltaSize = deltas[i].deltaSize();
-                if (deltaSize < x[i].getSize() && !firstPropagate) {
-                    incrementalUpdate(i);
-                }
-                else {
-                    resetUpdate(i);
+            if (firstPropagate) {
+                resetUpdate(i);
+            }
+            else {
+                if (deltas[i].changed()) {
+                    int deltaSize = deltas[i].deltaSize();
+                    if (deltaSize < x[i].getSize()) {
+                        incrementalUpdate(i);
+                    }
+                    else {
+                        resetUpdate(i);
+                    }
                 }
             }
         }
 
         int domainSizesProduct = computeDomainSizeProduct();
-        if (numberBits1(validTuples.getWords()) == domainSizesProduct) {
+        if (validTuples.cardinality() == domainSizesProduct) {
             throw INCONSISTENCY;
         }
     }
