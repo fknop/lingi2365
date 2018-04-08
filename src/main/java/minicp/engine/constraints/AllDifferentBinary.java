@@ -28,9 +28,8 @@ public class AllDifferentBinary extends Constraint {
 
     public AllDifferentBinary(IntVar ... x) {
         super(x[0].getSolver());
-        this.x = new IntVar[x.length];
-        this.limit = new ReversibleInt(x[0].getSolver().getTrail(), x.length);
-        System.arraycopy(x, 0, this.x, 0, x.length);
+        this.x = x;
+//        System.arraycopy(x, 0, this.x, 0, x.length);
     }
 
     @Override

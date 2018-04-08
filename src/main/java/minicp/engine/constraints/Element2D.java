@@ -55,7 +55,7 @@ public class Element2D extends Constraint {
     }
 
     /**
-     * T[x][y] = z
+     * T[x][z] = z
      * @param T
      * @param x
      * @param y

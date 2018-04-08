@@ -30,7 +30,7 @@ public class Maximum extends Constraint {
     private final IntVar y;
 
     /**
-     * y = maximum(x[0],x[1],...,x[n])
+     * z = maximum(x[0],x[1],...,x[n])
      * @param x
      * @param y
      */

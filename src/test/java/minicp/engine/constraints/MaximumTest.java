@@ -70,7 +70,7 @@ public class MaximumTest {
                 // x0 = 0..2
                 // x1 = 6
                 // x2 = 6..8
-                // y = 7..8
+                // z = 7..8
                 assertEquals(7, x[2].getMin());
 
 

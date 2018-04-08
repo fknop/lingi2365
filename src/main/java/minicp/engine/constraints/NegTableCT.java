@@ -29,6 +29,9 @@ import static minicp.util.InconsistencyException.INCONSISTENCY;
 
 public class NegTableCT extends TableCT {
 
+    private long[] intersection;
+    private long[] bitset;
+
     /**
      * Negative Table constraint.
      * Assignment of x_0=v_0, x_1=v_1,... is forbidden
@@ -39,6 +42,10 @@ public class NegTableCT extends TableCT {
      */
     public NegTableCT(IntVar[] x, int[][] table) {
         super(x, table, false);
+        System.out.println("neg table");
+        intersection = new long[validTuples.numberWords()];
+        bitset = new long[validTuples.numberWords()];
+
 
         // remove duplicate (the negative ct algo does not support it)
         ArrayList<int[]> tableList = new ArrayList<>();
@@ -68,25 +75,35 @@ public class NegTableCT extends TableCT {
     protected void filterDomains() throws InconsistencyException {
 
         int domainSizesProduct = computeDomainSizeProduct();
+        int[] sizes = new int[x.length];
         for (int i = 0; i < x.length; i++) {
-//            if (!x[i].isBound()) {
-            int domainSizesWithoutI = domainSizesProduct / x[i].getSize();
-            int size = x[i].getSize();
-            for (int j = 0; j < size; j++) {
-                int v = domains[i][j];
+            sizes[i] = domainSizesProduct / x[i].getSize();
+            if (!x[i].isBound()) {
+                validTuples.clearMask();
 
-                long[] bitset = validTuples.convert(supports[i][v]);
-                if (numberBits1(validTuples.intersection(bitset)) == domainSizesWithoutI) {
-                    x[i].remove(v);
+                boolean deleted = false;
+                int size = x[i].getSize();
+                for (int j = 0; j < size; j++) {
 
-                    validTuples.addToMask(bitset);
+
+                    int v = domains[i][j];
+
+                    validTuples.convert(supports[i][v], bitset);
+                    validTuples.intersection(bitset, intersection);
+                    if (numberBits1(intersection) == sizes[i]) {
+                        x[i].remove(v);
+                        deleted = true;
+                        validTuples.addToMask(bitset);
+
+                        domainSizesProduct = computeDomainSizeProduct();
+                        sizes[i] = domainSizesProduct / x[i].getSize();
+                    }
+                }
+                if (deleted) {
                     validTuples.reverseMask();
                     validTuples.intersectWithMask();
-                    domainSizesProduct = computeDomainSizeProduct();
-                    domainSizesWithoutI = domainSizesProduct / x[i].getSize();
                 }
             }
-//            }
         }
     }
 
@@ -97,12 +114,14 @@ public class NegTableCT extends TableCT {
             validTuples.clearMask();
             updateDomain(i);
 
-            int deltaSize = deltas[i].deltaSize();
-            if (deltaSize < x[i].getSize() && !firstPropagate) {
-                incrementalUpdate(i);
-            }
-            else {
-                resetUpdate(i);
+            if (deltas[i].changed()) {
+                int deltaSize = deltas[i].deltaSize();
+                if (deltaSize < x[i].getSize() && !firstPropagate) {
+                    incrementalUpdate(i);
+                }
+                else {
+                    resetUpdate(i);
+                }
             }
         }
 

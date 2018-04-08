@@ -29,7 +29,7 @@ import static minicp.cp.Factory.minus;
 import static minicp.util.InconsistencyException.INCONSISTENCY;
 import static minicp.util.Sequence.sequence;
 
-// TODO: USE RESIDUES
+
 public class TableCT extends Constraint {
     protected IntVar[] x; //variables
     protected DeltaInt[] deltas;
@@ -41,6 +41,7 @@ public class TableCT extends Constraint {
 
     protected boolean firstPropagate = true;
 
+    private long[] bitset;
 
     public TableCT(IntVar[] x, int[][] table) {
         this(x, table, true);
@@ -64,7 +65,8 @@ public class TableCT extends Constraint {
         this.supports = new BitSet[x.length][];
         this.residues = new int[x.length][];
 
-        this.validTuples = new ReversibleSparseBitSet(x[0].getSolver().getTrail(), table.length, sequence(0, table.length));
+        this.validTuples = new ReversibleSparseBitSet(this.cp.getTrail(), table.length, sequence(0, table.length));
+        this.bitset = new long[validTuples.numberWords()];
 
 
         for (int i = 0; i < x.length; i++) {
@@ -74,7 +76,7 @@ public class TableCT extends Constraint {
 
             for (int j = 0; j < supports[i].length; j++) {
                 residues[i][j] = 0;
-                supports[i][j] = new BitSet(table.length);
+                supports[i][j] = new BitSet();
             }
         }
 
@@ -106,7 +108,6 @@ public class TableCT extends Constraint {
 
     @Override
     public void propagate() throws InconsistencyException {
-
         updateTuples();
         filterDomains();
         this.firstPropagate = false;
@@ -123,6 +124,7 @@ public class TableCT extends Constraint {
     protected void incrementalUpdate(int i) {
         DeltaInt delta = deltas[i];
         if (delta.deltaSize() > 0) {
+
             for (int v: delta.values()) {
                 validTuples.addToMask(supports[i][v]);
             }
@@ -146,29 +148,38 @@ public class TableCT extends Constraint {
             validTuples.clearMask();
             updateDomain(i);
 
-            int deltaSize = deltas[i].deltaSize();
-            if (deltaSize < x[i].getSize() && !firstPropagate) {
-                incrementalUpdate(i);
-            }
-            else {
+
+            if (firstPropagate) {
                 resetUpdate(i);
             }
+            else if (deltas[i].changed()) {
+                if (deltas[i].deltaSize() < x[i].getSize()) {
+                    incrementalUpdate(i);
+                }
+                else {
+                    resetUpdate(i);
+                }
+            }
+
 
             if (validTuples.isEmpty()) {
                 throw INCONSISTENCY;
             }
         }
+
     }
 
     protected void filterDomains() throws InconsistencyException {
         for (int i = 0; i < x.length; i++) {
             if (!x[i].isBound()) {
-                for (int j = 0; j < x[i].getSize(); j++) {
+                int size = x[i].getSize();
+                for (int j = 0; j < size; j++) {
+
                     int v = domains[i][j];
 
                     int residue = residues[i][v];
-                    long[] bitset = validTuples.convert(supports[i][v]);
-                    if ((validTuples.get(residue) & bitset[residue]) == 0L) {
+                    validTuples.convert(supports[i][v], bitset);
+                    if (validTuples.emptyIntersection(residue, bitset[residue])) {
                         int index = validTuples.intersectIndex(bitset);
                         if (index == -1) {
                             x[i].remove(v);

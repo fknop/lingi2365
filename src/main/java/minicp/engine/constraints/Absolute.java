@@ -38,13 +38,13 @@ public class Absolute extends Constraint {
     private int[] xDomain;
 
     /**
-     * Build a constraint y = |x|
+     * Build a constraint z = |x|
      *
      * @param x
      * @param y
      */
     public Absolute(IntVar x, IntVar y) {
-        this(x, y, Consistency.BOUND);
+        this(x, y, Consistency.DOMAIN);
     }
 
     public Absolute(IntVar x, IntVar y, Consistency consistency) {
@@ -72,7 +72,7 @@ public class Absolute extends Constraint {
     @Override
     public void propagate() throws InconsistencyException {
 
-        // Remove value in y not in |x|
+        // Remove value in z not in |x|
 
         if (x.isBound()) {
             y.assign(Math.abs(x.getMin()));
@@ -89,7 +89,7 @@ public class Absolute extends Constraint {
         }
 
         if (this.consistency == Consistency.BOUND) {
-            // Filter bounds of y
+            // Filter bounds of z
             int min = y.getMin();
             int max = y.getMax();
 

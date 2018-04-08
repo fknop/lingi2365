@@ -16,12 +16,10 @@
 
 package minicp.engine.constraints;
 
-import minicp.cp.Factory;
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
 import minicp.reversible.ReversibleInt;
 import minicp.util.InconsistencyException;
-import minicp.util.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +30,7 @@ public class Element1D extends Constraint {
 
     int[] T;
     IntVar x;
-    IntVar y;
+    IntVar z;
 
     private final int n;
 
@@ -40,27 +38,29 @@ public class Element1D extends Constraint {
     private final ReversibleInt up;
     private final ArrayList<Pair> xy;
 
-    private class Pair implements Comparable<Pair> {
-        protected final int x,y;
+    private ReversibleInt[] nCol;
 
-        private Pair(int x, int y) {
+    private class Pair implements Comparable<Pair> {
+        protected final int x,z;
+
+        private Pair(int x, int z) {
             this.x = x;
-            this.y = y;
+            this.z = z;
         }
 
         @Override
         public int compareTo(Pair t) {
-            return y - t.y;
+            return z - t.z;
         }
     }
 
-    // T[x] = y
-    public Element1D(int[] T, IntVar x, IntVar y) {
-        super(y.getSolver());
+    // T[x] = z
+    public Element1D(int[] T, IntVar x, IntVar z) {
+        super(z.getSolver());
 
         this.T = T;
         this.x = x;
-        this.y = y;
+        this.z = z;
         this.n = T.length;
         this.xy = new ArrayList<>();
         for (int i = 0; i < T.length; i++) {
@@ -71,7 +71,11 @@ public class Element1D extends Constraint {
 
         low = new ReversibleInt(cp.getTrail(),0);
         up = new ReversibleInt(cp.getTrail(), xy.size() - 1);
+        nCol = new ReversibleInt[n];
 
+        for (int i = 0; i < n; i++) {
+            nCol[i] = new ReversibleInt(cp.getTrail(), 1);
+        }
 
 
     }
@@ -82,7 +86,7 @@ public class Element1D extends Constraint {
         x.removeAbove(n - 1);
 
         x.propagateOnDomainChange(this);
-        y.propagateOnBoundChange(this);
+        z.propagateOnBoundChange(this);
         propagate();
     }
 
@@ -91,12 +95,14 @@ public class Element1D extends Constraint {
         int l = low.getValue();
         int u = up.getValue();
 
-        int yMin = y.getMin();
-        int yMax = y.getMax();
+        int zMin = z.getMin();
+        int zMax = z.getMax();
 
-        while (xy.get(l).y < yMin || !x.contains(xy.get(l).x)) {
-            x.remove(xy.get(l).x);
-            y.remove(xy.get(l).y);
+        while (xy.get(l).z < zMin || !x.contains(xy.get(l).x)) {
+            if (nCol[xy.get(l).x].decrement() == 0) {
+                x.remove(xy.get(l).x);
+            }
+//            z.remove(xy.get(l).z);
             l++;
 
             if (l > u) {
@@ -104,9 +110,11 @@ public class Element1D extends Constraint {
             }
         }
 
-        while (xy.get(u).y > yMax || !x.contains(xy.get(u).x)) {
-            x.remove(xy.get(u).x);
-            y.remove(xy.get(u).y);
+        while (xy.get(u).z > zMax || !x.contains(xy.get(u).x)) {
+            if (nCol[xy.get(u).x].decrement() == 0) {
+                x.remove(xy.get(u).x);
+            }
+//            z.remove(xy.get(u).z);
 
             u--;
 
@@ -115,9 +123,14 @@ public class Element1D extends Constraint {
         }
 
 
-        y.removeBelow(xy.get(l).y);
-        y.removeAbove(xy.get(u).y);
+        z.removeBelow(xy.get(l).z);
+        z.removeAbove(xy.get(u).z);
         low.setValue(l);
         up.setValue(u);
+
+
+        if (x.isBound()) {
+            z.assign(T[x.getMin()]);
+        }
     }
 }

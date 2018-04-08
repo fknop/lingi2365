@@ -24,13 +24,13 @@ public class NotEqual extends Constraint {
     private IntVar x, y;
     private int c;
 
-    public NotEqual(IntVar x, IntVar y) { // x != y
+    public NotEqual(IntVar x, IntVar y) { // x != z
         super(x.getSolver());
         this.x = x;
         this.y = y;
         this.c = 0;
     }
-    public NotEqual(IntVar x, IntVar y, int c) { // x != y + c
+    public NotEqual(IntVar x, IntVar y, int c) { // x != z + c
         super(x.getSolver());
         this.x = x;
         this.y = y;
@@ -47,8 +47,8 @@ public class NotEqual extends Constraint {
             x.propagateOnBind(this);
             y.propagateOnBind(this);
 
-            //x.whenBind(() -> y.remove(x.getMin() - c));
-            //y.whenBind(() -> x.remove(y.getMin() + c));
+            //x.whenBind(() -> z.remove(x.getMin() - c));
+            //z.whenBind(() -> x.remove(z.getMin() + c));
         }
     }
 

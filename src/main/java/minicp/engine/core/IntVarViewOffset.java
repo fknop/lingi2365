@@ -65,6 +65,7 @@ public class IntVarViewOffset implements IntVar {
         x.propagateOnDomainChange(c);
         return delta;
     }
+
     @Override
     public void propagateOnBind(Constraint c) {
         x.propagateOnBind(c);

@@ -52,13 +52,18 @@ public class ReversibleSparseBitSet {
 
         initial.forEach((v) -> BitSetOperations.setBit(words, v));
 
-        for (int i = limit.getValue(); i >= 0; --i) {
+        int limit = this.limit.getValue();
+        for (int i = limit; i >= 0; --i) {
             if (words[indices[i]].isZero()) {
-                limit.decrement();
-                indices[i] = indices[limit.getValue()];
-                indices[limit.getValue()] = i;
+                indices[i] = indices[this.limit.getValue()];
+                indices[this.limit.getValue()] = i;
+                this.limit.decrement();
             }
         }
+    }
+
+    public int numberWords() {
+        return nWords;
     }
 
     public long[] getWords() {
@@ -89,43 +94,43 @@ public class ReversibleSparseBitSet {
     public void addToMask(long[] m) {
         for (int i = 0; i <= limit.getValue(); ++i) {
             int offset = indices[i];
-            mask[offset] |= m[offset];
+            mask[offset] = mask[offset] | m[offset];
         }
     }
 
-    public long[] convert(BitSet m) {
-        long[] words = new long[this.words.length];
-
+    public void convert(BitSet m, long[] words) {
+        assert(words.length == nWords);
         long[] mArray = m.toLongArray();
-
-        for (int i = 0; i < mArray.length; ++i) {
-            words[i] = mArray[i];
-        }
-
-        return words;
-    }
-
-    public void addToMask(BitSet m) {
-        addToMask(convert(m));
-    }
-
-    public void intersectWithMask() {
-        int limit = this.limit.getValue();
-        for (int i = limit; i >= 0; --i) {
-            int offset = indices[i];
-            long w = words[offset].getValue() & mask[offset];
-            words[offset].setValue(w);
-            if (w == 0L) {
-                indices[i] = indices[limit];
-                indices[limit] = offset;
-                this.limit.decrement();
+        for (int i = 0; i < words.length; ++i) {
+            if (i >= mArray.length) {
+                words[i] = 0L;
+            }
+            else {
+                words[i] = mArray[i];
             }
         }
     }
 
-    public int intersectIndex(BitSet m) {
-        return intersectIndex(convert(m));
+    public void addToMask(BitSet m) {
+        long[] words = new long[this.words.length];
+        convert(m, words);
+        addToMask(words);
     }
+
+    public void intersectWithMask() {
+
+        for (int i = limit.getValue(); i >= 0; i--) {
+            int offset = indices[i];
+            long w = words[offset].getValue() & mask[offset];
+            words[offset].setValue(w);
+            if (w == 0L) {
+                indices[i] = indices[limit.getValue()];
+                indices[limit.getValue()] = offset;
+                limit.decrement();
+            }
+        }
+    }
+
 
     public int intersectIndex(long[] m) {
         for (int i = limit.getValue(); i >= 0; --i) {
@@ -138,13 +143,14 @@ public class ReversibleSparseBitSet {
         return -1;
     }
 
-    public long[] intersection(long[] bs) {
-        long[] intersection = new long[nWords];
+    public boolean emptyIntersection(int index, long word) {
+        return (words[index].getValue() & word) == 0L;
+    }
+
+    public void intersection(long[] bs, long[] intersection) {
         for (int i = 0; i < nWords; ++i) {
             intersection[i] = this.words[i].getValue() & bs[i];
         }
-
-        return intersection;
     }
 
     public long get(int index) {
