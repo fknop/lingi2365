@@ -42,7 +42,6 @@ public class NegTableCT extends TableCT {
      */
     public NegTableCT(IntVar[] x, int[][] table) {
         super(x, table, false);
-        System.out.println("neg table");
         intersection = new long[validTuples.numberWords()];
         bitset = new long[validTuples.numberWords()];
 

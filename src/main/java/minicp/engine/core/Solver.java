@@ -53,8 +53,6 @@ public class Solver {
             if (!failed) {
                 try { c.execute(); }
                 catch (InconsistencyException e) {
-                    e.printStackTrace();
-                    System.out.println("failed");
                     failed = true;
                 }
             }

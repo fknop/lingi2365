@@ -39,7 +39,7 @@ public abstract class Constraint {
         delta.update();
     }
 
-    private void updateDeltas() {
+    protected void updateDeltas() {
         for (Delta d: deltas) {
             d.update();
         }

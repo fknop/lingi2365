@@ -103,6 +103,7 @@ public class TableCT extends Constraint {
         }
 
         propagate();
+        updateDeltas();
     }
 
 

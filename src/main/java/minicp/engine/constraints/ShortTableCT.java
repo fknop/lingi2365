@@ -34,13 +34,6 @@ public class ShortTableCT extends TableCT {
     public ShortTableCT(IntVar[] x, int[][] table, int star) {
         super(x, table, false);
         this.star = star;
-        System.out.println("Short table ?");
-        for (int[] a: table) {
-            for (int b: a) {
-                System.out.print(b + " ");
-            }
-            System.out.println();
-        }
 
         supportsStar = new BitSet[x.length][];
 
