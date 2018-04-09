@@ -27,7 +27,7 @@ public class ReversibleLong implements RevLong {
     }
     private Trail trail;
     private long v;
-    private Long lastMagic = -1L;
+    private long lastMagic = -1L;
 
     public ReversibleLong(Trail trail, long initial) {
         this.trail = trail;

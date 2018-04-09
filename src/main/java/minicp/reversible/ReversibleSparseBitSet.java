@@ -1,32 +1,11 @@
 package minicp.reversible;
 
 
+import minicp.util.BitSetOperations;
+
 import java.util.Arrays;
-import java.util.BitSet;
-import java.util.function.Consumer;
 
-class BitSetOperations {
-    public static int bitLength(int size) {
-        return (size + 63) >>> 6;
-    }
 
-    public static long oneBitLong(int pos) {
-        return 1L << pos;
-    }
-
-    public static int bitOffset(int pos) {
-        return pos >>> 6;
-    }
-
-    public static int bitPos(int pos) {
-        return pos & 63;
-    }
-
-    public static void setBit(ReversibleLong[] bitSet, int pos) {
-        ReversibleLong rl = bitSet[bitOffset(pos)];
-        rl.setValue(rl.getValue() | oneBitLong(bitPos(pos)));
-    }
-}
 
 public class ReversibleSparseBitSet {
 
@@ -98,24 +77,7 @@ public class ReversibleSparseBitSet {
         }
     }
 
-    public void convert(BitSet m, long[] words) {
-        assert(words.length == nWords);
-        long[] mArray = m.toLongArray();
-        for (int i = 0; i < words.length; ++i) {
-            if (i >= mArray.length) {
-                words[i] = 0L;
-            }
-            else {
-                words[i] = mArray[i];
-            }
-        }
-    }
 
-    public void addToMask(BitSet m) {
-        long[] words = new long[this.words.length];
-        convert(m, words);
-        addToMask(words);
-    }
 
     public void intersectWithMask() {
 

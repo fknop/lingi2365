@@ -82,25 +82,7 @@ public class ReversibleSparseBitSetTest {
         assertTrue(set.isEmpty());
     }
 
-    @Test
-    public void testConvert() {
-        Trail trail = new Trail();
 
-        Iterable<Integer> initial = sequence(0, 63);
-        ReversibleSparseBitSet set = new ReversibleSparseBitSet(trail, 64, initial);
-
-        BitSet bitSet = new BitSet(64);
-        bitSet.set(0);
-        bitSet.set(1);
-        long[] longBitSet = new long[set.numberWords()];
-        set.convert(bitSet, longBitSet);
-        assertEquals(3, longBitSet[0]);
-
-        long[] longBitSet2 = bitSet.toLongArray();
-        assertEquals(3, longBitSet2[0]);
-    }
-
-    @Test
     public void testIntersection() {
         Trail trail = new Trail();
 

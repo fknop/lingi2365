@@ -16,11 +16,12 @@
 package minicp.engine.constraints;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.delta.DeltaInt;
+import minicp.util.BitSetOperations;
 
 import java.util.BitSet;
 
 public class ShortTableCT extends TableCT {
-    private BitSet[][] supportsStar;
+    private long[][][] supportsStar;
     private int star;
 
     /**
@@ -35,13 +36,13 @@ public class ShortTableCT extends TableCT {
         super(x, table, false);
         this.star = star;
 
-        supportsStar = new BitSet[x.length][];
+        supportsStar = new long[x.length][][];
 
         for (int i = 0; i < x.length; i++) {
-            supportsStar[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
+            supportsStar[i] = new long[x[i].getMax() - x[i].getMin() + 1][];
 
             for (int j = 0; j < supports[i].length; j++) {
-                supportsStar[i][j] = new BitSet();
+                supportsStar[i][j] = new long[validTuples.numberWords()];
             }
         }
 
@@ -56,13 +57,13 @@ public class ShortTableCT extends TableCT {
                     // Set all tuple i for all supports of variable j
                     for (int k = this.x[j].getMin(); k <= this.x[j].getMax(); ++k) {
                         if (this.x[j].contains(k)) {
-                            supports[j][k].set(i);
+                            BitSetOperations.setBit(supports[j][k], i);
                         }
                     }
                 }
                 else if (x[j].contains(table[i][j])) {
-                    supports[j][table[i][j] - x[j].getMin()].set(i);
-                    supportsStar[j][table[i][j] - x[j].getMin()].set(i);
+                    BitSetOperations.setBit(supports[j][table[i][j] - x[j].getMin()], i);
+                    BitSetOperations.setBit(supportsStar[j][table[i][j] - x[j].getMin()], i);
                 }
             }
         }
@@ -72,7 +73,10 @@ public class ShortTableCT extends TableCT {
     protected void incrementalUpdate(int i) {
         DeltaInt delta = deltas[i];
         if (delta.deltaSize() > 0) {
-            for (int v: delta.values()) {
+
+            int size = delta.fillArray(deltaValues);
+            for (int j = 0; j < size; ++j) {
+                int v = deltaValues[j];
                 validTuples.addToMask(supportsStar[i][v]);
             }
 

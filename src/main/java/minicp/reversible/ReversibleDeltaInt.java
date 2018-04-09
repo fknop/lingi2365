@@ -28,7 +28,7 @@ public class ReversibleDeltaInt implements DeltaInt {
 
 
     private Trail trail;
-    private Long lastMagic = -1L;
+    private long lastMagic = -1L;
 
 
     private IntVar x;

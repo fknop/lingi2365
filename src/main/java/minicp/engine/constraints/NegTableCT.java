@@ -29,8 +29,6 @@ import static minicp.util.InconsistencyException.INCONSISTENCY;
 
 public class NegTableCT extends TableCT {
 
-    private long[] bitset;
-
     /**
      * Negative Table constraint.
      * Assignment of x_0=v_0, x_1=v_1,... is forbidden
@@ -41,8 +39,6 @@ public class NegTableCT extends TableCT {
      */
     public NegTableCT(IntVar[] x, int[][] table) {
         super(x, table, false);
-
-        bitset = new long[validTuples.numberWords()];
 
 
         // remove duplicate (the negative ct algo does not support it)
@@ -82,14 +78,12 @@ public class NegTableCT extends TableCT {
                 for (int j = 0; j < size; j++) {
 
                     int v = domains[i][j];
-                    validTuples.convert(supports[i][v], bitset);
 
-                    if (validTuples.intersectionCardinality(bitset) == sizes[i]) {
-
+                    if (validTuples.intersectionCardinality(supports[i][v]) == sizes[i]) {
                         x[i].remove(v);
 
                         validTuples.clearMask();
-                        validTuples.addToMask(bitset);
+                        validTuples.addToMask(supports[i][v]);
                         validTuples.reverseMask();
                         validTuples.intersectWithMask();
 

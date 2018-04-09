@@ -11,6 +11,7 @@ import static minicp.cp.Factory.*;
 
 import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
+import minicp.search.Selector;
 import minicp.util.Box;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
@@ -616,13 +617,17 @@ public class XCSP3 implements XCallbacks2 {
 
         IntVar[] vars = mapVar.entrySet().stream().sorted(new EntryComparator()).map(i -> i.getValue()).toArray(size -> new IntVar[size]);
         DFSearch search;
+
+        Selector.ValueFunIndexed<IntVar> varHeuristic = domPlusDegreeHeuristicIndexed;
+//        Selector.BranchOn<IntVar> branchOn = branchHeuristic;
+
         if (decisionVars.isEmpty()) {
 //            search = makeDfs(minicp, firstFail(vars));
-            search = makeDfs(minicp, buildHeuristic(vars, domPlusDegreeHeuristic, branchHeuristic));
+            search = makeDfs(minicp, lastSuccess(vars, varHeuristic));
         } else {
             search = makeDfs(minicp, and(
-                    buildHeuristic(decisionVars.toArray(new IntVar[0]), domPlusDegreeHeuristic, branchHeuristic),
-                    buildHeuristic(vars, domPlusDegreeHeuristic, branchHeuristic)));
+                    lastSuccess(decisionVars.toArray(new IntVar[0]), varHeuristic),
+                    lastSuccess(vars, varHeuristic)));
 
 //            search = makeDfs(minicp, and(firstFail(decisionVars.toArray(new IntVar[0])), firstFail(vars)));
         }

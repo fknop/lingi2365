@@ -29,6 +29,7 @@ import java.util.function.Function;
 import static minicp.search.Selector.branch;
 import static minicp.search.Selector.selectMin;
 import static minicp.cp.Factory.*;
+import static minicp.search.Selector.selectMinIndexed;
 
 public class Heuristics {
 
@@ -47,8 +48,38 @@ public class Heuristics {
         );
     }
 
+    public static Choice lastSuccess(IntVar[] x, Selector.ValueFunIndexed<IntVar> value) {
+        final int[] lastValues = new int[x.length];
+        for (int i = 0; i < x.length; ++i) {
+            lastValues[i] = x[i].getMin();
+        }
+
+        return selectMinIndexed(x,
+                filterUnbound,
+                value,
+                (IntVar xi, int i) -> {
+                    int last = lastValues[i];
+                    if (!x[i].contains(last)) {
+                        last = x[i].getMin(); // fallback
+                    }
+
+                    final int v = last;
+                    return branch(
+                        () -> {
+                            equal(xi, v);
+                            lastValues[i] = v;
+                        },
+                        () -> {
+                            notEqual(xi, v);
+                        }
+                    );
+                });
+    }
+
+
     public static Selector.ValueFun<IntVar> domDivDegreeHeuristic = (IntVar xi) -> xi.getSize() / xi.getDegree();
     public static Selector.ValueFun<IntVar> domPlusDegreeHeuristic = (IntVar xi) -> xi.getSize() + xi.getDegree();
+    public static Selector.ValueFunIndexed<IntVar> domPlusDegreeHeuristicIndexed = (IntVar xi, int i) -> xi.getSize() + xi.getDegree();
     public static Selector.ValueFun<IntVar> domPlusWeightedDegreeHeuristic = (IntVar xi) -> xi.getSize() + xi.getWeightedDegree();
     public static Selector.ValueFun<IntVar> domSizeHeuristic = IntVar::getSize;
 
@@ -65,6 +96,7 @@ public class Heuristics {
                 }
         );
     };
+
 
 
 

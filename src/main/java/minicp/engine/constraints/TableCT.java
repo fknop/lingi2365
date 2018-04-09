@@ -19,9 +19,11 @@ import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.delta.DeltaInt;
 import minicp.reversible.ReversibleSparseBitSet;
+import minicp.util.BitSetOperations;
 import minicp.util.InconsistencyException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
@@ -33,7 +35,7 @@ import static minicp.util.Sequence.sequence;
 public class TableCT extends Constraint {
     protected IntVar[] x; //variables
     protected DeltaInt[] deltas;
-    protected BitSet[][] supports;
+    protected long[][][] supports;
     protected ReversibleSparseBitSet validTuples;
     protected int[][] residues;
     // Array to store domains of variables (avoid allocating multiple times)
@@ -41,7 +43,8 @@ public class TableCT extends Constraint {
 
     protected boolean firstPropagate = true;
 
-    private long[] bitset;
+//    protected long[] bitset;
+    protected int[] deltaValues;
 
     public TableCT(IntVar[] x, int[][] table) {
         this(x, table, true);
@@ -62,24 +65,25 @@ public class TableCT extends Constraint {
 
         this.x = new IntVar[x.length];
         this.deltas = new DeltaInt[x.length];
+        this.deltaValues = new int[Arrays.stream(x).map(IntVar::getSize).max(Integer::compareTo).get()];
         this.domains = new int[x.length][];
 
         // Allocate supports and residues
-        this.supports = new BitSet[x.length][];
+        this.supports = new long[x.length][][];
         this.residues = new int[x.length][];
 
         this.validTuples = new ReversibleSparseBitSet(this.cp.getTrail(), table.length, sequence(0, table.length));
-        this.bitset = new long[validTuples.numberWords()];
+//        this.bitset = new long[validTuples.numberWords()];
 
 
         for (int i = 0; i < x.length; i++) {
             this.x[i] = minus(x[i], x[i].getMin()); // map the variables domain to start at 0
-            supports[i] = new BitSet[x[i].getMax() - x[i].getMin() + 1];
+            supports[i] = new long[x[i].getMax() - x[i].getMin() + 1][];
             residues[i] = new int[x[i].getMax() - x[i].getMin() + 1];
 
             for (int j = 0; j < supports[i].length; j++) {
                 residues[i][j] = 0;
-                supports[i][j] = new BitSet();
+                supports[i][j] = new long[validTuples.numberWords()];
             }
         }
 
@@ -93,7 +97,8 @@ public class TableCT extends Constraint {
         for (int i = 0; i < table.length; i++) { //i is the index of the tuple (in table)
             for (int j = 0; j < x.length; j++) { //j is the index of the current variable (in x)
                 if (x[j].contains(table[i][j])) {
-                    supports[j][table[i][j] - x[j].getMin()].set(i);
+                    BitSetOperations.setBit(supports[j][table[i][j] - x[j].getMin()], i);
+//                    supports[j][table[i][j] - x[j].getMin()].set(i);
                 }
             }
         }
@@ -129,8 +134,11 @@ public class TableCT extends Constraint {
         DeltaInt delta = deltas[i];
         if (delta.deltaSize() > 0) {
 
-            for (int v: delta.values()) {
+            int size = delta.fillArray(deltaValues);
+            for (int j = 0; j < size; ++j) {
+                int v = deltaValues[j];
                 validTuples.addToMask(supports[i][v]);
+//                validTuples.addToMask(supports[i][v], bitset);
             }
 
             validTuples.reverseMask();
@@ -142,6 +150,7 @@ public class TableCT extends Constraint {
         for (int j = 0; j < x[i].getSize(); ++j) {
             int v = domains[i][j];
             validTuples.addToMask(supports[i][v]);
+//            validTuples.addToMask(supports[i][v], bitset);
         }
 
         validTuples.intersectWithMask();
@@ -174,17 +183,19 @@ public class TableCT extends Constraint {
     }
 
     protected void filterDomains() throws InconsistencyException {
+        boolean allBound = true;
         for (int i = 0; i < x.length; i++) {
             if (!x[i].isBound()) {
+                allBound = false;
                 int size = x[i].getSize();
                 for (int j = 0; j < size; j++) {
 
                     int v = domains[i][j];
 
                     int residue = residues[i][v];
-                    validTuples.convert(supports[i][v], bitset);
-                    if (validTuples.emptyIntersection(residue, bitset[residue])) {
-                        int index = validTuples.intersectIndex(bitset);
+
+                    if (validTuples.emptyIntersection(residue, supports[i][v][residue])) {
+                        int index = validTuples.intersectIndex(supports[i][v]);
                         if (index == -1) {
                             x[i].remove(v);
                         }
@@ -194,6 +205,10 @@ public class TableCT extends Constraint {
                     }
                 }
             }
+        }
+
+        if (allBound) {
+            this.deactivate();
         }
     }
 }

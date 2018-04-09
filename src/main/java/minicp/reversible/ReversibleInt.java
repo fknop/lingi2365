@@ -27,7 +27,7 @@ public class ReversibleInt implements RevInt {
 
     private Trail trail;
     private int v;
-    private Long lastMagic = -1L;
+    private long lastMagic = -1L;
 
     public ReversibleInt(Trail trail, int initial) {
         this.trail = trail;
