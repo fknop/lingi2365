@@ -16,6 +16,8 @@
 package minicp.reversible;
 
 
+import minicp.util.LongStack;
+
 public class ReversibleLong implements RevLong {
 
     class TrailEntryLong implements TrailEntry {
@@ -25,22 +27,33 @@ public class ReversibleLong implements RevLong {
         }
         public void restore()       { ReversibleLong.this.v = v;}
     }
+
+
     private Trail trail;
     private long v;
     private long lastMagic = -1L;
+
+    LongStack trailEntries;
 
     public ReversibleLong(Trail trail, long initial) {
         this.trail = trail;
         v = initial;
         lastMagic = trail.magic;
+        trailEntries = new LongStack();
     }
 
     private void trail() {
         long trailMagic = trail.magic;
         if (lastMagic != trailMagic) {
             lastMagic = trailMagic;
-            trail.pushOnTrail(new TrailEntryLong(v));
+            trailEntries.push(v);
+            trail.pushOnTrail(this);
         }
+    }
+
+    @Override
+    public void restore() {
+        this.v = trailEntries.pop();
     }
 
     public long setValue(long v) {

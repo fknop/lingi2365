@@ -1,6 +1,6 @@
 package minicp.reversible;
 
-public interface RevLong {
+public interface RevLong extends Reversible {
     long setValue(long v);
     long getValue();
     long increment();

@@ -17,12 +17,12 @@ public abstract class XCSP3TestHelper {
         this.path = path;
     }
 
-    @Test
+    @Test(timeout = 60 * 1000)
     public void testInstance() throws Exception {
         try {
             System.out.println(path);
             XCSP3 xcsp3 = new XCSP3(path);
-            String solution = xcsp3.solve(1,1200);
+            String solution = xcsp3.solve(1,60);
 
             boolean shouldBeSat = !path.contains("unsat");
             if(shouldBeSat) {

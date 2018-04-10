@@ -2,8 +2,10 @@ package minicp.reversible;
 
 import minicp.engine.core.IntVar;
 import minicp.engine.core.delta.DeltaInt;
+import minicp.util.IntStack;
 
-public class ReversibleDeltaInt implements DeltaInt {
+public class ReversibleDeltaInt implements DeltaInt, Reversible {
+
 
 
     class DeltaTrailEntry implements TrailEntry {
@@ -30,11 +32,12 @@ public class ReversibleDeltaInt implements DeltaInt {
     private Trail trail;
     private long lastMagic = -1L;
 
-
     private IntVar x;
     private int oldMin;
     private int oldMax;
     private int oldSize;
+
+    private IntStack trailEntries;
 
     public ReversibleDeltaInt(Trail trail, IntVar x) {
         this.trail = trail;
@@ -44,6 +47,14 @@ public class ReversibleDeltaInt implements DeltaInt {
         this.oldMin = x.getMin();
         this.oldMax = x.getMax();
         this.oldSize = x.getSize();
+        trailEntries = new IntStack(21);
+    }
+
+    @Override
+    public void restore() {
+        oldSize = trailEntries.pop();
+        oldMax = trailEntries.pop();
+        oldMin = trailEntries.pop();
     }
 
     @Override
@@ -61,7 +72,10 @@ public class ReversibleDeltaInt implements DeltaInt {
         long trailMagic = trail.magic;
         if (lastMagic != trailMagic) {
             lastMagic = trailMagic;
-            trail.pushOnTrail(new DeltaTrailEntry(oldMin, oldMax, oldSize));
+            trailEntries.push(oldMin);
+            trailEntries.push(oldMax);
+            trailEntries.push(oldSize);
+            trail.pushOnTrail(this);
         }
     }
 

@@ -15,6 +15,8 @@
 
 package minicp.search;
 
+import java.util.Arrays;
+
 public class Selector {
 
     public static final Alternative[] TRUE = new Alternative[0];

@@ -16,6 +16,8 @@
 package minicp.reversible;
 
 
+import minicp.util.IntStack;
+
 public class ReversibleInt implements RevInt {
     class TrailEntryInt implements TrailEntry {
         private final int v;
@@ -29,18 +31,27 @@ public class ReversibleInt implements RevInt {
     private int v;
     private long lastMagic = -1L;
 
+    private IntStack trailEntries;
+
     public ReversibleInt(Trail trail, int initial) {
         this.trail = trail;
         v = initial;
         lastMagic = trail.magic;
+        this.trailEntries = new IntStack();
     }
 
     private void trail() {
         long trailMagic = trail.magic;
         if (lastMagic != trailMagic) {
             lastMagic = trailMagic;
-            trail.pushOnTrail(new TrailEntryInt(v));
+            this.trailEntries.push(v);
+            trail.pushOnTrail(this);
         }
+    }
+
+    @Override
+    public void restore() {
+        this.v = trailEntries.pop();
     }
 
     public int setValue(int v) {

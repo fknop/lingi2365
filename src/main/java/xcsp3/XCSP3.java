@@ -615,8 +615,10 @@ public class XCSP3 implements XCallbacks2 {
      */
     public String solve(int nSolution, int timeOut) {
 
-        IntVar[] vars = mapVar.entrySet().stream().sorted(new EntryComparator()).map(i -> i.getValue()).toArray(size -> new IntVar[size]);
+//        IntVar[] vars = mapVar.entrySet().stream().sorted(new EntryComparator()).map(i -> i.getValue()).toArray(size -> new IntVar[size]);
+        IntVar[] vars = mapVar.entrySet().stream().map(Map.Entry::getValue).toArray(IntVar[]::new);
         DFSearch search;
+
 
         Selector.ValueFun<IntVar> varHeuristic = domPlusDegreeHeuristic;
 
@@ -624,6 +626,7 @@ public class XCSP3 implements XCallbacks2 {
 //            search = makeDfs(minicp, firstFail(vars));
             search = makeDfs(minicp, buildHeuristic(vars, varHeuristic, branchHeuristic));
         } else {
+
             search = makeDfs(minicp, and(
                     buildHeuristic(decisionVars.toArray(new IntVar[0]), varHeuristic, branchHeuristic),
                     buildHeuristic(vars, varHeuristic, branchHeuristic)));
@@ -632,6 +635,7 @@ public class XCSP3 implements XCallbacks2 {
         }
 
         if (objectiveMinimize.isPresent()) {
+
             try {
                 minicp.post(new Minimize(objectiveMinimize.get(), search));
             } catch (InconsistencyException e) {

@@ -23,7 +23,7 @@ import java.util.Stack;
 public class Trail {
 
     public long magic = 0;
-    private Stack<TrailEntry> trail = new Stack<>();
+    private Stack<Reversible> trail = new Stack<>();
     private IntStack trailLimit = new IntStack(100);
 
     /**
@@ -32,7 +32,7 @@ public class Trail {
      */
     public Trail() {}
 
-    public void pushOnTrail(TrailEntry entry) {
+    public void pushOnTrail(Reversible entry) {
         trail.push(entry);
     }
 

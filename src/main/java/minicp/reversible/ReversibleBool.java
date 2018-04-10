@@ -16,38 +16,46 @@
 package minicp.reversible;
 
 
-public class ReversibleBool implements TrailEntry {
+import minicp.util.IntStack;
 
-    final TrailEntry restoreTrue = new TrailEntry() {
-        @Override
-        public void restore() {
-            v = true;
-        }
-    };
+public class ReversibleBool implements Reversible {
 
-    final TrailEntry restoreFalse = new TrailEntry() {
-        @Override
-        public void restore() {
-            v = false;
-        }
-    };
+//    final TrailEntry restoreTrue = new TrailEntry() {
+//        @Override
+//        public void restore() {
+//            v = true;
+//        }
+//    };
+//
+//    final TrailEntry restoreFalse = new TrailEntry() {
+//        @Override
+//        public void restore() {
+//            v = false;
+//        }
+//    };
 
     private boolean v;
     private Trail context;
     private long lastMagic;
 
+    private IntStack trailEntries;
+
     public ReversibleBool(Trail context, boolean initial) {
         this.context = context;
         v = initial;
         lastMagic = context.magic;
+        trailEntries = new IntStack();
     }
 
     private void trail() {
         long contextMagic = context.magic;
         if (lastMagic != contextMagic) {
             lastMagic = contextMagic;
-            if (v) context.pushOnTrail(restoreTrue);
-            else context.pushOnTrail(restoreFalse);
+            trailEntries.push(v ? 1 : 0);
+            context.pushOnTrail(this);
+
+//            if (v) context.pushOnTrail(restoreTrue);
+//            else context.pushOnTrail(restoreFalse);
         }
     }
 
@@ -61,6 +69,7 @@ public class ReversibleBool implements TrailEntry {
     public boolean getValue() { return this.v; }
 
     public void restore() {
-        v = !v;
+        v = trailEntries.pop() == 1;
+//        v = !v;
     }
 }

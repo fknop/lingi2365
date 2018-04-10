@@ -88,16 +88,10 @@ public class Heuristics {
     public static Selector.BranchOn<IntVar> branchHeuristic = (IntVar xi) -> {
         int v = xi.getMin();
         return branch(
-                () -> {
-                    equal(xi,v);
-                },
-                () -> {
-                    notEqual(xi,v);
-                }
+                () -> equal(xi,v),
+                () -> notEqual(xi,v)
         );
     };
-
-
 
 
     /**
