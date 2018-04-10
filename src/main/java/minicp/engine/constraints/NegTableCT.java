@@ -29,6 +29,8 @@ import static minicp.util.InconsistencyException.INCONSISTENCY;
 
 public class NegTableCT extends TableCT {
 
+    private int[] sizes;
+
     /**
      * Negative Table constraint.
      * Assignment of x_0=v_0, x_1=v_1,... is forbidden
@@ -40,6 +42,7 @@ public class NegTableCT extends TableCT {
     public NegTableCT(IntVar[] x, int[][] table) {
         super(x, table, false);
 
+         sizes = new int[x.length];
 
         // remove duplicate (the negative ct algo does not support it)
         ArrayList<int[]> tableList = new ArrayList<>();
@@ -69,7 +72,6 @@ public class NegTableCT extends TableCT {
     protected void filterDomains() throws InconsistencyException {
 
         int domainSizesProduct = computeDomainSizeProduct();
-        int[] sizes = new int[x.length];
         for (int i = 0; i < x.length; i++) {
             if (!x[i].isBound()) {
                 sizes[i] = domainSizesProduct / x[i].getSize();

@@ -618,16 +618,15 @@ public class XCSP3 implements XCallbacks2 {
         IntVar[] vars = mapVar.entrySet().stream().sorted(new EntryComparator()).map(i -> i.getValue()).toArray(size -> new IntVar[size]);
         DFSearch search;
 
-        Selector.ValueFunIndexed<IntVar> varHeuristic = domPlusDegreeHeuristicIndexed;
-//        Selector.BranchOn<IntVar> branchOn = branchHeuristic;
+        Selector.ValueFun<IntVar> varHeuristic = domPlusDegreeHeuristic;
 
         if (decisionVars.isEmpty()) {
 //            search = makeDfs(minicp, firstFail(vars));
-            search = makeDfs(minicp, lastSuccess(vars, varHeuristic));
+            search = makeDfs(minicp, buildHeuristic(vars, varHeuristic, branchHeuristic));
         } else {
             search = makeDfs(minicp, and(
-                    lastSuccess(decisionVars.toArray(new IntVar[0]), varHeuristic),
-                    lastSuccess(vars, varHeuristic)));
+                    buildHeuristic(decisionVars.toArray(new IntVar[0]), varHeuristic, branchHeuristic),
+                    buildHeuristic(vars, varHeuristic, branchHeuristic)));
 
 //            search = makeDfs(minicp, and(firstFail(decisionVars.toArray(new IntVar[0])), firstFail(vars)));
         }

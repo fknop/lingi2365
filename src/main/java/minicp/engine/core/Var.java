@@ -16,8 +16,9 @@ public interface Var {
 
     default int getWeightedDegree() {
         int degree = 0;
-        for (Constraint c: constraints) {
-            degree += c.getFailureCount();
+        int size = constraints.size();
+        for (int i = 0; i < size; ++i) {
+            degree += constraints.get(i).getFailureCount();
         }
 
         return degree;

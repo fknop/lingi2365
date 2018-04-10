@@ -54,8 +54,9 @@ public abstract class Constraint {
     }
 
     protected void updateDeltas() {
-        for (Delta d: deltas) {
-            d.update();
+        int size = deltas.size();
+        for (int i = 0; i < size; ++i) {
+            deltas.get(i).update();
         }
     }
 

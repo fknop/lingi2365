@@ -22,7 +22,7 @@ import minicp.reversible.ReversibleInt;
 import minicp.reversible.ReversibleSparseSet;
 import minicp.util.InconsistencyException;
 
-import java.util.ArrayList;
+
 
 public class AllDifferentBinary extends Constraint {
 

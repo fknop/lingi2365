@@ -15,14 +15,16 @@
 
 package minicp.reversible;
 
+import minicp.util.IntStack;
+
 import java.util.Stack;
 
 
 public class Trail {
 
     public long magic = 0;
-    private Stack<TrailEntry> trail = new Stack<TrailEntry>();
-    private Stack<Integer>    trailLimit = new Stack<Integer>();
+    private Stack<TrailEntry> trail = new Stack<>();
+    private IntStack trailLimit = new IntStack(100);
 
     /**
      * Initialize a reversible context

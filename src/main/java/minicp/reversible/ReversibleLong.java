@@ -18,9 +18,9 @@ package minicp.reversible;
 
 public class ReversibleLong implements RevLong {
 
-    class TrailEntryInt implements TrailEntry {
+    class TrailEntryLong implements TrailEntry {
         private final long v;
-        public TrailEntryInt(long v) {
+        public TrailEntryLong(long v) {
             this.v = v;
         }
         public void restore()       { ReversibleLong.this.v = v;}
@@ -39,7 +39,7 @@ public class ReversibleLong implements RevLong {
         long trailMagic = trail.magic;
         if (lastMagic != trailMagic) {
             lastMagic = trailMagic;
-            trail.pushOnTrail(new TrailEntryInt(v));
+            trail.pushOnTrail(new TrailEntryLong(v));
         }
     }
 
