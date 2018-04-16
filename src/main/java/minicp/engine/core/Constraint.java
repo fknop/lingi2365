@@ -16,12 +16,15 @@
 package minicp.engine.core;
 import minicp.engine.core.delta.Delta;
 import minicp.reversible.ReversibleBool;
+import minicp.reversible.ReversibleInt;
 import minicp.util.InconsistencyException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Constraint {
+
+    public static boolean NOTIFY_FAILURE_VARIABLE = false;
 
     protected final Solver cp;
     protected boolean scheduled = false;
@@ -30,11 +33,15 @@ public abstract class Constraint {
     private List<Delta> deltas = new ArrayList<>();
     private List<Var> variables = new ArrayList<>();
 
-    private int failureCount = 0;
+    private ReversibleInt failureCount;
 
     public Constraint(Solver cp) {
         this.cp = cp;
         active = new ReversibleBool(cp.getTrail(),true);
+        failureCount = new ReversibleInt(cp.getTrail(), 1);
+        if (NOTIFY_FAILURE_VARIABLE) {
+            failureCount.onBacktrack(this::notifyVariables);
+        }
     }
 
     void registerDelta(Delta delta) {
@@ -45,6 +52,7 @@ public abstract class Constraint {
     protected void registerVariable(Var var) {
         this.variables.add(var);
         var.register(this);
+
     }
 
     protected void registerVariable(Var... vars) {
@@ -60,12 +68,23 @@ public abstract class Constraint {
         }
     }
 
+    private void notifyVariables(int o, int n) {
+        int size = variables.size();
+        for (int i = 0; i < size; ++i) {
+            variables.get(i).updateWeight(o, n);
+        }
+    }
+
     public void notifyFailure() {
-        this.failureCount++;
+        this.failureCount.increment();
+        if (NOTIFY_FAILURE_VARIABLE) {
+            int value = this.failureCount.getValue();
+            notifyVariables(value - 1, value);
+        }
     }
 
     public int getFailureCount() {
-        return this.failureCount;
+        return this.failureCount.getValue();
     }
 
     public boolean isActive() {

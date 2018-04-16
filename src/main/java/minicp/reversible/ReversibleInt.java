@@ -18,19 +18,20 @@ package minicp.reversible;
 
 import minicp.util.IntStack;
 
+import java.util.ArrayList;
+
 public class ReversibleInt implements RevInt {
-    class TrailEntryInt implements TrailEntry {
-        private final int v;
-        public TrailEntryInt(int v) {
-            this.v = v;
-        }
-        public void restore()       { ReversibleInt.this.v = v;}
+
+    @FunctionalInterface()
+    public interface OnBacktrack {
+        void call(int oldValue, int newValue);
     }
 
     private Trail trail;
     private int v;
     private long lastMagic = -1L;
 
+    private ArrayList<OnBacktrack> listeners = new ArrayList<>();
     private IntStack trailEntries;
 
     public ReversibleInt(Trail trail, int initial) {
@@ -51,7 +52,25 @@ public class ReversibleInt implements RevInt {
 
     @Override
     public void restore() {
+        int old = this.v;
         this.v = trailEntries.pop();
+        notifyBacktrack(old, this.v);
+    }
+
+
+    public void onBacktrack(OnBacktrack listener) {
+        listeners.add(listener);
+    }
+
+    private void notifyBacktrack(int oldValue, int newValue) {
+        if (listeners.isEmpty()) {
+            return;
+        }
+
+        int size = listeners.size();
+        for (int i = 0; i < size; ++i) {
+            listeners.get(i).call(oldValue, newValue);
+        }
     }
 
     public int setValue(int v) {
