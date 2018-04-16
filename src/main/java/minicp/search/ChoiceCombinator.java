@@ -16,6 +16,9 @@
 package minicp.search;
 
 
+import minicp.util.InconsistencyException;
+import minicp.util.NotImplementedException;
+
 public class ChoiceCombinator implements Choice {
 
     private minicp.search.Choice [] choices;
@@ -26,7 +29,6 @@ public class ChoiceCombinator implements Choice {
 
     @Override
     public Alternative[] call() {
-
         Alternative[] alternatives = Selector.TRUE;
         for (Choice choice : choices) {
             Alternative[] alts = choice.call();
