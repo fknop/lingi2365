@@ -24,7 +24,6 @@ import java.util.List;
 
 public abstract class Constraint {
 
-    public static boolean NOTIFY_FAILURE_VARIABLE = false;
 
     protected final Solver cp;
     protected boolean scheduled = false;
@@ -32,16 +31,23 @@ public abstract class Constraint {
 
     private List<Delta> deltas = new ArrayList<>();
     private List<Var> variables = new ArrayList<>();
+    protected int arity;
 
-    private ReversibleInt failureCount;
+//    private ReversibleInt failureCount;
+    private int failureCount = 0;
 
     public Constraint(Solver cp) {
+        this(cp, 0);
+    }
+
+    public Constraint(Solver cp, int arity) {
+        this.arity = arity;
         this.cp = cp;
         active = new ReversibleBool(cp.getTrail(),true);
-        failureCount = new ReversibleInt(cp.getTrail(), 1);
-        if (NOTIFY_FAILURE_VARIABLE) {
-            failureCount.onBacktrack(this::notifyVariables);
-        }
+    }
+
+    public int getArity() {
+        return arity;
     }
 
     void registerDelta(Delta delta) {
@@ -68,23 +74,15 @@ public abstract class Constraint {
         }
     }
 
-    private void notifyVariables(int o, int n) {
-        int size = variables.size();
-        for (int i = 0; i < size; ++i) {
-            variables.get(i).updateWeight(o, n);
-        }
-    }
 
     public void notifyFailure() {
-        this.failureCount.increment();
-        if (NOTIFY_FAILURE_VARIABLE) {
-            int value = this.failureCount.getValue();
-            notifyVariables(value - 1, value);
+        ++this.failureCount;
+        int size = variables.size();
+        if (arity > 1) {
+            for (int i = 0; i < size; ++i) {
+                variables.get(i).addFailure();
+            }
         }
-    }
-
-    public int getFailureCount() {
-        return this.failureCount.getValue();
     }
 
     public boolean isActive() {

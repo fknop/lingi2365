@@ -48,7 +48,7 @@ public class Absolute extends Constraint {
     }
 
     public Absolute(IntVar x, IntVar y, Consistency consistency) {
-        super(x.getSolver());
+        super(x.getSolver(), 2);
 
         registerVariable(x, y);
 

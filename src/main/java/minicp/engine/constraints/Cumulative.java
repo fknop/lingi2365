@@ -41,7 +41,7 @@ public class Cumulative extends Constraint {
     }
 
     private Cumulative(IntVar[] start, int[] duration, int[] demand, int capa, boolean postMirror) throws InconsistencyException {
-        super(start[0].getSolver());
+        super(start[0].getSolver(), start.length);
 
         registerVariable(start);
 

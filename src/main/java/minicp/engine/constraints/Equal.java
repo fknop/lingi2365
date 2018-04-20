@@ -31,7 +31,7 @@ public class Equal extends Constraint {
     private int[] deltaValues;
 
     public Equal(IntVar x, IntVar y) {
-        super(x.getSolver());
+        super(x.getSolver(), 2);
 
         registerVariable(x, y);
 

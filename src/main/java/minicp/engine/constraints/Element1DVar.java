@@ -40,7 +40,7 @@ public class Element1DVar extends Constraint {
     }
 
     public Element1DVar(IntVar[] T, IntVar x, IntVar y, Consistency consistency) {
-        super(y.getSolver());
+        super(y.getSolver(), T.length + 2);
 
         registerVariable(x, y);
 

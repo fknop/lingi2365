@@ -34,7 +34,7 @@ public class ShortTableDecomp extends Constraint {
      * @param star the symbol representing "any" value in the table
      */
     public ShortTableDecomp(IntVar[] x, int[][] table, int star) {
-        super(x[0].getSolver());
+        super(x[0].getSolver(), x.length);
 
         registerVariable(x);
 

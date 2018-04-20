@@ -36,7 +36,7 @@ public class Circuit extends Constraint {
      * @param x
      */
     public Circuit(IntVar [] x) {
-        super(x[0].getSolver());
+        super(x[0].getSolver(), x.length);
 
         registerVariable(x);
 

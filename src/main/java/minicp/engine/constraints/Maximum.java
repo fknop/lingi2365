@@ -35,7 +35,7 @@ public class Maximum extends Constraint {
      * @param y
      */
     public Maximum(IntVar[] x, IntVar y) {
-        super(x[0].getSolver());
+        super(x[0].getSolver(), x.length + 1);
         assert (x.length > 0);
 
         registerVariable(x);

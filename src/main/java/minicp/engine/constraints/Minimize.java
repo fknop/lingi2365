@@ -27,7 +27,7 @@ public class Minimize extends Constraint {
     public final DFSearch dfs;
 
     public Minimize(IntVar x, DFSearch dfs) {
-        super(x.getSolver());
+        super(x.getSolver(), 1);
 
         registerVariable(x);
 

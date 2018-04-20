@@ -32,7 +32,7 @@ public class AllDifferentBinary extends Constraint {
     private ReversibleSparseSet set;
 
     public AllDifferentBinary(IntVar ... x) {
-        super(x[0].getSolver());
+        super(x[0].getSolver(), x.length);
 
         registerVariable(x);
 

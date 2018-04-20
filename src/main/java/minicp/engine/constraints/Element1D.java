@@ -56,7 +56,7 @@ public class Element1D extends Constraint {
 
     // T[x] = z
     public Element1D(int[] T, IntVar x, IntVar z) {
-        super(z.getSolver());
+        super(z.getSolver(), 2);
 
         registerVariable(x, z);
 

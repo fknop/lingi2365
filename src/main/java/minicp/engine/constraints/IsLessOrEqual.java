@@ -28,7 +28,7 @@ public class IsLessOrEqual extends Constraint { // b <=> x <= c
     private final int c;
 
     public IsLessOrEqual(BoolVar b, IntVar x, int c) {
-        super(x.getSolver());
+        super(x.getSolver(), 2);
 
         registerVariable(b, x);
 

@@ -59,7 +59,7 @@ public class TableCT extends Constraint {
      * @param table array of valid solutions (second dimension must be of same size as the array x)
      */
     protected TableCT(IntVar[] x, int[][] table, boolean setupSupports) {
-        super(x[0].getSolver());
+        super(x[0].getSolver(), x.length);
 
         registerVariable(x);
 

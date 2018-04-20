@@ -28,7 +28,7 @@ public class ConstraintClosure extends Constraint {
     private final Filtering filtering;
 
     public ConstraintClosure(Solver cp, Filtering filtering) {
-        super(cp);
+        super(cp, 0);
         this.filtering = filtering;
     }
 

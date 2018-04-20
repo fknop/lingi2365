@@ -53,7 +53,7 @@ public class Sum extends Constraint {
      * @param x
      */
     public Sum(IntVar [] x) {
-        super(x[0].getSolver());
+        super(x[0].getSolver(), x.length);
 
         for (int i = 0; i < x.length - 1; ++i) {
             registerVariable(x[i]);

@@ -1,14 +1,16 @@
 package minicp.engine.core;
 
 import minicp.util.Box;
+import minicp.util.BoxInt;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
 public interface Var {
     List<Constraint> constraints = new ArrayList<>();
 
-    Box<Integer> weightedDegree = new Box<>(0);
+    BoxInt weightedDegree = new BoxInt(0);
 
 
     default void register(Constraint constraint) {
@@ -19,12 +21,14 @@ public interface Var {
         return constraints.size();
     }
 
-    default void updateWeight(int old, int n) {
-        weightedDegree.set(weightedDegree.get() - old + n);
+    default void addFailure() {
+        ++weightedDegree.value;
     }
 
 
     default int getWeightedDegree() {
-        return weightedDegree.get() == 0 ? 1 : weightedDegree.get();
+        return weightedDegree.value;
     }
+
+    boolean isBound();
 }

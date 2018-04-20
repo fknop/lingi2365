@@ -3,7 +3,6 @@ package xcsp3;
 import minicp.cp.Factory;
 import minicp.engine.constraints.*;
 import minicp.engine.core.BoolVar;
-import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 
@@ -28,8 +27,6 @@ import java.io.ByteArrayInputStream;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class XCSP3 implements XCallbacks2 {
@@ -56,8 +53,6 @@ public class XCSP3 implements XCallbacks2 {
     }
 
     public XCSP3(String fileName) throws Exception {
-        Constraint.NOTIFY_FAILURE_VARIABLE = true;
-
 
         this.fileName = fileName;
 
@@ -642,7 +637,7 @@ public class XCSP3 implements XCallbacks2 {
         DFSearch search;
 
 
-        Selector.ValueFun<IntVar> varHeuristic = impactHeuristic;
+        Selector.ValueFun<IntVar> varHeuristic = wdegHeuristic;
 
         if (decisionVars.isEmpty()) {
             search = makeDfs(minicp, lastSuccessConflict(vars));

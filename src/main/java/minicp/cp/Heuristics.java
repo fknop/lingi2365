@@ -17,15 +17,10 @@ package minicp.cp;
 
 
 import minicp.engine.core.IntVar;
-import minicp.engine.core.Solver;
-import minicp.search.Alternative;
 import minicp.search.Choice;
 import minicp.search.ChoiceCombinator;
 import minicp.search.Selector;
 import minicp.util.Box;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static minicp.search.Selector.branch;
 import static minicp.search.Selector.selectMin;
@@ -94,7 +89,7 @@ public class Heuristics {
                         return Float.NEGATIVE_INFINITY;
                     }
                     else {
-                        return impactHeuristic.call(xi);
+                        return wdegHeuristic.call(xi);
                     }
                 },
                 (IntVar xi, int i) -> {
@@ -124,7 +119,16 @@ public class Heuristics {
     public static Selector.ValueFun<IntVar> domPlusDegreeHeuristic = (IntVar xi) -> xi.getSize() + xi.getDegree();
     public static Selector.ValueFunIndexed<IntVar> domPlusDegreeHeuristicIndexed = (IntVar xi, int i) -> xi.getSize() + xi.getDegree();
     public static Selector.ValueFun<IntVar> domPlusWeightedDegreeHeuristic = (IntVar xi) -> xi.getSize() + xi.getWeightedDegree();
-    public static Selector.ValueFun<IntVar> impactHeuristic = (IntVar xi) -> (float) xi.getSize() / (float) xi.getWeightedDegree();
+    public static Selector.ValueFun<IntVar> wdegHeuristic = (IntVar xi) -> {
+        int wdeg = xi.getWeightedDegree();
+        if (wdeg == 0) {
+            return 100_000_000f;
+        }
+        else {
+            return (float) xi.getSize() / (float) wdeg;
+        }
+    };
+
     public static Selector.ValueFun<IntVar> domSizeHeuristic = IntVar::getSize;
 
     public static Selector.Filter<IntVar> filterUnbound = (IntVar xi) -> xi.getSize() > 1;
