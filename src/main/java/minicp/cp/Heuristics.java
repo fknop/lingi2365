@@ -115,7 +115,7 @@ public class Heuristics {
     }
 
 
-    public static Selector.ValueFun<IntVar> domDivDegreeHeuristic = (IntVar xi) -> xi.getSize() / xi.getDegree();
+    public static Selector.ValueFun<IntVar> domDivDegreeHeuristic = (IntVar xi) -> (float) xi.getSize() / (float) xi.getDegree();
     public static Selector.ValueFun<IntVar> domPlusDegreeHeuristic = (IntVar xi) -> xi.getSize() + xi.getDegree();
     public static Selector.ValueFunIndexed<IntVar> domPlusDegreeHeuristicIndexed = (IntVar xi, int i) -> xi.getSize() + xi.getDegree();
     public static Selector.ValueFun<IntVar> domPlusWeightedDegreeHeuristic = (IntVar xi) -> xi.getSize() + xi.getWeightedDegree();
