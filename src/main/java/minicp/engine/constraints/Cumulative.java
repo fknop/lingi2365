@@ -17,6 +17,7 @@
 package minicp.engine.constraints;
 
 import static minicp.cp.Factory.*;
+import static minicp.util.InconsistencyException.INCONSISTENCY;
 
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
@@ -73,32 +74,62 @@ public class Cumulative extends Constraint {
 
 
         Profile profile = buildProfile();
-        // TODO 2: check that the profile is not exceeding the capa otherwise throw an INCONSISTENCY
 
-        for (int i = 0; i < profile.size(); i++) {
-            // TODO: check
+        // check that the profile is not exceeding the capa otherwise throw an INCONSISTENCY
+        for (int i = profile.size() - 1; i >= 0; --i) {
+            Rectangle rect = profile.get(i);
+            if (rect.height > capa) {
+                throw INCONSISTENCY;
+            }
         }
+        // hint:
+        // You need to check that at every-point on the interval
+        // [start[i].getMin() ... start[i].getMin()+duration[i]-1] there is enough space.
+        // You may have to look-ahead on the next profile rectangle(s)
+        // Be careful that the activity you are currently pushing may have contributed to the profile.
+
 
         for (int i = 0; i < start.length; i++) {
             if (!start[i].isBound()) {
                 // j is the index of the profile rectangle overlapping t
                 int j = profile.rectangleIndex(start[i].getMin());
-                // TODO 3: push i to the right
-                // hint:
-                // You need to check that at every-point on the interval
-                // [start[i].getMin() ... start[i].getMin()+duration[i]-1] there is enough space.
-                // You may have to look-ahead on the next profile rectangle(s)
-                // Be careful that the activity you are currently pushing may have contributed to the profile.
+
+                boolean hasMandatory = end[i].getMin() > start[i].getMax();
+
+                Rectangle rect = profile.get(j);
+
+                for (int t = start[i].getMin(); t < start[i].getMin() + duration[i]; ++t) {
+
+                    if (t >= rect.end) {
+                        rect = profile.get(profile.rectangleIndex(t));
+                    }
+
+                    if (hasMandatory) {
+                        if (t < start[i].getMax() || t >= end[i].getMin()) {
+                            if (rect.height + demand[i] > capa) {
+                                start[i].removeBelow(t + 1);
+                            }
+                        }
+                    }
+                    else {
+                        if (rect.height + demand[i] > capa) {
+                            start[i].removeBelow(t + 1);
+                        }
+                    }
+                }
 
             }
         }
-        throw new NotImplementedException("Cumulative");
     }
 
     public Profile buildProfile() throws InconsistencyException {
         ArrayList<Rectangle> mandatoryParts = new ArrayList<Rectangle>();
         for (int i = 0; i < start.length; i++) {
-            // TODO 1: add mandatory part of activity i if any
+            // add mandatory part of activity i if any
+            if (end[i].getMin() > start[i].getMax()) {
+                Rectangle rect = new Rectangle(start[i].getMax(), end[i].getMin(), demand[i]);
+                mandatoryParts.add(rect);
+            }
         }
         return new Profile(mandatoryParts.toArray(new Profile.Rectangle[0]));
     }

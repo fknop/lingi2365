@@ -72,8 +72,13 @@ public class NegTableCT extends TableCT {
     protected void filterDomains() throws InconsistencyException {
 
         int domainSizesProduct = computeDomainSizeProduct();
-        for (int i = 0; i < x.length; i++) {
-            if (!x[i].isBound()) {
+
+        int unbounds = unboundVariables.fillArray(unboundIndices);
+        for (int k = 0; k < unbounds; ++k) {
+            int i = unboundIndices[k];
+
+//            for (int i = 0; i < x.length; i++) {
+//            if (!x[i].isBound()) {
                 sizes[i] = domainSizesProduct / x[i].getSize();
 
                 int size = x[i].getSize();
@@ -93,7 +98,7 @@ public class NegTableCT extends TableCT {
                         sizes[i] = domainSizesProduct / x[i].getSize();
                     }
                 }
-            }
+//            }
         }
     }
 

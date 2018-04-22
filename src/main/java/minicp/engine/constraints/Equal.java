@@ -59,7 +59,7 @@ public class Equal extends Constraint {
                 }
             }
 
-            int ySize = x.fillArray(domainY);
+            int ySize = y.fillArray(domainY);
             for (int i = 0; i < ySize; ++i) {
                 int v = domainY[i];
                 if (!x.contains(v)) {

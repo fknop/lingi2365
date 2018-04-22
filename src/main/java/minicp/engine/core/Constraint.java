@@ -30,11 +30,14 @@ public abstract class Constraint {
     protected final ReversibleBool active;
 
     private List<Delta> deltas = new ArrayList<>();
-    private List<Var> variables = new ArrayList<>();
+    private List<Variable> variables = new ArrayList<>();
+
+    private ReversibleInt nBound;
+
     protected int arity;
 
-//    private ReversibleInt failureCount;
-    private int failureCount = 0;
+    private int weight;
+//    private int failureCount;
 
     public Constraint(Solver cp) {
         this(cp, 0);
@@ -44,10 +47,15 @@ public abstract class Constraint {
         this.arity = arity;
         this.cp = cp;
         active = new ReversibleBool(cp.getTrail(),true);
+        nBound = new ReversibleInt(cp.getTrail(), 0);
     }
 
     public int getArity() {
         return arity;
+    }
+
+    public List<Variable> getVars() {
+        return variables;
     }
 
     void registerDelta(Delta delta) {
@@ -55,14 +63,13 @@ public abstract class Constraint {
         delta.update();
     }
 
-    protected void registerVariable(Var var) {
+    protected void registerVariable(Variable var) {
         this.variables.add(var);
         var.register(this);
-
     }
 
-    protected void registerVariable(Var... vars) {
-        for (Var var: vars) {
+    protected void registerVariable(Variable... vars) {
+        for (Variable var: vars) {
             registerVariable(var);
         }
     }
@@ -76,13 +83,11 @@ public abstract class Constraint {
 
 
     public void notifyFailure() {
-        ++this.failureCount;
-        int size = variables.size();
-        if (arity > 1) {
-            for (int i = 0; i < size; ++i) {
-                variables.get(i).addFailure();
-            }
-        }
+        ++weight;
+    }
+
+    public int getWeight() {
+        return this.weight;
     }
 
     public boolean isActive() {

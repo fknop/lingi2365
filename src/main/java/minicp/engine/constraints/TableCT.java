@@ -19,6 +19,7 @@ import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.delta.DeltaInt;
 import minicp.reversible.ReversibleSparseBitSet;
+import minicp.reversible.ReversibleSparseSet;
 import minicp.util.BitSetOperations;
 import minicp.util.InconsistencyException;
 
@@ -42,6 +43,9 @@ public class TableCT extends Constraint {
     protected int domains[][];
 
     protected boolean firstPropagate = true;
+
+    protected ReversibleSparseSet unboundVariables;
+    protected int[] unboundIndices;
 
 //    protected long[] bitset;
     protected int[] deltaValues;
@@ -67,6 +71,8 @@ public class TableCT extends Constraint {
         this.deltas = new DeltaInt[x.length];
         this.deltaValues = new int[Arrays.stream(x).map(IntVar::getSize).max(Integer::compareTo).get()];
         this.domains = new int[x.length][];
+        unboundVariables = new ReversibleSparseSet(cp.getTrail(), x.length);
+        unboundIndices = new int[x.length];
 
         // Allocate supports and residues
         this.supports = new long[x.length][][];
@@ -108,6 +114,10 @@ public class TableCT extends Constraint {
     public void post() throws InconsistencyException {
         for (int i = 0; i < x.length; ++i) {
             deltas[i] = x[i].propagateOnDomainChangeWithDelta(this);
+            final int j = i;
+            x[i].whenBind(() -> {
+                unboundVariables.remove(j);
+            });
         }
 
         propagate();
@@ -183,10 +193,15 @@ public class TableCT extends Constraint {
     }
 
     protected void filterDomains() throws InconsistencyException {
-        boolean allBound = true;
-        for (int i = 0; i < x.length; i++) {
-            if (!x[i].isBound()) {
-                allBound = false;
+//        boolean allBound = true;
+
+        int unbounds = unboundVariables.fillArray(unboundIndices);
+        for (int k = 0; k < unbounds; ++k) {
+            int i = unboundIndices[k];
+
+//        for (int i = 0; i < x.length; i++) {
+//            if (!x[i].isBound()) {
+//                allBound = false;
                 int size = x[i].getSize();
                 for (int j = 0; j < size; j++) {
 
@@ -204,10 +219,10 @@ public class TableCT extends Constraint {
                         }
                     }
                 }
-            }
+//            }
         }
 
-        if (allBound) {
+        if (unboundVariables.isEmpty()) {
             this.deactivate();
         }
     }

@@ -21,16 +21,16 @@ import minicp.reversible.ReversibleInt;
 import java.util.Arrays;
 
 import static minicp.cp.Factory.makeSolver;
-import static minicp.search.Selector.*;
 
 import minicp.reversible.Trail;
 import minicp.util.Counter;
-import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
-import static minicp.search.Selector.*;
+
 import static minicp.cp.Factory.*;
+import static minicp.search.branching.Branching.LEAF;
+import static minicp.search.branching.Branching.branch;
 import static minicp.util.InconsistencyException.INCONSISTENCY;
 import static org.junit.Assert.assertEquals;
 
@@ -45,7 +45,7 @@ public class DFSearchTest {
 
         DFSearch dfs = new DFSearch(tr,() -> {
             if (i.getValue() >= values.length)
-                return TRUE;
+                return LEAF;
             else return branch(
                     ()-> { // left branch
                         values[i.getValue()] = 0;
@@ -78,7 +78,7 @@ public class DFSearchTest {
                     sel = i;
             final int i = sel;
             if (i == -1)
-                return TRUE;
+                return LEAF;
             else return branch(()-> equal(values[i],0),
                     ()-> equal(values[i],1));
         });
@@ -99,7 +99,7 @@ public class DFSearchTest {
 
         DFSearch dfs = new DFSearch(tr,() -> {
             if (i.getValue() >= values.length)
-                return TRUE;
+                return LEAF;
             else return branch(
                     ()-> { // left branch
                         values[i.getValue()] = 1;
@@ -137,7 +137,7 @@ public class DFSearchTest {
 
         DFSearch dfs = new DFSearch(tr,() -> {
             if (i.getValue() >= values.length)
-                return TRUE;
+                return LEAF;
             else return branch (
                     ()-> {
                         // left branch
@@ -215,7 +215,7 @@ public class DFSearchTest {
 
         DFSearch dfs = new DFSearch(tr,() -> {
             if (i.getValue() >= values.length) {
-                return TRUE;
+                return LEAF;
             }
             else return branch (
                     ()-> {

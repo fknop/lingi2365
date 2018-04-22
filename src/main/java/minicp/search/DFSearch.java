@@ -15,8 +15,8 @@
 
 package minicp.search;
 
-import minicp.reversible.ReversibleInt;
 import minicp.reversible.Trail;
+import minicp.search.branching.Branch;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
@@ -82,7 +82,7 @@ public class DFSearch {
     }
 
     public void dfs(SearchStatistics statistics, SearchLimit limit) {
-        Stack<Alternative> alternatives = new Stack<>();
+        Stack<Branch> alternatives = new Stack<>();
         expandNode(alternatives, statistics);
 
         while(!alternatives.isEmpty()) {
@@ -97,8 +97,8 @@ public class DFSearch {
         }
      }
 
-     private void expandNode(Stack<Alternative> alternatives, SearchStatistics statistics) {
-        Alternative[] alts = choice.call();
+     private void expandNode(Stack<Branch> alternatives, SearchStatistics statistics) {
+        Branch[] alts = choice.call();
 
         if (alts.length == 0) {
             alternatives.push(() -> {
@@ -109,7 +109,7 @@ public class DFSearch {
 
         // Push right to left on the stack so that left is first
         for (int i = alts.length - 1; i >= 0; i--) {
-            Alternative alt = alts[i];
+            Branch alt = alts[i];
 
             alternatives.push(() -> {
                 trail.pop();

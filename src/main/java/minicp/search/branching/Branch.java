@@ -13,12 +13,12 @@
  * Copyright (c)  2017. by Laurent Michel, Pierre Schaus, Pascal Van Hentenryck
  */
 
-package minicp.search;
+package minicp.search.branching;
 
 import minicp.util.InconsistencyException;
 
 @FunctionalInterface
-public interface Alternative {
+public interface Branch {
     void call() throws InconsistencyException;
 }
 

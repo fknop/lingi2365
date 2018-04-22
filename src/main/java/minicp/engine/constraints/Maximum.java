@@ -62,34 +62,33 @@ public class Maximum extends Constraint {
     @Override
     public void propagate() throws InconsistencyException {
 
-        int min = Integer.MAX_VALUE;
+        int min = Integer.MIN_VALUE;
         int max = Integer.MIN_VALUE;
 
-        for (IntVar var: x) {
-            var.removeAbove(y.getMax());
+        for (int i = 0; i < x.length; ++i) {
+            x[i].removeAbove(y.getMax());
 
-            if (var.getMax() >= y.getMin()) {
-                var.removeBelow(y.getMin());
+            int xmin = x[i].getMin();
+            int xmax = x[i].getMax();
 
-                if (var.getMin() < min) {
-                    min = var.getMin();
-                }
+            if (xmin > min) {
+                min = xmin;
+            }
 
-                if (var.getMax() > max) {
-                    max = var.getMax();
-                }
+            if (xmax > max) {
+                max = xmax;
             }
         }
-
 
         y.removeAbove(max);
         y.removeBelow(min);
 
-        boolean allBound = Arrays.stream(x).allMatch(IntVar::isBound);
-        if (allBound) {
-            y.assign(max);
-            this.deactivate();
+        for (int i = 0; i < x.length; ++i) {
+            if (x[i].isBound() && x[i].getMin() == max) {
+                y.assign(max);
+                this.deactivate();
+                break;
+            }
         }
-
     }
 }

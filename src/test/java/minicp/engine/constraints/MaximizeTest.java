@@ -25,6 +25,8 @@ import minicp.util.NotImplementedExceptionAssume;
 import org.junit.Test;
 
 import static minicp.cp.Factory.*;
+import static minicp.search.branching.Branching.LEAF;
+import static minicp.search.branching.Branching.branch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static minicp.search.Selector.*;
@@ -40,7 +42,7 @@ public class MaximizeTest {
                 IntVar y = makeIntVar(cp, 10,20);
 
                 IntVar[] x = new IntVar[]{y};
-                DFSearch dfs = makeDfs(cp,() -> y.isBound() ? TRUE : branch(
+                DFSearch dfs = makeDfs(cp,() -> y.isBound() ? LEAF : branch(
                         () -> {
                             System.out.println("equal");
                             equal(y, y.getMin());

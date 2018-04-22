@@ -19,6 +19,7 @@ import minicp.engine.constraints.*;
 import minicp.engine.core.*;
 import minicp.search.Choice;
 import minicp.search.DFSearch;
+import minicp.search.branching.Branching;
 import minicp.util.InconsistencyException;
 
 

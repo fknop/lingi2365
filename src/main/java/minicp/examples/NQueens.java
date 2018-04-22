@@ -21,6 +21,7 @@ import minicp.util.InconsistencyException;
 import minicp.search.SearchStatistics;
 import java.util.Arrays;
 
+import static minicp.cp.Heuristics.firstFail;
 import static minicp.search.Selector.*;
 import static minicp.cp.Factory.*;
 
@@ -37,16 +38,8 @@ public class NQueens {
                 cp.post(notEqual(q[i],q[j],i-j));
             }
 
-        SearchStatistics stats = makeDfs(cp,
-                selectMin(q,
-                        qi -> qi.getSize() > 1,
-                        qi -> qi.getSize(),
-                        qi -> {
-                            int v = qi.getMin();
-                            return branch(() -> equal(qi,v),
-                                          () -> notEqual(qi,v));
-                        }
-                )
+        SearchStatistics stats = makeDfs(cp, firstFail(q)
+
         ).onSolution(() ->
                 System.out.println("solution:"+ Arrays.toString(q))
         ).start();

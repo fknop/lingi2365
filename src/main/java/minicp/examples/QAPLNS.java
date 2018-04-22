@@ -18,15 +18,18 @@ package minicp.examples;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.search.DFSearch;
+import minicp.search.branching.Branching;
+import minicp.search.branching.FirstFailBranching;
+import minicp.search.selector.value.ValueSelector;
+import minicp.search.selector.variable.VariableEvaluator;
+import minicp.search.selector.variable.VariableFilter;
+import minicp.search.selector.variable.VariableSelector;
 import minicp.util.InconsistencyException;
 import minicp.util.InputReader;
 
 import java.util.Random;
 
 import static minicp.cp.Factory.*;
-import static minicp.cp.Heuristics.firstFail;
-import static minicp.search.Selector.branch;
-import static minicp.search.Selector.selectMin;
 
 public class QAPLNS {
 
@@ -61,63 +64,65 @@ public class QAPLNS {
         cp.post(allDifferent(x));
 
 //        DFSearch dfs = makeDfs(cp,firstFail(x));
-        DFSearch dfs = makeDfs(cp,
-                selectMin(x,
-                        xi -> xi.getSize() > 1, // filter,
-                        xi -> {
-                            int max = Integer.MIN_VALUE;
 
-                            int[] values = new int[xi.getSize()];
-                            int[] valuesj = new int[n];
-                            int size = xi.fillArray(values);
+        VariableFilter<IntVar> filter = (IntVar v) -> !v.isBound();
+        VariableEvaluator<IntVar> evaluator = (IntVar[] vars, int index) -> {
+            IntVar var = vars[index];
+            int max = Integer.MIN_VALUE;
 
-                            for (int i = 0; i < size; ++i) {
-                                int valuei = values[i];
-                                for (int j = 0; j < n; ++j) {
-                                    int sizej = x[j].fillArray(valuesj);
-                                    for (int k = 0; k < sizej; ++k) {
-                                        int valuej = valuesj[k];
-                                        int weight = w[valuei][valuej];
-                                        if (weight > max) {
-                                            max = weight;
-                                        }
-                                    }
-                                }
-                            }
+            int[] values = new int[var.getSize()];
+            int[] valuesj = new int[n];
+            int size = var.fillArray(values);
 
-                            return -max;
-                        },
-                        xi -> {
-                            int min = Integer.MAX_VALUE;
-
-                            int[] values = new int[xi.getSize()];
-                            int[] valuesj = new int[n];
-
-                            int size = xi.fillArray(values);
-
-                            int bestLocation = xi.getMin(); // fallback
-
-                            for (int i = 0; i < size; ++i) {
-                                int location = values[i];
-                                for (int j = 0; j < n; ++j) {
-                                    int sizej = x[j].fillArray(valuesj);
-                                    for (int k = 0; k < sizej; ++k) {
-                                        int valuej = valuesj[k];
-                                        int distance = d[location][valuej];
-                                        if (distance < min) {
-                                            min = distance;
-                                        }
-                                    }
-                                }
-                            }
-
-                            return branch(
-                                    () -> equal(xi, bestLocation),
-                                    () -> notEqual(xi, bestLocation)
-                            );
+            for (int i = 0; i < size; ++i) {
+                int valuei = values[i];
+                for (int j = 0; j < n; ++j) {
+                    int sizej = x[j].fillArray(valuesj);
+                    for (int k = 0; k < sizej; ++k) {
+                        int valuej = valuesj[k];
+                        int weight = w[valuei][valuej];
+                        if (weight > max) {
+                            max = weight;
                         }
-                )
-        );
+                    }
+                }
+            }
+
+            return -max;
+        };
+
+        VariableSelector<IntVar> variableSelector = (IntVar[] vars) -> VariableSelector.selectMinVariable(vars, filter, evaluator);
+        ValueSelector valueSelector = (IntVar var) -> {
+            int min = Integer.MAX_VALUE;
+
+            int[] values = new int[var.getSize()];
+            int[] valuesj = new int[n];
+
+            int size = var.fillArray(values);
+
+            int bestLocation = var.getMin(); // fallback
+
+            for (int i = 0; i < size; ++i) {
+                int location = values[i];
+                for (int j = 0; j < n; ++j) {
+                    int sizej = x[j].fillArray(valuesj);
+                    for (int k = 0; k < sizej; ++k) {
+                        int valuej = valuesj[k];
+                        int distance = d[location][valuej];
+                        if (distance < min) {
+                            min = distance;
+                        }
+                    }
+                }
+            }
+
+            return bestLocation;
+        };
+
+        Branching<IntVar> branching = new FirstFailBranching();
+
+
+        DFSearch dfs = makeDfs(cp, branching.branch(x, variableSelector, valueSelector));
 
 
         // build the objective function

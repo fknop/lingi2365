@@ -17,6 +17,7 @@
 package minicp.engine.constraints;
 
 import minicp.engine.core.BoolVar;
+import minicp.engine.core.BoolVarImpl;
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
 import minicp.util.InconsistencyException;
@@ -59,8 +60,15 @@ public class CumulativeDecomposition extends Constraint {
             BoolVar[] overlaps = new BoolVar[start.length];
             for (int i = 0; i < start.length; i++) {
                 overlaps[i] = makeBoolVar(cp);
-                throw new NotImplementedException("CumulativeDecomp");
-                // TODO
+
+                BoolVar first = new BoolVarImpl(cp);
+                BoolVar second = new BoolVarImpl(cp);
+
+                cp.post(new IsLessOrEqual(first, start[i], t));
+                cp.post(new IsLessOrEqual(second, minus(plus(start[i], duration[i] - 1)), -t));
+                cp.post(new Equal(overlaps[i], isEqual(sum(first, second), 2)));
+
+
                 // post the constraints to enforce
                 // that overlaps[i] is true iff start[i] <= t && t < start[i] + duration[i]
                 // hint: use IsLessOrEqual, introduce BoolVar, use views minus, plus, etc.

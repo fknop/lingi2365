@@ -16,8 +16,8 @@
 package minicp.search;
 
 
-import minicp.util.InconsistencyException;
-import minicp.util.NotImplementedException;
+import minicp.search.branching.Branch;
+import minicp.search.branching.Branching;
 
 public class ChoiceCombinator implements Choice {
 
@@ -28,10 +28,10 @@ public class ChoiceCombinator implements Choice {
     }
 
     @Override
-    public Alternative[] call() {
-        Alternative[] alternatives = Selector.TRUE;
+    public Branch[] call() {
+        Branch[] alternatives = Branching.LEAF;
         for (Choice choice : choices) {
-            Alternative[] alts = choice.call();
+            Branch[] alts = choice.call();
             if (alts.length > 0) {
                 alternatives = alts;
                 break;

@@ -18,6 +18,7 @@ package minicp.search;
 
 import minicp.reversible.Trail;
 import minicp.reversible.ReversibleInt;
+import minicp.search.branching.Branch;
 import minicp.util.NotImplementedException;
 import minicp.util.InconsistencyException;
 
@@ -35,7 +36,7 @@ public abstract class DiscrepancyChoice {
         throw new NotImplementedException();
     }
 
-    public Alternative[] getAlternatives() throws InconsistencyException {
+    public Branch[] getAlternatives() throws InconsistencyException {
         // Hint:
         // Let b.alts denote b.call()
         // Filter-out alternatives from b.alts that would exceed maxDiscrepancy

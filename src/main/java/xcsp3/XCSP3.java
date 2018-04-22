@@ -11,7 +11,13 @@ import static minicp.cp.Factory.*;
 
 import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
-import minicp.search.Selector;
+import minicp.search.branching.Branching;
+import minicp.search.branching.FirstFailBranching;
+import minicp.search.heuristic.Heuristic;
+import minicp.search.heuristic.LastSuccessAndConflict;
+import minicp.search.selector.value.BIVS;
+import minicp.search.selector.value.MinValue;
+import minicp.search.selector.variable.*;
 import minicp.util.Box;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
@@ -654,7 +660,8 @@ public class XCSP3 implements XCallbacks2 {
         Long t0 = System.currentTimeMillis();
 
         solve((solution, value) -> {
-            System.out.println("solfound "+(value == Integer.MAX_VALUE ? value: "solution"));
+            System.out.println(value);
+            System.out.println("solfound " + value);
             lastSolution.set(solution);
         }, ss -> {
             int nSols = isCOP() ? nSolution : 1;
@@ -681,18 +688,22 @@ public class XCSP3 implements XCallbacks2 {
         DFSearch search;
 
 
-        Selector.ValueFun<IntVar> varHeuristic = wdegHeuristic;
+        Heuristic heuristic = new LastSuccessAndConflict(new DomDivDegree(), isCOP() ? new BIVS(objectiveMinimize.get()) : null, !isCOP());
+        Heuristic heuristic2 = new LastSuccessAndConflict(new DomDivDegree(), isCOP() ? new BIVS(objectiveMinimize.get()) : null, !isCOP());
+
+        VariableSelector<IntVar> selector = new WDeg();
+        Branching<IntVar> firstFailBranching = new FirstFailBranching();
 
         if (decisionVars.isEmpty()) {
-            search = makeDfs(minicp, lastSuccessConflict(vars));
+            search = makeDfs(minicp, heuristic.branch(vars));
+//            search = makeDfs(minicp, firstFailBranching.branch(vars, selector, new MinValue()));
 //            search = makeDfs(minicp, buildHeuristic(vars, varHeuristic, branchHeuristic));
         } else {
 
-//            search = makeDfs(minicp, and(
-//                    buildHeuristic(decisionVars.toArray(new IntVar[0]), varHeuristic, branchHeuristic),
-//                    buildHeuristic(vars, varHeuristic, branchHeuristic)));
 //
-            search = makeDfs(minicp, and(lastSuccessConflict(decisionVars.toArray(new IntVar[0])), lastSuccessConflict(vars)));
+            search = makeDfs(minicp, and(heuristic.branch(decisionVars.toArray(new IntVar[0])), heuristic2.branch(vars)));
+//            search = makeDfs(minicp, and(firstFailBranching.branch(decisionVars.toArray(new IntVar[0]), selector, new MinValue()),
+//                    heuristic.branch(vars, selector, new MinValue())));
         }
 
         if (objectiveMinimize.isPresent()) {
