@@ -22,7 +22,6 @@ import minicp.search.SearchStatistics;
 import java.util.Arrays;
 
 import static minicp.cp.Heuristics.firstFail;
-import static minicp.search.Selector.*;
 import static minicp.cp.Factory.*;
 
 public class NQueens {

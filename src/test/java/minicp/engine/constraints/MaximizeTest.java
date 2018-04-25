@@ -29,7 +29,6 @@ import static minicp.search.branching.Branching.LEAF;
 import static minicp.search.branching.Branching.branch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static minicp.search.Selector.*;
 
 public class MaximizeTest {
 

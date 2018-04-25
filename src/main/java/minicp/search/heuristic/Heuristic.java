@@ -8,8 +8,8 @@ import minicp.search.selector.variable.VariableEvaluator;
 import minicp.search.selector.variable.VariableFilter;
 import minicp.search.selector.variable.VariableSelector;
 
-public interface Heuristic extends VariableFilter<IntVar>, VariableSelector<IntVar>, VariableEvaluator<IntVar>, ValueSelector, Branching<IntVar> {
-    default Choice branch(IntVar[] x) {
-        return branch(x, this, this);
-    }
-}
+//public interface Heuristic extends VariableFilter<IntVar>, VariableSelector<IntVar>, VariableEvaluator<IntVar>, ValueSelector, Branching<IntVar> {
+//    default Choice branch(IntVar[] x) {
+//        return branch(x, this, this);
+//    }
+//}

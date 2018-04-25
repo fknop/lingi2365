@@ -27,6 +27,7 @@ import minicp.search.selector.variable.VariableSelector;
 import minicp.util.InconsistencyException;
 import minicp.util.InputReader;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import static minicp.cp.Factory.*;
@@ -92,7 +93,8 @@ public class QAPLNS {
         };
 
         VariableSelector<IntVar> variableSelector = (IntVar[] vars) -> VariableSelector.selectMinVariable(vars, filter, evaluator);
-        ValueSelector valueSelector = (IntVar var) -> {
+        ValueSelector valueSelector = (IntVar[] vars, int index) -> {
+            IntVar var = vars[index];
             int min = Integer.MAX_VALUE;
 
             int[] values = new int[var.getSize()];
@@ -119,10 +121,10 @@ public class QAPLNS {
             return bestLocation;
         };
 
-        Branching<IntVar> branching = new FirstFailBranching();
+        Branching<IntVar> branching = new FirstFailBranching(x, variableSelector, valueSelector);
 
 
-        DFSearch dfs = makeDfs(cp, branching.branch(x, variableSelector, valueSelector));
+        DFSearch dfs = makeDfs(cp, branching.branch());
 
 
         // build the objective function
@@ -172,6 +174,7 @@ public class QAPLNS {
                         equal(x[j],xBest[j]);
                     }
                 }
+
 
                 if (i % 3 == 0) {
                     percentage += 5;

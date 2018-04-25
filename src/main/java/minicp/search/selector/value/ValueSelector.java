@@ -7,5 +7,5 @@ import minicp.search.selector.variable.VariableFilter;
 
 @FunctionalInterface
 public interface ValueSelector {
-    int getValue(IntVar var);
+    int getValue(IntVar[] x, int index);
 }

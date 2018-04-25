@@ -11,12 +11,8 @@ import static minicp.cp.Factory.*;
 
 import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
-import minicp.search.branching.Branching;
 import minicp.search.branching.FirstFailBranching;
-import minicp.search.heuristic.Heuristic;
-import minicp.search.heuristic.LastSuccessAndConflict;
-import minicp.search.selector.value.BIVS;
-import minicp.search.selector.value.MinValue;
+import minicp.search.selector.value.*;
 import minicp.search.selector.variable.*;
 import minicp.util.Box;
 import minicp.util.InconsistencyException;
@@ -687,21 +683,29 @@ public class XCSP3 implements XCallbacks2 {
         IntVar[] vars = mapVar.entrySet().stream().sorted(new EntryComparator()).map(Map.Entry::getValue).toArray(IntVar[]::new);
         DFSearch search;
 
+        IntVar[] decisions = decisionVars.toArray(new IntVar[0]);
+        FirstFailBranching decisionBranching = new FirstFailBranching(decisions);
+        decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new DomDivDegree()));
+//        decisionBranching.setVariableSelector(new DomDivDegree());
+        decisionBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), decisions) : new LastSuccess(decisions, decisionBranching, new MinValue()));
+//        decisionBranching.setValueSelector(new LastSuccess(decisions, decisionBranching, isCOP() ? new BIVS(objectiveMinimize.get(), 10) : new MinValue()));
 
-        Heuristic heuristic = new LastSuccessAndConflict(new DomDivDegree(), isCOP() ? new BIVS(objectiveMinimize.get()) : null, !isCOP());
-        Heuristic heuristic2 = new LastSuccessAndConflict(new DomDivDegree(), isCOP() ? new BIVS(objectiveMinimize.get()) : null, !isCOP());
+        FirstFailBranching secondBranching = new FirstFailBranching(vars);
+        secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new DomDivDegree()));
+//        secondBranching.setVariableSelector(new DomDivDegree());
 
-        VariableSelector<IntVar> selector = new WDeg();
-        Branching<IntVar> firstFailBranching = new FirstFailBranching();
+//        secondBranching.setValueSelector(new LastSuccess(vars, secondBranching, isCOP() ? new BIVS(objectiveMinimize.get()) : new MinValue()));
+        secondBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), vars, 10) : new LastSuccess(vars, secondBranching, new MinValue()));
+
 
         if (decisionVars.isEmpty()) {
-            search = makeDfs(minicp, heuristic.branch(vars));
+            search = makeDfs(minicp, secondBranching.branch());
 //            search = makeDfs(minicp, firstFailBranching.branch(vars, selector, new MinValue()));
 //            search = makeDfs(minicp, buildHeuristic(vars, varHeuristic, branchHeuristic));
         } else {
 
 //
-            search = makeDfs(minicp, and(heuristic.branch(decisionVars.toArray(new IntVar[0])), heuristic2.branch(vars)));
+            search = makeDfs(minicp, and(decisionBranching.branch(), secondBranching.branch()));
 //            search = makeDfs(minicp, and(firstFailBranching.branch(decisionVars.toArray(new IntVar[0]), selector, new MinValue()),
 //                    heuristic.branch(vars, selector, new MinValue())));
         }

@@ -29,13 +29,11 @@ import minicp.search.selector.variable.VariableSelector;
 
 public class Heuristics {
 
-    public static Choice makeHeuristic(IntVar[] x, VariableSelector<IntVar> selector, ValueSelector valueSelector, Branching<IntVar> branching) {
-        return branching.branch(x, selector, valueSelector);
-    }
+
 
     public static Choice firstFail(IntVar... x) {
-        Branching<IntVar> branching = new FirstFailBranching();
-        return branching.branch(x, new Dom(), new MinValue());
+        Branching<IntVar> branching = new FirstFailBranching(x, new Dom(), new MinValue());
+        return branching.branch();
     }
 
 //    public static Choice firstFail(IntVar... x) {

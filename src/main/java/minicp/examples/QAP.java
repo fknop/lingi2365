@@ -89,7 +89,8 @@ public class QAP {
         };
 
         VariableSelector<IntVar> variableSelector = (IntVar[] vars) -> VariableSelector.selectMinVariable(vars, filter, evaluator);
-        ValueSelector valueSelector = (IntVar var) -> {
+        ValueSelector valueSelector = (IntVar[] vars, int index) -> {
+            IntVar var = vars[index];
             int min = Integer.MAX_VALUE;
 
             int[] values = new int[var.getSize()];
@@ -116,10 +117,10 @@ public class QAP {
             return bestLocation;
         };
 
-        Branching<IntVar> branching = new FirstFailBranching();
+        Branching<IntVar> branching = new FirstFailBranching(x, variableSelector, valueSelector);
 
 //        DFSearch dfs = makeDfs(cp,firstFail(x));
-        DFSearch dfs = makeDfs(cp, branching.branch(x, variableSelector, valueSelector));
+        DFSearch dfs = makeDfs(cp, branching.branch());
         // build the objective function
         IntVar[] weightedDist = new IntVar[n*n];
         int ind = 0;
