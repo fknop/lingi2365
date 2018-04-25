@@ -143,6 +143,16 @@ public class Factory {
         x.getSolver().fixPoint();
     }
 
+    static public void less(IntVar x, int v) throws InconsistencyException {
+        x.removeAbove(v - 1);
+        x.getSolver().fixPoint();
+    }
+
+    static public void greater(IntVar x, int v) throws InconsistencyException {
+        x.removeBelow(v + 1);
+        x.getSolver().fixPoint();
+    }
+
     static public void notEqual(IntVar x, int v) throws InconsistencyException {
         x.remove(v);
         x.getSolver().fixPoint();

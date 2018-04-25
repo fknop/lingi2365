@@ -4,6 +4,8 @@ import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.util.InconsistencyException;
 
+import java.util.Arrays;
+
 import static minicp.cp.Factory.equal;
 
 public class IBS implements ValueSelector {

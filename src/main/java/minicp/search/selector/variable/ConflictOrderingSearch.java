@@ -16,7 +16,7 @@ public class ConflictOrderingSearch implements VariableFilter<IntVar>, VariableS
     private long counter = 0L;
     private boolean[] conflictedVariables;
 
-    private long RESTART_TRESHOLD = 500L;
+    private long RESTART_TRESHOLD = 1000L;
 
     public ConflictOrderingSearch(IntVar[] x, AbstractBranching<IntVar> branching) {
         this(x, branching, new DomDivDegree());
@@ -41,15 +41,15 @@ public class ConflictOrderingSearch implements VariableFilter<IntVar>, VariableS
         ++counter;
         timestamps[index] = counter;
         conflictedVariables[index] = true;
+    }
 
-        if (counter > RESTART_TRESHOLD) {
-            for (int i = 0; i < timestamps.length; ++i) {
-                timestamps[i] = 0L;
-                conflictedVariables[index] = false;
-            }
-            counter = 0L;
-            RESTART_TRESHOLD = Math.min(RESTART_TRESHOLD * 2, 100000);
+    private void reset() {
+        for (int i = 0; i < timestamps.length; ++i) {
+            timestamps[i] = 0L;
+            conflictedVariables[i] = false;
         }
+        counter = 0L;
+//            RESTART_TRESHOLD = Math.min(RESTART_TRESHOLD * 2, 100000);
     }
 
     private boolean allConflictedBound() {
@@ -66,7 +66,11 @@ public class ConflictOrderingSearch implements VariableFilter<IntVar>, VariableS
 
     @Override
     public int getVariable(IntVar[] x) {
-        if (allConflictedBound()) {
+        if (counter == 0L || allConflictedBound()) {
+            if (counter > 0L) {
+                reset();
+            }
+
             return VariableSelector.selectMinVariable(x, this, evaluator);
         }
         else {

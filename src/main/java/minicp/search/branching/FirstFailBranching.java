@@ -8,9 +8,7 @@ import minicp.search.selector.value.ValueSelector;
 import minicp.search.selector.variable.VariableSelector;
 import minicp.util.InconsistencyException;
 
-import static minicp.cp.Factory.equal;
-import static minicp.cp.Factory.isLess;
-import static minicp.cp.Factory.notEqual;
+import static minicp.cp.Factory.*;
 
 public class FirstFailBranching extends AbstractBranching<IntVar> {
 

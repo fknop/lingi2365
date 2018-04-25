@@ -132,8 +132,8 @@ public class XCSP3 implements XCallbacks2 {
             // Note that most of the time, tuples are already cleaned by the parser
         }*/
 
-        try {
 
+        try {
             if (!positive) {
                 minicp.post(new NegTableCT(trVars(list), tuples));
             }
@@ -683,19 +683,25 @@ public class XCSP3 implements XCallbacks2 {
         IntVar[] vars = mapVar.entrySet().stream().sorted(new EntryComparator()).map(Map.Entry::getValue).toArray(IntVar[]::new);
         DFSearch search;
 
+        if (decisionVars.isEmpty()) {
+            Set<XVarInteger> set =  mapVar.keySet();
+            for (XVarInteger var : set) {
+                IntVar v = mapVar.get(var);
+                if (v.getSize() == 2) {
+                    decisionVars.add(mapVar.get(var));
+                }
+            }
+        }
+
         IntVar[] decisions = decisionVars.toArray(new IntVar[0]);
         FirstFailBranching decisionBranching = new FirstFailBranching(decisions);
-        decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new DomDivDegree()));
-//        decisionBranching.setVariableSelector(new DomDivDegree());
+        decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new WDeg()));
         decisionBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), decisions) : new LastSuccess(decisions, decisionBranching, new MinValue()));
-//        decisionBranching.setValueSelector(new LastSuccess(decisions, decisionBranching, isCOP() ? new BIVS(objectiveMinimize.get(), 10) : new MinValue()));
 
         FirstFailBranching secondBranching = new FirstFailBranching(vars);
-        secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new DomDivDegree()));
+        secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new WDeg()));
 //        secondBranching.setVariableSelector(new DomDivDegree());
-
-//        secondBranching.setValueSelector(new LastSuccess(vars, secondBranching, isCOP() ? new BIVS(objectiveMinimize.get()) : new MinValue()));
-        secondBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), vars, 10) : new LastSuccess(vars, secondBranching, new MinValue()));
+        secondBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), vars) : new LastSuccess(vars, secondBranching, new MinValue()));
 
 
         if (decisionVars.isEmpty()) {
