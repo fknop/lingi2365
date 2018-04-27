@@ -698,10 +698,11 @@ public class XCSP3 implements XCallbacks2 {
         decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new WDeg()));
         decisionBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), decisions) : new LastSuccess(decisions, decisionBranching, new MinValue()));
 
+
         FirstFailBranching secondBranching = new FirstFailBranching(vars);
         secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new WDeg()));
-//        secondBranching.setVariableSelector(new DomDivDegree());
         secondBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), vars) : new LastSuccess(vars, secondBranching, new MinValue()));
+
 
 
         if (decisionVars.isEmpty()) {
@@ -729,8 +730,15 @@ public class XCSP3 implements XCallbacks2 {
             throw InconsistencyException.INCONSISTENCY;
         }
 
+        int[] best = new int[vars.length];
+
 
         search.onSolution(() -> {
+
+            for (int i = 0; i < vars.length; ++i) {
+                best[i] = vars[i].getMin();
+            }
+
             StringBuilder sol = new StringBuilder("<instantiation>\n\t<list>\n\t\t");
             for (XVarInteger x : xVars)
                 sol.append(x.id()).append(" ");
@@ -741,7 +749,40 @@ public class XCSP3 implements XCallbacks2 {
             onSolution.accept(sol.toString(), realObjective.map(IntVar::getMin).orElse(Integer.MAX_VALUE));
         });
 
-        return search.start(shouldStop::apply);
+        int nRestarts = 5000;
+        int failureLimit = 200;
+        Random rand = new Random(0);
+        double percentage = 50.0;
+
+        boolean firstSearch = true;
+        SearchStatistics stats = null;
+        for (int i = 0; i < nRestarts; ++i) {
+            try {
+                minicp.push();
+
+                if (!firstSearch) {
+                    for (int j = 0; j < vars.length; ++j) {
+                        if (rand.nextInt(100) < percentage) {
+                            equal(vars[j], best[j]);
+                        }
+                    }
+                }
+
+
+                firstSearch = false;
+//                failureLimit *= 1.05;
+                final int failures = failureLimit;
+                stats = search.start(statistics -> shouldStop.apply(statistics) || statistics.nFailures >= failures);
+            }
+            catch (InconsistencyException e) {
+            }
+            finally {
+                minicp.pop();
+            }
+        }
+
+        return stats;
+//        return search.start(shouldStop::apply);
     }
 
 
