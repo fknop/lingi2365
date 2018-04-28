@@ -683,15 +683,15 @@ public class XCSP3 implements XCallbacks2 {
         IntVar[] vars = mapVar.entrySet().stream().sorted(new EntryComparator()).map(Map.Entry::getValue).toArray(IntVar[]::new);
         DFSearch search;
 
-        if (decisionVars.isEmpty()) {
-            Set<XVarInteger> set =  mapVar.keySet();
-            for (XVarInteger var : set) {
-                IntVar v = mapVar.get(var);
-                if (v.getSize() == 2) {
-                    decisionVars.add(mapVar.get(var));
-                }
-            }
-        }
+//        if (decisionVars.isEmpty()) {
+//            Set<XVarInteger> set =  mapVar.keySet();
+//            for (XVarInteger var : set) {
+//                IntVar v = mapVar.get(var);
+//                if (v.getSize() == 2) {
+//                    decisionVars.add(mapVar.get(var));
+//                }
+//            }
+//        }
 
         IntVar[] decisions = decisionVars.toArray(new IntVar[0]);
         FirstFailBranching decisionBranching = new FirstFailBranching(decisions);
@@ -750,7 +750,7 @@ public class XCSP3 implements XCallbacks2 {
         });
 
         int nRestarts = 5000;
-        int failureLimit = 200;
+        int failureLimit = 750;
         Random rand = new Random(0);
         double percentage = 50.0;
 
