@@ -11,6 +11,7 @@ import static minicp.cp.Factory.*;
 
 import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
+import minicp.search.branching.DiscrepancyBranching;
 import minicp.search.branching.FirstFailBranching;
 import minicp.search.selector.value.*;
 import minicp.search.selector.variable.*;
@@ -682,7 +683,7 @@ public class XCSP3 implements XCallbacks2 {
 
         IntVar[] vars = mapVar.entrySet().stream().sorted(new EntryComparator()).map(Map.Entry::getValue).toArray(IntVar[]::new);
         DFSearch search;
-
+//
         if (decisionVars.isEmpty()) {
             Set<XVarInteger> set =  mapVar.keySet();
             for (XVarInteger var : set) {
@@ -695,12 +696,14 @@ public class XCSP3 implements XCallbacks2 {
 
         IntVar[] decisions = decisionVars.toArray(new IntVar[0]);
         FirstFailBranching decisionBranching = new FirstFailBranching(decisions);
-        decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new WDeg()));
+//        DiscrepancyBranching<IntVar> discrepancyBranching = new DiscrepancyBranching<>(decisionBranching, 100);
+        decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new DomDivDegree()));
         decisionBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), decisions) : new LastSuccess(decisions, decisionBranching, new MinValue()));
 
 
         FirstFailBranching secondBranching = new FirstFailBranching(vars);
-        secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new WDeg()));
+//        DiscrepancyBranching<IntVar> secondDiscrepancyBranching = new DiscrepancyBranching<>(secondBranching, 100);
+        secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new DomDivDegree()));
         secondBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), vars) : new LastSuccess(vars, secondBranching, new MinValue()));
 
 
@@ -732,11 +735,16 @@ public class XCSP3 implements XCallbacks2 {
 
         int[] best = new int[vars.length];
 
-
+        boolean useLNS = false;
+        Box<Boolean> firstSearch = new Box<>(true);
         search.onSolution(() -> {
 
-            for (int i = 0; i < vars.length; ++i) {
-                best[i] = vars[i].getMin();
+            if (useLNS) {
+                for (int i = 0; i < vars.length; ++i) {
+                    best[i] = vars[i].getMin();
+                }
+
+                firstSearch.set(false);
             }
 
             StringBuilder sol = new StringBuilder("<instantiation>\n\t<list>\n\t\t");
@@ -749,40 +757,47 @@ public class XCSP3 implements XCallbacks2 {
             onSolution.accept(sol.toString(), realObjective.map(IntVar::getMin).orElse(Integer.MAX_VALUE));
         });
 
-        int nRestarts = 5000;
-        int failureLimit = 200;
-        Random rand = new Random(0);
-        double percentage = 50.0;
 
-        boolean firstSearch = true;
-        SearchStatistics stats = null;
-        for (int i = 0; i < nRestarts; ++i) {
-            try {
-                minicp.push();
+        if (useLNS) {
+            int nRestarts = 5000;
+            int failureLimit = 1000;
+            Random rand = new Random(0);
+            double percentage = 50.0;
 
-                if (!firstSearch) {
-                    for (int j = 0; j < vars.length; ++j) {
-                        if (rand.nextInt(100) < percentage) {
-                            equal(vars[j], best[j]);
+            SearchStatistics stats = new SearchStatistics();
+            for (int i = 0; i < nRestarts; ++i) {
+                try {
+                    minicp.push();
+
+                    if (!firstSearch.get()) {
+                        for (int j = 0; j < vars.length; ++j) {
+                            if (rand.nextInt(100) < percentage) {
+                                equal(vars[j], best[j]);
+                            }
                         }
                     }
+
+
+    //                failureLimit *= 1.05;
+                    final int failures = failureLimit + stats.nFailures;
+                    SearchStatistics s = search.start(statistics -> shouldStop.apply(statistics) || statistics.nFailures >= failures);
+                    stats = stats.merge(s);
+                    if (shouldStop.apply(stats)) {
+                        System.out.println("stop");
+                        break;
+                    }
                 }
+                catch (InconsistencyException e) {
+                }
+                finally {
+                    minicp.pop();
+                }
+            }
 
-
-                firstSearch = false;
-//                failureLimit *= 1.05;
-                final int failures = failureLimit;
-                stats = search.start(statistics -> shouldStop.apply(statistics) || statistics.nFailures >= failures);
-            }
-            catch (InconsistencyException e) {
-            }
-            finally {
-                minicp.pop();
-            }
+            return stats;
         }
 
-        return stats;
-//        return search.start(shouldStop::apply);
+        return search.start(shouldStop::apply);
     }
 
 
