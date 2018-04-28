@@ -40,16 +40,17 @@ public class WDeg implements VariableFilter<IntVar>, VariableSelector<IntVar>, V
         if (unassigned == null) {
             setup(x);
         }
+//
+//        int max = Integer.MIN_VALUE;
+//        for (int i = 0; i < x.length; ++i) {
+//            int size = x[i].getSize();
+//            if (size > max) {
+//                max = size;
+//            }
+//        }
 
-        int max = Integer.MIN_VALUE;
-        for (int i = 0; i < x.length; ++i) {
-            int size = x[i].getSize();
-            if (size > max) {
-                max = size;
-            }
-        }
-
-        return VariableSelector.selectMinVariable(x, this, max > SIZE_TRESHOLD ? fallback : this);
+//        return VariableSelector.selectMinVariable(x, this, max > SIZE_TRESHOLD ? fallback : this);
+        return VariableSelector.selectMinVariable(x, this, this);
     }
     @Override
     public boolean take(IntVar variable) {

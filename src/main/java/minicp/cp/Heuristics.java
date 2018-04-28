@@ -36,6 +36,12 @@ public class Heuristics {
         return branching.branch();
     }
 
+    public static Choice firstFail(IntVar[] x, VariableSelector<IntVar> varSelector, ValueSelector valSelector) {
+        Branching<IntVar> branching = new FirstFailBranching(x, varSelector, valSelector);
+        return branching.branch();
+    }
+
+
 //    public static Choice firstFail(IntVar... x) {
 //        return buildHeuristic(x,
 //                domSizeHeuristic,

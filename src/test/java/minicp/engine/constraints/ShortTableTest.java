@@ -18,6 +18,8 @@ package minicp.engine.constraints;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.search.SearchStatistics;
+import minicp.search.selector.value.MinValue;
+import minicp.search.selector.variable.Dom;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 import org.junit.Assume;
@@ -122,7 +124,7 @@ public class ShortTableTest {
             cp.post(new ShortTableDecomp(new IntVar[]{x[0], x[1], x[2]}, t1, star));
             cp.post(new ShortTableDecomp(new IntVar[]{x[2], x[3], x[4]}, t2, star));
             cp.post(new ShortTableDecomp(new IntVar[]{x[0], x[2], x[4]}, t3, star));
-            statsDecomp = makeDfs(cp, firstFail(x)).start();
+            statsDecomp = makeDfs(cp, firstFail(x, new Dom(false), new MinValue())).start();
         } catch (InconsistencyException e) {
             statsDecomp = null;
         }
@@ -134,7 +136,7 @@ public class ShortTableTest {
             cp.post(new ShortTableCT(new IntVar[]{x[0], x[1], x[2]}, t1, star));
             cp.post(new ShortTableCT(new IntVar[]{x[2], x[3], x[4]}, t2, star));
             cp.post(new ShortTableCT(new IntVar[]{x[0], x[2], x[4]}, t3, star));
-            statsAlgo = makeDfs(cp, firstFail(x)).start();
+            statsAlgo = makeDfs(cp, firstFail(x, new Dom(false), new MinValue())).start();
         } catch (InconsistencyException e) {
             statsAlgo = null;
         }

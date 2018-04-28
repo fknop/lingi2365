@@ -5,14 +5,11 @@ import minicp.util.IntArrayList;
 
 import java.util.Random;
 
-public interface VariableSelector<V extends Variable> {
-    int getVariable(V[] x);
+class SelectMin {
+    private static Random rand = new Random(0);
+    private static IntArrayList bests = new IntArrayList();
 
-
-    static Random rand = new Random(0);
-    static IntArrayList bests = new IntArrayList();
-
-    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator) {
+    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator, boolean breakTies) {
         bests.clear();
 
         double min = Double.MAX_VALUE;
@@ -37,11 +34,23 @@ public interface VariableSelector<V extends Variable> {
             return -1;
         }
 
-        if (bests.size() == 1) {
+        if (bests.size() == 1 || !breakTies) {
             return bests.get(0);
         }
 
         int i = rand.nextInt(bests.size());
         return bests.get(i);
+    }
+}
+
+public interface VariableSelector<V extends Variable> {
+    int getVariable(V[] x);
+
+    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator) {
+        return SelectMin.selectMinVariable(variables, filter, evaluator, true);
+    }
+
+    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator, boolean breakTies) {
+        return SelectMin.selectMinVariable(variables, filter, evaluator, breakTies);
     }
 }

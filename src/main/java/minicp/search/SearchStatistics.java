@@ -17,6 +17,15 @@ package minicp.search;
 
 
 public class SearchStatistics {
+
+    public SearchStatistics merge(SearchStatistics stats) {
+        nFailures += stats.nFailures;
+        nSolutions += stats.nSolutions;
+        nNodes += stats.nNodes;
+        completed = stats.completed;
+        return this;
+    }
+
     public int nFailures = 0;
     public int nNodes = 0;
     public int nSolutions = 0;
