@@ -16,10 +16,14 @@
 package minicp.examples;
 
 import minicp.engine.constraints.Cumulative;
+import minicp.engine.constraints.Element1D;
+import minicp.engine.constraints.LessOrEqual;
+import minicp.engine.constraints.Minimize;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
+import minicp.search.branching.Branching;
 import minicp.util.InconsistencyException;
 import minicp.util.InputReader;
 
@@ -85,15 +89,36 @@ public class RCPSP {
         // capa[r] is the capacity of resource r
         // consumption[r] is the consumption for each activity on the resource [r]
         // duration is the duration of each activity
+        for (int i = 0; i < nResources; ++i) {
+            cp.post(new Cumulative(start, duration, consumption[i], capa[i]));
+        }
 
 
         // TODO 2: add the precedence constraints
         // successors[i] is the sucessors of activity i
+        for (int i = 0; i < nActivities; ++i) {
+            for (int j = 0; j < successors[i].length; ++j) {
+                cp.post(lessOrEqual(end[i], start[j]));
+            }
+        }
+
+        DFSearch search = makeDfs(cp, firstFail(start));
 
         // TODO 3: minimize the makespan
+        IntVar makespan = maximum(end);
+        cp.post(minimize(makespan, search));
+
+
 
         // TODO 4: implement the search
 
+        System.out.println("Search");
+
+        search.onSolution(() -> {
+            System.out.println(makespan.getMin());
+        });
+
+        search.start();
 
 
     }
