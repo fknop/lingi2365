@@ -118,6 +118,17 @@ public class ReversibleSparseSet {
         return s;
     }
 
+    public int fillArrayN(int [] dest, int n) {
+        int s = Math.min(n, size.getValue());
+
+        for (int i = 0; i < s; ++i) {
+            dest[i] = realValue(values[i]);
+        }
+
+        return s;
+    }
+
+
     /**
      * @return true if the set is empty
      */

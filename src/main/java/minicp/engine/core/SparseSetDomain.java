@@ -119,6 +119,12 @@ public class SparseSetDomain extends IntDomain {
         return size;
     }
 
+
+    public int fillArrayN(int[] dest, int n) {
+        int size = domain.fillArrayN(dest, n);
+        return size;
+    }
+
     public int[] delta(int oldSize) {
         return domain.delta(oldSize);
     }

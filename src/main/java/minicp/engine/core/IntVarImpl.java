@@ -172,6 +172,11 @@ public class IntVarImpl implements IntVar {
         return domain.fillArray(dest);
     }
 
+    @Override
+    public int fillArrayN(int[] dest, int n) {
+        return domain.fillArrayN(dest, n);
+    }
+
     private void scheduleAll(ReversibleStack<Constraint> constraints) {
         for (int i = 0; i < constraints.size(); i++)
             cp.schedule(constraints.get(i));

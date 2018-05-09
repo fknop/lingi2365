@@ -23,9 +23,22 @@ import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
+import minicp.search.branching.AbstractBranching;
 import minicp.search.branching.Branching;
+import minicp.search.branching.FirstFailBranching;
+import minicp.search.selector.value.IBS;
+import minicp.search.selector.value.MinValue;
+import minicp.search.selector.value.ValueSelector;
+import minicp.search.selector.variable.ConflictOrderingSearch;
+import minicp.search.selector.variable.DomDivDegree;
+import minicp.search.selector.variable.VariableSelector;
+import minicp.util.Box;
 import minicp.util.InconsistencyException;
 import minicp.util.InputReader;
+import minicp.util.IntArrayList;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static minicp.cp.Factory.*;
 import static minicp.cp.Heuristics.firstFail;
@@ -37,11 +50,47 @@ import static minicp.cp.Heuristics.firstFail;
 public class RCPSP {
 
 
+
     public static void main(String[] args) throws InconsistencyException {
+         class StartSnapshot implements Comparable<StartSnapshot> {
+            int start;
+            int i;
+             StartSnapshot(int start, int i) {
+                this.start = start;
+                this.i = i;
+            }
+
+            @Override
+            public int compareTo(StartSnapshot s) {
+                return Integer.compare(this.start, s.start);
+            }
+
+             @Override
+             public String toString() {
+                 return "Activity: " + i + " starts at: " + start;
+             }
+         }
 
         // Reading the data
 
-        InputReader reader = new InputReader("data/rcpsp/j30_1_1.rcp");
+        String folder = "data/rcpsp/";
+        String instance = null;
+//
+        instance = "j30_1_1.rcp";
+//        instance = "j30_1_2.rcp";
+//        instance = "j30_1_3.rcp";
+//        instance = "j60_1_1.rcp";
+//        instance = "j60_1_2.rcp";
+//        instance = "j60_1_3.rcp";
+//        instance = "j90_1_1.rcp";
+//        instance = "j90_1_2.rcp";
+//        instance = "j90_1_3.rcp";
+//        instance = "j120_1_1.rcp";
+//        instance = "j120_1_2.rcp";
+//        instance = "j120_1_3.rcp";
+
+
+        InputReader reader = new InputReader(folder + instance);
 
         int nActivities = reader.getInt();
         int nResources = reader.getInt();
@@ -94,32 +143,101 @@ public class RCPSP {
         }
 
 
-        // TODO 2: add the precedence constraints
-        // successors[i] is the sucessors of activity i
+
         for (int i = 0; i < nActivities; ++i) {
             for (int j = 0; j < successors[i].length; ++j) {
-                cp.post(lessOrEqual(end[i], start[j]));
+                int k = successors[i][j];
+                cp.post(lessOrEqual(end[i], start[k]));
             }
         }
 
-        DFSearch search = makeDfs(cp, firstFail(start));
+
+        IntVar makespan = maximum(end);
+
+        FirstFailBranching branching = new FirstFailBranching(start);
+        VariableSelector<IntVar> varSelector = new ConflictOrderingSearch(start, branching, new DomDivDegree());
+//        ValueSelector valSelector = new IBS(makespan, start);
+
+        branching.setVariableSelector(varSelector);
+        branching.setValueSelector(new MinValue());
+
+        DFSearch search = makeDfs(cp, branching.branch());
 
         // TODO 3: minimize the makespan
-        IntVar makespan = maximum(end);
         cp.post(minimize(makespan, search));
 
 
 
         // TODO 4: implement the search
 
-        System.out.println("Search");
 
+        StartSnapshot[] startSnapshots = new StartSnapshot[start.length];
+        int[] activityIndices = new int[start.length];
+        ArrayList<IntArrayList> graph = new ArrayList<>();
+
+        for (int i = 0; i < start.length; ++i) {
+            startSnapshots[i] = new StartSnapshot(0, 0);
+            graph.add(new IntArrayList(4));
+        }
+
+        Box<Integer> last = new Box<>(0);
         search.onSolution(() -> {
             System.out.println(makespan.getMin());
+
+            int index = -1;
+            int lastValue = -1;
+
+
+            for (int i = 0; i < start.length; ++i) {
+                startSnapshots[i].i = i;
+                startSnapshots[i].start = start[i].getMin();
+                graph.get(i).clear();
+            }
+
+            Arrays.sort(startSnapshots);
+
+            for (int i = 0; i < start.length; ++i) {
+
+                if (lastValue != startSnapshots[i].start) {
+                    index++;
+                    last.set(index);
+                }
+
+                graph.get(index).add(startSnapshots[i].i);
+                lastValue = startSnapshots[i].start;
+
+
+                int j = startSnapshots[i].i;
+                activityIndices[j] = index;
+            }
+
+            System.out.println(Arrays.toString(startSnapshots));
+            System.out.println(Arrays.toString(activityIndices));
+
+           for (int i = 0; i < last.get(); ++i) {
+               for (int j = 0; j < graph.get(i).size(); ++j) {
+                   System.out.print(graph.get(i).get(j) + " ");
+               }
+               System.out.print(" | ");
+           }
+            System.out.println();
+            // TODO: build tree
+
+
         });
 
         search.start();
 
 
+    }
+
+    boolean isSuccessor(int[][] successors, int i, int j) {
+        for (int k = 0; k < successors[i].length; ++k) {
+            if (successors[i][k] == j) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

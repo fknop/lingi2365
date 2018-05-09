@@ -83,6 +83,17 @@ public class IntVarViewOpposite implements IntVar {
 
         return size;
     }
+
+    @Override
+    public int fillArrayN(int[] dest, int n) {
+        int size = x.fillArrayN(dest, n);
+        for (int i = 0; i < size; ++i) {
+            dest[i] = -dest[i];
+        }
+
+        return size;
+    }
+
     @Override
     public int getMin() {
         return -x.getMax();

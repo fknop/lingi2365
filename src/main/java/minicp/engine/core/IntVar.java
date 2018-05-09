@@ -96,6 +96,7 @@ public interface IntVar extends Variable {
      *         the values in the domain in an arbitrary order
      */
     int fillArray(int [] dest);
+    int fillArrayN(int [] dest, int n);
 
     /**
      * Return true if the domain of the variable has a single value

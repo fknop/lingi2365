@@ -699,13 +699,13 @@ public class XCSP3 implements XCallbacks2 {
         FirstFailBranching decisionBranching = new FirstFailBranching(decisions);
 //        DiscrepancyBranching<IntVar> discrepancyBranching = new DiscrepancyBranching<>(decisionBranching, 100);
         decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new WDeg()));
-        decisionBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), decisions) : new LastSuccess(decisions, decisionBranching, new MinValue()));
+        decisionBranching.setValueSelector(isCOP() ? new BIVS(objectiveMinimize.get()) : new LastSuccess(decisions, decisionBranching, new MinValue()));
 
 
         FirstFailBranching secondBranching = new FirstFailBranching(vars);
 //        DiscrepancyBranching<IntVar> secondDiscrepancyBranching = new DiscrepancyBranching<>(secondBranching, 100);
         secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new WDeg()));
-        secondBranching.setValueSelector(isCOP() ? new IBS(objectiveMinimize.get(), vars) : new LastSuccess(vars, secondBranching, new MinValue()));
+        secondBranching.setValueSelector(isCOP() ? new BIVS(objectiveMinimize.get()) : new LastSuccess(vars, secondBranching, new MinValue()));
 
 
 
@@ -773,9 +773,11 @@ public class XCSP3 implements XCallbacks2 {
                     if (!firstSearch.get()) {
                         for (int j = 0; j < vars.length; ++j) {
                             if (rand.nextInt(100) < percentage) {
-                                equal(vars[j], best[j]);
+                                vars[j].assign(best[j]);
+//                                equal(vars[j], best[j]);
                             }
                         }
+                        minicp.fixPoint();
                     }
 
 
@@ -783,11 +785,11 @@ public class XCSP3 implements XCallbacks2 {
                     SearchStatistics s = search.start(statistics -> shouldStop.apply(statistics) || statistics.nFailures >= failures);
                     stats = stats.merge(s);
                     if (shouldStop.apply(stats)) {
-                        System.out.println("stop");
                         break;
                     }
                 }
                 catch (InconsistencyException e) {
+//                    System.out.println("catch");
                 }
                 finally {
                     minicp.pop();

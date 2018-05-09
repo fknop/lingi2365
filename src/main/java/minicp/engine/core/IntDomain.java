@@ -39,6 +39,7 @@ public abstract class IntDomain {
     public abstract  int removeAbove(int value, DomainListener x) throws InconsistencyException;
 
     public abstract int fillArray(int [] dest);
+    public abstract int fillArrayN(int [] dest, int n);
 
 
     @Override
