@@ -69,48 +69,33 @@ public class IsLessOrEqualVar extends Constraint { // b <=> x <= y
 
     private void whenBoolBound() throws InconsistencyException {
         if (b.isTrue()) {
-//            cp.post(new LessOrEqual(x, y));
             y.removeBelow(x.getMin());
             x.removeAbove(y.getMax());
         } else {
-//            cp.post(new LessOrEqual(y, x));
-            // should deactivate the constraint as it is entailed
             x.removeBelow(y.getMin() + 1);
             y.removeAbove(x.getMax() - 1);
         }
 
-        if (x.isBound() && y.isBound() && b.isBound()) {
-            this.deactivate();
-        }
+        this.deactivate();
     }
 
     private void whenVariableBound() throws InconsistencyException {
         if (x.isBound()) {
             if (b.isBound()) {
-                if (b.isTrue() && x.getMin() > y.getMin()) {
-                    throw INCONSISTENCY;
-                }
-
-                if (b.isFalse() && x.getMin() <= y.getMax()) {
-                    throw INCONSISTENCY;
+                if (b.isTrue()) {
+                    y.removeBelow(x.getMin());
+                } else {
+                    y.removeAbove(x.getMax() - 1);
                 }
             }
         }
 
         if (y.isBound()) {
-            if (b.isBound()) {
-                if (b.isTrue() && x.getMin() > y.getMin()) {
-                    throw INCONSISTENCY;
-                }
-
-                if (b.isFalse() && x.getMin() <= y.getMax()) {
-                    throw INCONSISTENCY;
-                }
+            if (b.isTrue()) {
+                x.removeAbove(y.getMax());
+            } else {
+                x.removeBelow(y.getMin() + 1);
             }
-        }
-
-        if (x.isBound() && y.isBound() && b.isBound()) {
-            this.deactivate();
         }
     }
 

@@ -49,12 +49,12 @@ public class Disjunctive extends Constraint {
     @Override
     public void post() throws InconsistencyException {
 
-        int [] demands = new int[start.length];
-        for (int i = 0; i < start.length; i++) {
-            demands[i] = 1;
-        }
-        cp.post(new Cumulative(start,duration,demands,1));
-
+//        int [] demands = new int[start.length];
+//        for (int i = 0; i < start.length; i++) {
+//            demands[i] = 1;
+//        }
+//        cp.post(new Cumulative(start,duration,demands,1));
+//
 
         // TODO 1: replace the cumulative by  posting  binary decomposition using IsLessOrEqualVar
 
