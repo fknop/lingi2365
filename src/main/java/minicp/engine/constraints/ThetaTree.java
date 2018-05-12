@@ -162,8 +162,7 @@ public class ThetaTree {
             pos = getFather(pos);
         }
         // Fast recompute the top node. We do not need all info.
-        nodes[0].setECT(Math.max(nodes[2].getECT(),
-                nodes[1].getECT() + nodes[2].getSUMP()));
+        nodes[0].setECT(Math.max(nodes[2].getECT(),  nodes[1].getECT() + nodes[2].getSUMP()));
     }
 
 

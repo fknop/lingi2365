@@ -41,65 +41,52 @@ public class IsLessOrEqualVar extends Constraint { // b <=> x <= y
     @Override
     public void post() throws InconsistencyException {
 
+//
+//        if (x.isBound() || y.isBound()) {
+//            whenVariableBound();
+//        }
 
-        if (x.isBound() || y.isBound()) {
-            whenVariableBound();
-        }
-
-        whenVariableChange();
+//        whenVariableChange();
 
         if (!b.isBound()) {
-            b.whenBind(this::whenBoolBound);
+//            b.whenBind(this::whenBoolBound);
+            b.propagateOnBind(this);
         }
 
         if (!x.isBound()) {
-            x.whenDomainChange(this::whenVariableChange);
-            x.whenBind(this::whenVariableBound);
+            x.propagateOnBoundChange(this);
+//            x.whenDomainChange(this::whenVariableChange);
+//            x.whenBind(this::whenVariableBound);
         }
 
         if (!y.isBound()) {
-            y.whenDomainChange(this::whenVariableChange);
-            y.whenBind(this::whenVariableBound);
+            y.propagateOnBoundChange(this);
+//            y.whenDomainChange(this::whenVariableChange);
+//            y.whenBind(this::whenVariableBound);
         }
 
+//        if (b.isBound()) {
+//            propagate();
+//            whenBoolBound();
+//        }
+
+        propagate();
+    }
+
+    @Override
+    public void propagate() throws InconsistencyException {
         if (b.isBound()) {
-            whenBoolBound();
-        }
-    }
-
-    private void whenBoolBound() throws InconsistencyException {
-        if (b.isTrue()) {
-            y.removeBelow(x.getMin());
-            x.removeAbove(y.getMax());
-        } else {
-            x.removeBelow(y.getMin() + 1);
-            y.removeAbove(x.getMax() - 1);
-        }
-
-        this.deactivate();
-    }
-
-    private void whenVariableBound() throws InconsistencyException {
-        if (x.isBound()) {
-            if (b.isBound()) {
-                if (b.isTrue()) {
-                    y.removeBelow(x.getMin());
-                } else {
-                    y.removeAbove(x.getMax() - 1);
-                }
-            }
-        }
-
-        if (y.isBound()) {
             if (b.isTrue()) {
+                y.removeBelow(x.getMin());
                 x.removeAbove(y.getMax());
             } else {
                 x.removeBelow(y.getMin() + 1);
+                y.removeAbove(x.getMax() - 1);
             }
-        }
-    }
 
-    private void whenVariableChange() throws InconsistencyException {
+            this.deactivate();
+        }
+
         if (x.getMax() <= y.getMin()) {
             b.assign(true);
         }

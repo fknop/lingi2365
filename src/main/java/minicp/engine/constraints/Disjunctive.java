@@ -60,8 +60,12 @@ public class Disjunctive extends Constraint {
     // Temporary array with the size of nTask
     private final int[] tmp;
 
-
+    // Theta tree
     private final ThetaTree thetaTree;
+
+    // Flags for propagation
+    private boolean changed = true;
+    private boolean failure = false;
 
     public Disjunctive(IntVar[] start, int[] duration) throws InconsistencyException {
         this(start, duration, true);
@@ -104,8 +108,6 @@ public class Disjunctive extends Constraint {
         // TODO 1: replace the cumulative by  posting  binary decomposition using IsLessOrEqualVar
 
 
-//        ThetaTree tt = new ThetaTree(start.length);
-
         for (int i = 0; i < start.length; i++) {
             for (int j = i+1; j < start.length; j++) {
                 // i before j or j before i
@@ -123,12 +125,12 @@ public class Disjunctive extends Constraint {
             cp.post(new Disjunctive(startMirror, duration, false), false);
         }
 
-        for (int i = 0; i < nTask; ++i) {
-            start[i].propagateOnBoundChange(this);
+//        for (int i = 0; i < nTask; ++i) {
+//            start[i].propagateOnBoundChange(this);
 //            end[i].propagateOnBoundChange(this);
-        }
-//
-        propagate();
+//        }
+////
+//        propagate();
 
         // TODO 4: add the OverLoadCheck algorithms
 
@@ -142,6 +144,9 @@ public class Disjunctive extends Constraint {
     @Override
     public void propagate() throws InconsistencyException {
 
+        failure = false;
+        changed = true;
+
         for (int i = 0; i < nTask; ++i) {
             currentMinStarts[i] = start[i].getMin();
             currentMaxStarts[i] = start[i].getMax();
@@ -149,20 +154,24 @@ public class Disjunctive extends Constraint {
             currentMaxEnds[i] = end[i].getMax();
         }
 
-        overloadChecking();
-//        detectablePrecedences();
+        while(!failure && changed) {
+            changed = overloadChecking();
+        }
+
+        if (failure) {
+            throw INCONSISTENCY;
+        }
     }
 
     private void sortActivities(int[] values, int[] orderedIndices) {
         SortUtils.quicksort(values, orderedIndices);
     }
 
-    private void overloadChecking() throws InconsistencyException {
+    private boolean overloadChecking() {
 
         thetaTree.reset();
 
         sortActivities(currentMinStarts, orderedByIncreasingMinStarts);
-
         sortActivities(currentMaxEnds, orderedByIncreasingMaxEnds);
 
         for (int i = 0; i < nTask; ++i) {
@@ -170,14 +179,15 @@ public class Disjunctive extends Constraint {
             int index = orderedByIncreasingMaxEnds[i];
             int value = currentMaxEnds[index];
 
-            assert(value == end[index].getMax());
-
             thetaTree.insert(orderedByIncreasingMinStarts[i], end[index].getMin(), duration[index]);
 
             if (thetaTree.getECT() > end[index].getMax()) {
-                throw INCONSISTENCY;
+                failure = true;
+                return true;
             }
         }
+
+        return false;
     }
 
     private void detectablePrecedences() throws InconsistencyException {
