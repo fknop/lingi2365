@@ -22,6 +22,7 @@ import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
 import static minicp.cp.Factory.*;
+import static minicp.util.InconsistencyException.INCONSISTENCY;
 
 public class IsLessOrEqualVar extends Constraint { // b <=> x <= y
 
@@ -53,31 +54,17 @@ public class IsLessOrEqualVar extends Constraint { // b <=> x <= y
 
         if (!x.isBound()) {
             x.whenDomainChange(this::whenVariableChange);
+            x.whenBind(this::whenVariableBound);
         }
 
         if (!y.isBound()) {
             y.whenDomainChange(this::whenVariableChange);
+            y.whenBind(this::whenVariableBound);
         }
 
         if (b.isBound()) {
             whenBoolBound();
         }
-
-//        if (b.isBound()) {
-//            whenBoolBound();
-//        } else if (x.isBound() || y.isBound()) {
-//            whenVariableBound();
-//        } else if (x.getMin() <= y.getMin() && x.getMax() <= y.getMax()) {
-//            b.assign(true);
-//        } else if (x.getMin() > y.getMin() && x.getMax() > y.getMax()) {
-//            b.assign(false);
-//        } else {
-//            b.whenBind(this::whenBoolBound);
-//            x.whenBind(this::whenVariableBound);
-//            y.whenBind(this::whenVariableBound);
-//            x.whenDomainChange(this::whenVariableChange);
-//            y.whenDomainChange(this::whenVariableChange);
-//        }
     }
 
     private void whenBoolBound() throws InconsistencyException {
@@ -91,11 +78,40 @@ public class IsLessOrEqualVar extends Constraint { // b <=> x <= y
             x.removeBelow(y.getMin() + 1);
             y.removeAbove(x.getMax() - 1);
         }
-        this.deactivate();
+
+        if (x.isBound() && y.isBound() && b.isBound()) {
+            this.deactivate();
+        }
     }
 
     private void whenVariableBound() throws InconsistencyException {
-        b.assign(x.getMin() <= y.getMin());
+        if (x.isBound()) {
+            if (b.isBound()) {
+                if (b.isTrue() && x.getMin() > y.getMin()) {
+                    throw INCONSISTENCY;
+                }
+
+                if (b.isFalse() && x.getMin() <= y.getMax()) {
+                    throw INCONSISTENCY;
+                }
+            }
+        }
+
+        if (y.isBound()) {
+            if (b.isBound()) {
+                if (b.isTrue() && x.getMin() > y.getMin()) {
+                    throw INCONSISTENCY;
+                }
+
+                if (b.isFalse() && x.getMin() <= y.getMax()) {
+                    throw INCONSISTENCY;
+                }
+            }
+        }
+
+        if (x.isBound() && y.isBound() && b.isBound()) {
+            this.deactivate();
+        }
     }
 
     private void whenVariableChange() throws InconsistencyException {
@@ -105,11 +121,5 @@ public class IsLessOrEqualVar extends Constraint { // b <=> x <= y
         else if (x.getMin() > y.getMax()) {
             b.assign(false);
         }
-
-//        if (x.getMin() <= y.getMin() && x.getMax() <= y.getMax()) {
-//            b.assign(true);
-//        } else if (x.getMin() > y.getMin() && x.getMax() > y.getMax()) {
-//            b.assign(false);
-//        }
     }
 }

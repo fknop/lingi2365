@@ -49,17 +49,17 @@ public class Disjunctive extends Constraint {
     @Override
     public void post() throws InconsistencyException {
 
-//        int [] demands = new int[start.length];
-//        for (int i = 0; i < start.length; i++) {
-//            demands[i] = 1;
-//        }
-//        cp.post(new Cumulative(start,duration,demands,1));
-//
+        int [] demands = new int[start.length];
+        for (int i = 0; i < start.length; i++) {
+            demands[i] = 1;
+        }
+        cp.post(new Cumulative(start,duration,demands,1));
+
 
         // TODO 1: replace the cumulative by  posting  binary decomposition using IsLessOrEqualVar
 
 
-        ThetaTree tt = new ThetaTree(start.length);
+//        ThetaTree tt = new ThetaTree(start.length);
 
         for (int i = 0; i < start.length; i++) {
             for (int j = i+1; j < start.length; j++) {
@@ -74,13 +74,12 @@ public class Disjunctive extends Constraint {
 //
         // TODO 3: add the mirror filtering as done in the Cumulative Constraint
         if (postMirror) {
-            System.out.println("post mirror");
             IntVar[] startMirror = makeIntVarArray(cp, start.length, i -> minus(end[i]));
             cp.post(new Disjunctive(startMirror, duration, false), false);
         }
 
 
-        
+
 
 
 
