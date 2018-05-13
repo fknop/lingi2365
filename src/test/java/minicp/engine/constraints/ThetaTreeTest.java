@@ -116,7 +116,7 @@ inserting: 0 at pos 0 with ect 2
         assertEquals(4, tt.getECT());
 
         tt.insert(0, 2, 1);
-        assertEquals(5, tt.getECT());
+        assertEquals(6, tt.getECT());
 
     }
 
