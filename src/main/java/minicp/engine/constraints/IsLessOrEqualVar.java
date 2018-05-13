@@ -84,7 +84,9 @@ public class IsLessOrEqualVar extends Constraint { // b <=> x <= y
                 y.removeAbove(x.getMax() - 1);
             }
 
-            this.deactivate();
+//            if (b.isBound() && x.isBound() && y.isBound()) {
+//                this.deactivate();
+//            }
         }
 
         if (x.getMax() <= y.getMin()) {

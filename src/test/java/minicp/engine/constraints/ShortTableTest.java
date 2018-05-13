@@ -29,6 +29,7 @@ import java.util.Random;
 
 import static minicp.cp.Factory.*;
 import static minicp.cp.Heuristics.firstFail;
+import static minicp.cp.Heuristics.firstFailNoTieBreaker;
 import static org.junit.Assert.*;
 
 public class ShortTableTest {
@@ -124,7 +125,7 @@ public class ShortTableTest {
             cp.post(new ShortTableDecomp(new IntVar[]{x[0], x[1], x[2]}, t1, star));
             cp.post(new ShortTableDecomp(new IntVar[]{x[2], x[3], x[4]}, t2, star));
             cp.post(new ShortTableDecomp(new IntVar[]{x[0], x[2], x[4]}, t3, star));
-            statsDecomp = makeDfs(cp, firstFail(x, new Dom(false), new MinValue())).start();
+            statsDecomp = makeDfs(cp, firstFailNoTieBreaker(x)).start();
         } catch (InconsistencyException e) {
             statsDecomp = null;
         }
@@ -136,7 +137,7 @@ public class ShortTableTest {
             cp.post(new ShortTableCT(new IntVar[]{x[0], x[1], x[2]}, t1, star));
             cp.post(new ShortTableCT(new IntVar[]{x[2], x[3], x[4]}, t2, star));
             cp.post(new ShortTableCT(new IntVar[]{x[0], x[2], x[4]}, t3, star));
-            statsAlgo = makeDfs(cp, firstFail(x, new Dom(false), new MinValue())).start();
+            statsAlgo = makeDfs(cp, firstFailNoTieBreaker(x)).start();
         } catch (InconsistencyException e) {
             statsAlgo = null;
         }

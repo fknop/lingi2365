@@ -42,6 +42,83 @@ public class ThetaTreeTest {
         assertEquals(Integer.MIN_VALUE,thetaTree.getECT());
     }
 
+    @Test
+    public void test1() {
+        ThetaTree tt = new ThetaTree(5);
+        tt.insert(4, 2, 1);
+        assertEquals(2, tt.getECT());
+
+
+        tt.insert(0, 1, 1);
+
+        assertEquals(2, tt.getECT());
+
+
+        tt.insert(1, 1, 1);
+
+        assertEquals(3, tt.getECT());
+
+        tt.insert(2, 1, 1);
+
+        assertEquals(4, tt.getECT());
+
+        tt.insert(3, 1, 1);
+
+        assertEquals(5, tt.getECT());
+
+
+    }
+
+
+    @Test
+    public void test2() {
+        ThetaTree tt = new ThetaTree(5);
+
+        tt.insert(2, 1, 1);
+        assertEquals(1, tt.getECT());
+
+        tt.insert(3, 1, 1);
+        assertEquals(2, tt.getECT());
+
+        tt.insert(4, 2, 1);
+        assertEquals(3, tt.getECT());
+
+        tt.insert(1, 1, 1);
+
+        assertEquals(4, tt.getECT());
+        tt.insert(0, 1, 1);
+        assertEquals(5, tt.getECT());
+
+    }
+
+    /*
+    inserting: 2 at pos 2 with ect 1
+inserting: 3 at pos 3 with ect 1
+inserting: 4 at pos 4 with ect 1
+inserting: 1 at pos 1 with ect 1
+inserting: 0 at pos 0 with ect 2
+     */
+
+    @Test
+    public void test3() {
+        ThetaTree tt = new ThetaTree(5);
+
+        tt.insert(2, 1, 1);
+        assertEquals(1, tt.getECT());
+
+        tt.insert(3, 1, 1);
+        assertEquals(2, tt.getECT());
+
+        tt.insert(4, 1, 1);
+        assertEquals(3, tt.getECT());
+
+        tt.insert(1, 1, 1);
+        assertEquals(4, tt.getECT());
+
+        tt.insert(0, 2, 1);
+        assertEquals(5, tt.getECT());
+
+    }
 
 
 }

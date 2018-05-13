@@ -24,6 +24,7 @@ import minicp.search.branching.FirstFailBranching;
 import minicp.search.selector.value.MinValue;
 import minicp.search.selector.value.ValueSelector;
 import minicp.search.selector.variable.Dom;
+import minicp.search.selector.variable.FirstTieBreaker;
 import minicp.search.selector.variable.VariableSelector;
 
 
@@ -33,6 +34,13 @@ public class Heuristics {
 
     public static Choice firstFail(IntVar... x) {
         Branching<IntVar> branching = new FirstFailBranching(x, new Dom(), new MinValue());
+        return branching.branch();
+    }
+
+    public static Choice firstFailNoTieBreaker(IntVar... x) {
+        Dom dom = new Dom();
+        dom.setTieBreaker(new FirstTieBreaker());
+        Branching<IntVar> branching = new FirstFailBranching(x, dom, new MinValue());
         return branching.branch();
     }
 

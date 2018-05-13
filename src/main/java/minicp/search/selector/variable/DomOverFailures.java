@@ -5,10 +5,10 @@ import minicp.engine.core.IntVar;
 
 import java.util.List;
 
-public class DomOverFailures implements VariableSelector<IntVar>, VariableEvaluator<IntVar>, VariableFilter<IntVar> {
+public class DomOverFailures extends AbstractVariableSelector<IntVar> implements VariableEvaluator<IntVar>, VariableFilter<IntVar> {
     @Override
     public int getVariable(IntVar[] variables) {
-        return VariableSelector.selectMinVariable(variables, this, this);
+        return VariableSelector.selectMinVariable(variables, this, this, tieBreaker);
     }
 
     @Override

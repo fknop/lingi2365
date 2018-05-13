@@ -2,11 +2,11 @@ package minicp.search.selector.variable;
 
 import minicp.engine.core.IntVar;
 
-public class MinDelta implements VariableFilter<IntVar>, VariableSelector<IntVar>, VariableEvaluator<IntVar> {
+public class MinDelta extends AbstractVariableSelector<IntVar> implements VariableFilter<IntVar>, VariableEvaluator<IntVar> {
 
     @Override
     public int getVariable(IntVar[] x) {
-        return VariableSelector.selectMinVariable(x, this, this);
+        return VariableSelector.selectMinVariable(x, this, this, tieBreaker);
 
     }
 

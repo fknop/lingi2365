@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static minicp.cp.Factory.*;
+import static minicp.search.selector.variable.VariableSelector.selectMinVariable;
 
 public class QAPLNS {
 
@@ -92,7 +93,7 @@ public class QAPLNS {
             return -max;
         };
 
-        VariableSelector<IntVar> variableSelector = (IntVar[] vars) -> VariableSelector.selectMinVariable(vars, filter, evaluator);
+        VariableSelector<IntVar> variableSelector = (IntVar[] vars) -> selectMinVariable(vars, filter, evaluator);
         ValueSelector valueSelector = (IntVar[] vars, int index) -> {
             IntVar var = vars[index];
             int min = Integer.MAX_VALUE;

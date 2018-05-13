@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 
-public class ConflictOrderingSearch implements VariableFilter<IntVar>, VariableSelector<IntVar>, VariableEvaluator<IntVar>, SearchOnFailure<IntVar> {
+public class ConflictOrderingSearch extends AbstractVariableSelector<IntVar> implements VariableFilter<IntVar>,  VariableEvaluator<IntVar>, SearchOnFailure<IntVar> {
 
     private VariableEvaluator<IntVar> evaluator;
     private IntVar[] x;
@@ -71,10 +71,10 @@ public class ConflictOrderingSearch implements VariableFilter<IntVar>, VariableS
                 reset();
             }
 
-            return VariableSelector.selectMinVariable(x, this, evaluator);
+            return VariableSelector.selectMinVariable(x, this, evaluator, tieBreaker);
         }
         else {
-            return VariableSelector.selectMinVariable(x, this, this);
+            return VariableSelector.selectMinVariable(x, this, this, tieBreaker);
         }
     }
 

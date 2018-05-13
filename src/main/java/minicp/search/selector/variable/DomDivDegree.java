@@ -2,10 +2,10 @@ package minicp.search.selector.variable;
 
 import minicp.engine.core.IntVar;
 
-public class DomDivDegree implements VariableSelector<IntVar>, VariableEvaluator<IntVar>, VariableFilter<IntVar> {
+public class DomDivDegree extends AbstractVariableSelector<IntVar> implements VariableEvaluator<IntVar>, VariableFilter<IntVar> {
     @Override
     public int getVariable(IntVar[] variables) {
-        return VariableSelector.selectMinVariable(variables, this, this);
+        return VariableSelector.selectMinVariable(variables, this, this, tieBreaker);
     }
 
     @Override

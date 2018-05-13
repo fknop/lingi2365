@@ -2,15 +2,16 @@ package minicp.search.selector.variable;
 
 import minicp.engine.core.IntVar;
 
-public class MaxRegret implements VariableFilter<IntVar>, VariableSelector<IntVar>, VariableEvaluator<IntVar> {
+public class MaxRegret extends AbstractVariableSelector<IntVar> implements VariableFilter<IntVar>, VariableEvaluator<IntVar> {
 
     int[] domain;
 
     @Override
     public int getVariable(IntVar[] x) {
-        return VariableSelector.selectMinVariable(x, this, this);
+        return VariableSelector.selectMinVariable(x, this, this, tieBreaker);
 
     }
+
 
     @Override
     public double evaluate(IntVar[] x, int index) {

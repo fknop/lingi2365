@@ -2,18 +2,13 @@ package minicp.search.selector.variable;
 
 import minicp.engine.core.IntVar;
 
-public class Dom implements VariableSelector<IntVar>, VariableEvaluator<IntVar>, VariableFilter<IntVar> {
-
-    private boolean breakTies = true;
-    public Dom(boolean breakTies) {
-        this.breakTies = breakTies;
-    }
+public class Dom extends AbstractVariableSelector<IntVar> implements VariableEvaluator<IntVar>, VariableFilter<IntVar> {
 
     public Dom() {}
 
     @Override
     public int getVariable(IntVar[] variables) {
-        return VariableSelector.selectMinVariable(variables, this, this, breakTies);
+        return VariableSelector.selectMinVariable(variables, this, this, tieBreaker);
     }
 
     @Override

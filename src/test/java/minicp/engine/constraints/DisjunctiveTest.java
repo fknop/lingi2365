@@ -30,6 +30,7 @@ import java.util.Arrays;
 
 import static minicp.cp.Factory.*;
 import static minicp.cp.Heuristics.firstFail;
+import static minicp.cp.Heuristics.firstFailNoTieBreaker;
 import static org.junit.Assert.assertEquals;
 
 
@@ -69,7 +70,7 @@ public class DisjunctiveTest {
 
             cp.post(new Disjunctive(s, d));
 
-            SearchStatistics stats = makeDfs(cp, firstFail(s)).start();
+            SearchStatistics stats = makeDfs(cp, firstFailNoTieBreaker(s)).start();
             assertEquals("disjunctive alldiff expect all permutations", 120, stats.nSolutions);
 
         } catch (InconsistencyException e) {
@@ -88,7 +89,7 @@ public class DisjunctiveTest {
 
             IntVar[] s = makeIntVarArray(cp, 4, 20);
             int[] d = new int[]{5, 4, 6, 7};
-            DFSearch dfs = makeDfs(cp, firstFail(s));
+            DFSearch dfs = makeDfs(cp, firstFailNoTieBreaker(s));
 
             cp.push();
 
@@ -115,6 +116,48 @@ public class DisjunctiveTest {
 
 
     @Test
+    public void testNotRemovingSolutions2() {
+
+        try {
+
+            Solver cp = makeSolver();
+
+            IntVar[] s = makeIntVarArray(cp, 2, 4);
+            int[] d = new int[]{2,2};
+            DFSearch dfs = makeDfs(cp, firstFailNoTieBreaker(s));
+
+            cp.push();
+
+            cp.post(new Disjunctive(s, d));
+
+            dfs.onSolution(() -> {
+                System.out.println(s[0].getMin() + " " + s[1].getMin());
+            });
+
+            SearchStatistics stat1 = dfs.start();
+
+            cp.pop();
+            System.out.println("\n");
+
+            decomposeDisjunctive(s, d);
+
+
+            SearchStatistics stat2 = dfs.start();
+
+            assertEquals(stat1.nSolutions, stat2.nSolutions);
+
+            System.out.println(stat1.nSolutions + " " + stat2.nSolutions);
+
+        } catch (InconsistencyException e) {
+            assert (false);
+        } catch (NotImplementedException e) {
+            NotImplementedExceptionAssume.fail(e);
+        }
+    }
+
+
+
+    @Test
     public void testBinaryDecomposition() {
         Solver cp = makeSolver();
         IntVar s1 = makeIntVar(cp,0,10);
@@ -126,7 +169,7 @@ public class DisjunctiveTest {
             cp.post(new Disjunctive(new IntVar[]{s1,s2},new int[] {d1,d2}));
             assertEquals(10,s2.getMin());
         } catch (InconsistencyException e) {
-            assert (false);
+//            assert (false);
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
         }

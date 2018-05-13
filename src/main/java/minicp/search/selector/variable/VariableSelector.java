@@ -9,7 +9,7 @@ class SelectMin {
     private static Random rand = new Random(0);
     private static IntArrayList bests = new IntArrayList();
 
-    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator, boolean breakTies) {
+    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator, TieBreaker tieBreaker) {
         bests.clear();
 
         double min = Double.MAX_VALUE;
@@ -34,23 +34,22 @@ class SelectMin {
             return -1;
         }
 
-        if (bests.size() == 1 || !breakTies) {
+        if (bests.size() == 1 || tieBreaker == null) {
             return bests.get(0);
         }
 
-        int i = rand.nextInt(bests.size());
-        return bests.get(i);
+        return tieBreaker.breakTies(bests);
     }
 }
 
 public interface VariableSelector<V extends Variable> {
     int getVariable(V[] x);
 
-    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator) {
-        return SelectMin.selectMinVariable(variables, filter, evaluator, true);
+    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator, TieBreaker tieBreaker) {
+        return SelectMin.selectMinVariable(variables, filter, evaluator, tieBreaker);
     }
 
-    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator, boolean breakTies) {
-        return SelectMin.selectMinVariable(variables, filter, evaluator, breakTies);
+    static <V extends Variable> int selectMinVariable(V[] variables, VariableFilter<V> filter, VariableEvaluator<V> evaluator) {
+        return SelectMin.selectMinVariable(variables, filter, evaluator, null);
     }
 }

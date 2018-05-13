@@ -31,6 +31,7 @@ import java.util.function.BiFunction;
 
 import static minicp.cp.Factory.*;
 import static minicp.cp.Heuristics.firstFail;
+import static minicp.cp.Heuristics.firstFailNoTieBreaker;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -198,7 +199,7 @@ public class TableTest {
             cp.post(new TableDecomp(new IntVar[]{x[0], x[1], x[2]}, t1));
             cp.post(new TableDecomp(new IntVar[]{x[2], x[3], x[4]}, t2));
             cp.post(new TableDecomp(new IntVar[]{x[0], x[2], x[4]}, t3));
-            statsDecomp = makeDfs(cp, firstFail(x, new Dom(false), new MinValue())).start();
+            statsDecomp = makeDfs(cp, firstFailNoTieBreaker(x)).start();
         } catch (InconsistencyException e) {
             statsDecomp = null;
         }
@@ -210,7 +211,7 @@ public class TableTest {
             cp.post(tc.apply(new IntVar[]{x[0], x[1], x[2]}, t1));
             cp.post(tc.apply(new IntVar[]{x[2], x[3], x[4]}, t2));
             cp.post(tc.apply(new IntVar[]{x[0], x[2], x[4]}, t3));
-            statsAlgo = makeDfs(cp, firstFail(x, new Dom(false), new MinValue())).start();
+            statsAlgo = makeDfs(cp, firstFailNoTieBreaker(x)).start();
         } catch (InconsistencyException e) {
             statsAlgo = null;
         }

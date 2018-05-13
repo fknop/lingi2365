@@ -5,7 +5,7 @@ import minicp.search.SearchOnFailure;
 import minicp.search.branching.AbstractBranching;
 
 
-public class LastConflict implements VariableFilter<IntVar>, VariableSelector<IntVar>, VariableEvaluator<IntVar>, SearchOnFailure<IntVar> {
+public class LastConflict extends AbstractVariableSelector<IntVar> implements VariableFilter<IntVar>,  VariableEvaluator<IntVar>, SearchOnFailure<IntVar> {
 
     private VariableEvaluator<IntVar> evaluator;
     private IntVar[] x;
@@ -29,8 +29,9 @@ public class LastConflict implements VariableFilter<IntVar>, VariableSelector<In
 
     @Override
     public int getVariable(IntVar[] x) {
-        return VariableSelector.selectMinVariable(x, this, this);
+        return VariableSelector.selectMinVariable(x, this, this, tieBreaker);
     }
+
 
     @Override
     public double evaluate(IntVar[] x, int i) {

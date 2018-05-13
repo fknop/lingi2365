@@ -7,7 +7,7 @@ import minicp.search.selector.value.ValueSelector;
 
 import java.util.List;
 
-public class WDeg implements VariableFilter<IntVar>, VariableSelector<IntVar>, VariableEvaluator<IntVar> {
+public class WDeg extends AbstractVariableSelector<IntVar> implements VariableFilter<IntVar>, VariableEvaluator<IntVar> {
 
 
     private ReversibleInt[][] unassigned = null;
@@ -50,7 +50,7 @@ public class WDeg implements VariableFilter<IntVar>, VariableSelector<IntVar>, V
 //        }
 
 //        return VariableSelector.selectMinVariable(x, this, max > SIZE_TRESHOLD ? fallback : this);
-        return VariableSelector.selectMinVariable(x, this, this);
+        return VariableSelector.selectMinVariable(x, this, this, tieBreaker);
     }
     @Override
     public boolean take(IntVar variable) {

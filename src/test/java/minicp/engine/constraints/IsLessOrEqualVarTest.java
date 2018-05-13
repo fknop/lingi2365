@@ -147,5 +147,36 @@ public class IsLessOrEqualVarTest {
         }
     }
 
+    @Test
+    public void test5() {
+        try {
+            try {
+
+                Solver cp = new Solver();
+
+                IntVar s1 = makeIntVar(cp, 2, 2);
+                IntVar s2 = makeIntVar(cp, 1, 1);
+
+                IntVar e1 = makeIntVar(cp, 4, 4);
+                IntVar e2 = makeIntVar(cp, 3, 3);
+
+                BoolVar b1 = makeBoolVar(cp);
+                BoolVar b2 = makeBoolVar(cp);
+
+                cp.push();
+
+                cp.post(new IsLessOrEqualVar(b1, e1, s2));
+                cp.post(new IsLessOrEqualVar(b2, e2, s1));
+                cp.post(new NotEqual(b1, b2), false);
+
+                fail("should fail");
+            } catch (InconsistencyException e) {
+                System.out.println("fail");
+            }
+        } catch (NotImplementedException e) {
+            e.print();
+        }
+    }
+
 
 }

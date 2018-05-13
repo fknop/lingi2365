@@ -31,6 +31,7 @@ import java.util.Random;
 
 import static minicp.cp.Factory.*;
 import static minicp.cp.Heuristics.firstFail;
+import static minicp.cp.Heuristics.firstFailNoTieBreaker;
 import static org.junit.Assert.*;
 
 public class NegTableTest {
@@ -204,7 +205,7 @@ public class NegTableTest {
             cp.post(new TableCT(new IntVar[]{x[0], x[1], x[2]}, toPositive(x[0], x[1], x[2],t1)));
             cp.post(new TableCT(new IntVar[]{x[2], x[3], x[4]}, toPositive(x[2], x[3], x[4],t2)));
             cp.post(new TableCT(new IntVar[]{x[0], x[2], x[4]}, toPositive(x[0], x[2], x[4],t3)));
-            statsDecomp = makeDfs(cp, firstFail(x, new Dom(false), new MinValue())).start();
+            statsDecomp = makeDfs(cp, firstFailNoTieBreaker(x)).start();
         } catch (InconsistencyException e) {
             statsDecomp = null;
         }
@@ -216,7 +217,7 @@ public class NegTableTest {
             cp.post(new NegTableCT(new IntVar[]{x[0], x[1], x[2]}, t1));
             cp.post(new NegTableCT(new IntVar[]{x[2], x[3], x[4]}, t2));
             cp.post(new NegTableCT(new IntVar[]{x[0], x[2], x[4]}, t3));
-            statsAlgo = makeDfs(cp, firstFail(x, new Dom(false), new MinValue())).start();
+            statsAlgo = makeDfs(cp, firstFailNoTieBreaker(x)).start();
         } catch (InconsistencyException e) {
             statsAlgo = null;
         }
