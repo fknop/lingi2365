@@ -109,9 +109,10 @@ public class StableMariage {
 
         for (int m = 0; m < n; m++) {
             // the husband of the wife of man m is m
+            cp.post(new Element1DVar(husband, wife[m], m));
             // TODO: model this with Element1DVar
 
-
+            cp.post(new Element1D(rankWomen[m], wife[m], wifePref[m]));
             // rankWomen[m][wife[m]] == wifeFref[m]
             // TODO: model this with Element1D
 
@@ -119,9 +120,11 @@ public class StableMariage {
         }
 
         for (int w = 0; w < n; w++) {
+            cp.post(new Element1DVar(wife, husband[w], w));
             // the wife of the husband of woman w is w
             // TODO: model this with Element1DVar
 
+            cp.post(new Element1D(rankMen[w], husband[w], husbandPref[w]));
             // rankMen[w][husband[w]] == husbandPref[w]
             // TODO: model this with Element1D
         }
@@ -135,6 +138,9 @@ public class StableMariage {
                 BoolVar wDont = isLess(husbandPref[w],rankMen[w][m]);
                 cp.post(implies(mPrefersW,wDont));
 
+                BoolVar wPrefersM = isLarger(husbandPref[w], rankMen[w][m]);
+                BoolVar mDont = isLess(wifePref[m], rankWomen[m][w]);
+                cp.post(implies(wPrefersM, mDont));
                 // if w prefers m than her husband, the opposite is not true i.e. m prefers his own woman than w
                 // (husbandPref[w] > rankMen[w][m]) => (wifePref[m] < rankWomen[m][w])
                 // TODO: model this constraint

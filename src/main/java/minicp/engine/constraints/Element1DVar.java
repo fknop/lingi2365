@@ -20,9 +20,11 @@ import minicp.engine.core.IntVar;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
+import static minicp.cp.Factory.makeIntVar;
+
 public class Element1DVar extends Constraint {
 
-    enum Consistency {
+    public enum Consistency {
         BOUND,
         DOMAIN
     }
@@ -34,6 +36,9 @@ public class Element1DVar extends Constraint {
     private final int n;
 
 
+    public Element1DVar(IntVar[] T, IntVar x, int y) {
+        this(T, x, makeIntVar(x.getSolver(), y, y));
+    }
 
     public Element1DVar(IntVar[] T, IntVar x, IntVar y) {
         this(T, x, y, Consistency.BOUND);
