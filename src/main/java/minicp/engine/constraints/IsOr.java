@@ -18,6 +18,7 @@ package minicp.engine.constraints;
 import minicp.engine.core.BoolVar;
 import minicp.engine.core.Constraint;
 import minicp.reversible.ReversibleInt;
+import minicp.reversible.ReversibleSparseSet;
 import minicp.util.InconsistencyException;
 import minicp.util.NotImplementedException;
 
@@ -28,7 +29,9 @@ public class IsOr extends Constraint { // b <=> x1 or x2 or ... xn
     private final int n;
 
     private int[] unBounds;
-    private ReversibleInt nUnBounds;
+//    private ReversibleInt nUnBounds;
+
+    private ReversibleSparseSet set;
 
     private final Or or;
 
@@ -38,27 +41,56 @@ public class IsOr extends Constraint { // b <=> x1 or x2 or ... xn
         this.x = x;
         this.n = x.length;
         or = new Or(x);
+        set = new ReversibleSparseSet(cp.getTrail(), n);
 
-        nUnBounds = new ReversibleInt(cp.getTrail(), n);
+//        nUnBounds = new ReversibleInt(cp.getTrail(), n);
         unBounds = new int[n];
-        for (int i = 0; i < n; i++) {
-            unBounds[i] = i;
-        }
+//        for (int i = 0; i < n; i++) {
+//            unBounds[i] = i;
+//        }
     }
 
     @Override
     public void post() throws InconsistencyException {
         b.propagateOnBind(this);
-        for (BoolVar xi : x) {
-            xi.propagateOnBind(this);
+
+        for (int i = 0; i < n; i++) {
+            int j = i;
+
+            if (x[i].isFalse()) {
+                set.remove(i);
+            }
+
+            x[i].whenBind(() -> {
+                if (x[j].isTrue()) {
+                    b.assign(true);
+                    this.deactivate();
+                }
+                else {
+                    set.remove(j);
+                }
+
+                if (set.isEmpty()) {
+                    b.assign(false);
+                }
+            });
         }
     }
 
     @Override
     public void propagate() throws InconsistencyException {
 
-        // TODO Implement the constraint as efficiently as possible and make sure you pass all the tests
-
-       throw new NotImplementedException();
+        if (b.isBound()) {
+            if (b.isTrue()) {
+                cp.post(or);
+                this.deactivate();
+            }
+            else {
+                int size = set.fillArray(unBounds);
+                for (int i = 0; i < size; ++i) {
+                    x[i].assign(false);
+                }
+            }
+        }
     }
 }

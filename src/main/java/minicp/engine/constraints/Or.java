@@ -44,10 +44,50 @@ public class Or extends Constraint { // x1 or x2 or ... xn
         propagate();
     }
 
-
     @Override
     public void propagate() throws InconsistencyException {
-        // TODO: implement the filtering using watched literal technique and make sure you pass all the tests
-        throw new NotImplementedException();
+
+        int down = wL.getValue();
+        int up = wR.getValue();
+
+        while (down < x.length && x[down].isBound()) {
+            if (x[down].isTrue()) {
+                this.deactivate();
+                setBounds(down, up);
+                return;
+            }
+
+            down++;
+        }
+
+        while (up >= 0 && x[up].isBound()) {
+            if (x[up].isTrue()) {
+                setBounds(down, up);
+                this.deactivate();
+                return;
+            }
+
+            up--;
+        }
+
+
+        if (down > up) {
+            throw INCONSISTENCY;
+        }
+        else if (down == up) {
+            x[down].assign(true);
+            setBounds(down, up);
+            this.deactivate();
+        }
+        else {
+            setBounds(down, up);
+            x[wL.getValue()].propagateOnBind(this);
+            x[wR.getValue()].propagateOnBind(this);
+        }
+    }
+
+    private void setBounds(int down, int up) {
+        wL.setValue(down);
+        wR.setValue(up);
     }
 }

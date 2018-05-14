@@ -20,6 +20,11 @@ import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.search.DFSearch;
 import minicp.search.SearchStatistics;
+import minicp.search.branching.FirstFailBranching;
+import minicp.search.selector.value.MinValue;
+import minicp.search.selector.variable.ConflictOrderingSearch;
+import minicp.search.selector.variable.DomDivDegree;
+import minicp.search.selector.variable.VariableSelector;
 import minicp.util.InconsistencyException;
 
 import java.io.*;
@@ -45,7 +50,7 @@ public class JobShop {
         // Reading the data
 
         try {
-            FileInputStream istream = new FileInputStream("data/jobshop/sascha/jobshop-4-4-0");
+            FileInputStream istream = new FileInputStream("data/jobshop/Lawrence/la03.txt");
             BufferedReader in = new BufferedReader(new InputStreamReader(istream));
             in.readLine();
             in.readLine();
@@ -111,7 +116,15 @@ public class JobShop {
             IntVar makespan = maximum(endLast);
 
 
-            DFSearch dfs = makeDfs(cp, firstFail(flatten(start)));
+            IntVar[] flattenStart = flatten(start);
+            FirstFailBranching branching = new FirstFailBranching(flattenStart);
+            VariableSelector<IntVar> varSelector = new ConflictOrderingSearch(flattenStart, branching, new DomDivDegree());
+//        ValueSelector valSelector = new IBS(makespan, start);
+
+            branching.setVariableSelector(varSelector);
+            branching.setValueSelector(new MinValue());
+
+            DFSearch dfs = makeDfs(cp, branching.branch());
 
 
             cp.post(minimize(makespan, dfs));
