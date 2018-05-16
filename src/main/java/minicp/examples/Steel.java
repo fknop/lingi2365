@@ -15,8 +15,10 @@
 
 package minicp.examples;
 
+import minicp.engine.constraints.Element1D;
 import minicp.engine.constraints.IsOr;
 import minicp.engine.core.BoolVar;
+import minicp.engine.core.BoolVarImpl;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.search.DFSearch;
@@ -106,6 +108,9 @@ public class Steel {
                     }
 
                     // TODO 2: model that presence[col] is true iff at least one order with color col is placed in slab j
+                    BoolVar[] arr = new BoolVar[inSlabWithColor.size()];
+                    cp.post(new IsOr((BoolVar) presence[col], inSlabWithColor.toArray(arr)));
+
 
                 }
                 // TODO 3 : restrict the number of colors present in slab j to be <= 2
@@ -127,8 +132,14 @@ public class Steel {
             System.out.println("total weights of items:"+IntStream.of(w).sum());
 
 
+
+            IntVar[] losses = makeIntVarArray(cp, nSlab, maxCapa + 1);
+            for (int i = 0; i < nSlab; ++i) {
+                cp.post(new Element1D(loss, l[i], losses[i]));
+            }
+
             // TODO 1: model the objective function using element constraint + a sum constraint
-            IntVar totLoss = null;
+            IntVar totLoss = sum(losses);
 
             //DFSearch dfs = makeDfs(cp,firstFail(x));
 

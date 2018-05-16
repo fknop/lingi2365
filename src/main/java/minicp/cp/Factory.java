@@ -237,6 +237,7 @@ public class Factory {
             sumMin += x[i].getMin();
             sumMax += x[i].getMax();
         }
+
         Solver cp = x[0].getSolver();
         IntVar s = makeIntVar(cp, sumMin, sumMax);
         cp.post(new Sum(x, s));
