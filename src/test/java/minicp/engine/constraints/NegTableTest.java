@@ -41,12 +41,12 @@ public class NegTableTest {
         for (int i = 0; i < nTuples; i++)
             for (int j = 0; j < arity; j++)
                 r[i][j] = rand.nextInt(maxvalue - minvalue) + minvalue;
-        return noDuplicates? removeDuplicates(r): r;
+        return noDuplicates ? removeDuplicates(r) : r;
     }
 
-    public int[][] removeDuplicates(int [][] table) {
+    public int[][] removeDuplicates(int[][] table) {
         ArrayList<int[]> tableList = new ArrayList<>();
-        boolean [] duplicate = new boolean[table.length];
+        boolean[] duplicate = new boolean[table.length];
         for (int i = 0; i < table.length; i++) {
             if (!duplicate[i]) {
                 tableList.add(table[i]);
@@ -80,7 +80,7 @@ public class NegTableTest {
                                         add = false;
                                     }
                                 }
-                                if (add) posTableList.add(new int[]{i,j,k});
+                                if (add) posTableList.add(new int[]{i, j, k});
                             }
                         }
                     }
@@ -94,26 +94,24 @@ public class NegTableTest {
     @Test
     public void simpleTest0() {
         try {
-            try {
-                Solver cp = makeSolver();
-                IntVar[] x = makeIntVarArray(cp, 3, 2);
-                int[][] table = new int[][]{
-                        {0, 0, 0},
-                        {1, 0, 0},
-                        {1, 1, 0},
-                        {0, 1, 0},
-                        {0, 1, 1},
-                        {1, 0, 1},
-                        {0, 0, 1}};
-                cp.post(new NegTableCT(x, table));
-                //cp.post(new TableCT(x, toPositive(x[0],x[1],x[2],table)));
-                assertEquals(1,x[0].getMin());
-                assertEquals(1,x[1].getMin());
-                assertEquals(1,x[2].getMin());
+            Solver cp = makeSolver();
+            IntVar[] x = makeIntVarArray(cp, 3, 2);
+            int[][] table = new int[][]{
+                    {0, 0, 0},
+                    {1, 0, 0},
+                    {1, 1, 0},
+                    {0, 1, 0},
+                    {0, 1, 1},
+                    {1, 0, 1},
+                    {0, 0, 1}};
+            cp.post(new NegTableCT(x, table));
+            //cp.post(new TableCT(x, toPositive(x[0],x[1],x[2],table)));
+            assertEquals(1, x[0].getMin());
+            assertEquals(1, x[1].getMin());
+            assertEquals(1, x[2].getMin());
 
-            } catch (InconsistencyException e) {
-                fail("should not fail");
-            }
+        } catch (InconsistencyException e) {
+            fail("should not fail");
         } catch (NotImplementedException e) {
             Assume.assumeNoException(e);
         }
@@ -122,19 +120,17 @@ public class NegTableTest {
     @Test
     public void simpleTest1() {
         try {
-            try {
-                Solver cp = makeSolver();
-                IntVar[] x = makeIntVarArray(cp, 3, 2);
-                int[][] table = new int[][]{{1,1,1}};
-                cp.post(new NegTableCT(x, table));
 
-                DFSearch dfs = makeDfs(cp,firstFail(x));
-                SearchStatistics stats = dfs.start();
-                assertEquals(7,stats.nSolutions);
+            Solver cp = makeSolver();
+            IntVar[] x = makeIntVarArray(cp, 3, 2);
+            int[][] table = new int[][]{{1, 1, 1}};
+            cp.post(new NegTableCT(x, table));
+            DFSearch dfs = makeDfs(cp, firstFail(x));
+            SearchStatistics stats = dfs.start();
+            assertEquals(7, stats.nSolutions);
 
-            } catch (InconsistencyException e) {
-                fail("should not fail");
-            }
+        } catch (InconsistencyException e) {
+            fail("should not fail");
         } catch (NotImplementedException e) {
             Assume.assumeNoException(e);
         }
@@ -143,18 +139,16 @@ public class NegTableTest {
     @Test
     public void simpleTest2() {
         try {
-            try {
-                Solver cp = makeSolver();
-                IntVar[] x = makeIntVarArray(cp, 3, 2);
-                int[][] table = new int[][]{{1,1,1},{1,1,1},{1,1,1}};
-                cp.post(new NegTableCT(x, table));
-                DFSearch dfs = makeDfs(cp,firstFail(x));
-                SearchStatistics stats = dfs.start();
-                assertEquals(7,stats.nSolutions);
+            Solver cp = makeSolver();
+            IntVar[] x = makeIntVarArray(cp, 3, 2);
+            int[][] table = new int[][]{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+            cp.post(new NegTableCT(x, table));
+            DFSearch dfs = makeDfs(cp, firstFail(x));
+            SearchStatistics stats = dfs.start();
+            assertEquals(7, stats.nSolutions);
 
-            } catch (InconsistencyException e) {
-                fail("should not fail");
-            }
+        } catch (InconsistencyException e) {
+            fail("should not fail");
         } catch (NotImplementedException e) {
             Assume.assumeNoException(e);
         }
@@ -184,7 +178,7 @@ public class NegTableTest {
         for (int i = 0; i < 20; i++) {
             int[][] tuples1 = randomTuples(rand, 3, 50, 2, 8, false);
             int[][] tuples2 = randomTuples(rand, 3, 50, 1, 3, false);
-            int[][] tuples3 = randomTuples(rand, 3, 80, 0, 6, false );
+            int[][] tuples3 = randomTuples(rand, 3, 80, 0, 6, false);
             try {
                 testTable(tuples1, tuples2, tuples3);
             } catch (NotImplementedException e) {
@@ -206,6 +200,7 @@ public class NegTableTest {
             cp.post(new TableCT(new IntVar[]{x[2], x[3], x[4]}, toPositive(x[2], x[3], x[4],t2)));
             cp.post(new TableCT(new IntVar[]{x[0], x[2], x[4]}, toPositive(x[0], x[2], x[4],t3)));
             statsDecomp = makeDfs(cp, firstFailNoTieBreaker(x)).start();
+
         } catch (InconsistencyException e) {
             statsDecomp = null;
         }

@@ -33,19 +33,19 @@ import static org.junit.Assert.*;
 public class CircuitTest {
 
 
-    int [] circuit1ok = new int []{1,2,3,4,5,0};
-    int [] circuit2ok = new int []{1,2,3,4,5,0};
+    int[] circuit1ok = new int[]{1, 2, 3, 4, 5, 0};
+    int[] circuit2ok = new int[]{1, 2, 3, 4, 5, 0};
 
-    int [] circuit1ko = new int []{1,2,3,4,5,2};
-    int [] circuit2ko = new int []{1,2,0,4,5,3};
+    int[] circuit1ko = new int[]{1, 2, 3, 4, 5, 2};
+    int[] circuit2ko = new int[]{1, 2, 0, 4, 5, 3};
 
-    public static boolean checkHamiltonian(int [] circuit) {
-        int [] count = new int[circuit.length];
-        for (int v: circuit) {
+    public static boolean checkHamiltonian(int[] circuit) {
+        int[] count = new int[circuit.length];
+        for (int v : circuit) {
             count[v]++;
             if (count[v] > 1) return false;
         }
-        boolean [] visited = new boolean[circuit.length];
+        boolean[] visited = new boolean[circuit.length];
         int c = circuit[0];
         for (int i = 0; i < circuit.length; i++) {
             visited[c] = true;
@@ -57,10 +57,10 @@ public class CircuitTest {
         return true;
     }
 
-    public static IntVar[] instanciate(Solver cp, int [] circuit) {
+    public static IntVar[] instanciate(Solver cp, int[] circuit) {
         IntVar[] x = new IntVar[circuit.length];
         for (int i = 0; i < circuit.length; i++) {
-            x[i] = makeIntVar(cp,circuit[i],circuit[i]);
+            x[i] = makeIntVar(cp, circuit[i], circuit[i]);
         }
         return x;
     }
@@ -82,6 +82,7 @@ public class CircuitTest {
             } catch (InconsistencyException e) {
                 fail("should not fail");
             }
+
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
         }
@@ -91,16 +92,16 @@ public class CircuitTest {
     @Test
     public void testCircuitKo() {
         try {
-            try {
-                Solver cp = new Solver();
-                cp.post(new Circuit(instanciate(cp,circuit1ko)));
-                fail("should fail");
-            } catch (InconsistencyException e) {}
-            try {
-                Solver cp = new Solver();
-                cp.post(new Circuit(instanciate(cp,circuit2ko)));
-                fail("should fail");
-            } catch (InconsistencyException e) {}
+            Solver cp = new Solver();
+            cp.post(new Circuit(instanciate(cp, circuit1ko)));
+            fail("should fail");
+        } catch (InconsistencyException e) {
+        }
+        try {
+            Solver cp = new Solver();
+            cp.post(new Circuit(instanciate(cp, circuit2ko)));
+            fail("should fail");
+        } catch (InconsistencyException e) {
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
         }
@@ -110,20 +111,20 @@ public class CircuitTest {
     @Test
     public void testAllSolutions() {
         try {
-            try {
-                Solver cp = new Solver();
-                IntVar [] x = makeIntVarArray(cp,5,5);
-                cp.post(new Circuit(x));
-                SearchStatistics stats = makeDfs(cp,firstFail(x)).onSolution(() -> {
-                            int [] sol = new int[x.length];
-                            for (int i = 0; i < x.length; i++) {
-                                sol[i] = x[i].getMin();
-                            }
-                            System.out.println(Arrays.toString(sol));
-                            assertTrue("Solution is not an hamiltonian Circuit",checkHamiltonian(sol));
+            Solver cp = new Solver();
+            IntVar[] x = makeIntVarArray(cp, 5, 5);
+            cp.post(new Circuit(x));
+            SearchStatistics stats = makeDfs(cp, firstFail(x)).onSolution(() -> {
+                        int[] sol = new int[x.length];
+                        for (int i = 0; i < x.length; i++) {
+                            sol[i] = x[i].getMin();
                         }
-                ).start();
-            } catch (InconsistencyException e) { fail("should not fail");}
+                        System.out.println(Arrays.toString(sol));
+                        assertTrue("Solution is not an hamiltonian Circuit", checkHamiltonian(sol));
+                    }
+            ).start();
+        } catch (InconsistencyException e) {
+            fail("should not fail");
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
         }
@@ -132,25 +133,25 @@ public class CircuitTest {
     @Test
     public void testCircuitDomainFilter() {
         try {
-            try {
-                Solver cp = new Solver();
+            Solver cp = new Solver();
 
-                IntVar[] x = new IntVar[10];
-                for (int i = 0; i < 10; i++)
-                    x[i] = makeIntVar(cp,0,9);
+            IntVar[] x = new IntVar[10];
+            for (int i = 0; i < 10; i++)
+                x[i] = makeIntVar(cp, 0, 9);
 
-                cp.post(new Circuit(x));
+            cp.post(new Circuit(x));
 
-                // No self-loop
-                for(int i = 0; i < x.length; i++)
-                    assertFalse(x[i].contains(i));
+            // No self-loop
+            for (int i = 0; i < x.length; i++)
+                assertFalse(x[i].contains(i));
 
-                x[0].assign(1);
-                cp.fixPoint();
-                for(int i = 1; i < x.length; i++)
-                    assertFalse(x[i].contains(1));
+            x[0].assign(1);
+            cp.fixPoint();
+            for (int i = 1; i < x.length; i++)
+                assertFalse(x[i].contains(1));
 
-            } catch (InconsistencyException e) { fail("should not fail");}
+        } catch (InconsistencyException e) {
+            fail("should not fail");
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
         }
@@ -159,14 +160,14 @@ public class CircuitTest {
     @Test
     public void testImmediateCircuit() {
         try {
-            try {
-                Solver cp = new Solver();
+            Solver cp = new Solver();
 
-                IntVar[] x = new IntVar[1];
-                x[0] = makeIntVar(cp, 0, 0);
+            IntVar[] x = new IntVar[1];
+            x[0] = makeIntVar(cp, 0, 0);
 
-                cp.post(new Circuit(x));
-            } catch (InconsistencyException e) { fail("should not fail");}
+            cp.post(new Circuit(x));
+        } catch (InconsistencyException e) {
+            fail("should not fail");
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
         }
@@ -174,19 +175,20 @@ public class CircuitTest {
 
     @Test
     public void testCircuitDomainInit() {
+
         try {
-            try {
-                Solver cp = new Solver();
+            Solver cp = new Solver();
 
-                IntVar[] x = new IntVar[10];
-                for (int i = 0; i < 10; i++)
-                    x[i] = makeIntVar(cp,-100,100);
+            IntVar[] x = new IntVar[10];
+            for (int i = 0; i < 10; i++)
+                x[i] = makeIntVar(cp, -100, 100);
 
-                cp.post(new Circuit(x));
+            cp.post(new Circuit(x));
 
-                assertEquals(0, x[2].getMin());
-                assertEquals(9, x[2].getMax());
-            } catch (InconsistencyException e) { fail("should not fail");}
+            assertEquals(0, x[2].getMin());
+            assertEquals(9, x[2].getMax());
+        } catch (InconsistencyException e) {
+            fail("should not fail");
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
         }

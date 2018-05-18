@@ -36,6 +36,7 @@ public class Element1DTest {
 
     @Test
     public void element1dTest1() {
+
         try {
 
             Solver cp = makeSolver();
@@ -74,6 +75,7 @@ public class Element1DTest {
 
     @Test
     public void element1dTest2() {
+
         try {
 
             Solver cp = new Solver();
@@ -98,6 +100,7 @@ public class Element1DTest {
             fail("should not fail");
         }
         catch (NotImplementedException e) {
+
             NotImplementedExceptionAssume.fail(e);
         }
     }
@@ -120,7 +123,6 @@ public class Element1DTest {
 
             cp.fixPoint();
 
-
             assertEquals(6, z.getMin());
             assertEquals(8, z.getMax());
         } catch (InconsistencyException e) {
@@ -132,12 +134,12 @@ public class Element1DTest {
 
     @Test
     public void element1dTest4() {
+
         try {
 
             Solver cp = new Solver();
             IntVar y = makeIntVar(cp, 0, 4);
             IntVar z = makeIntVar(cp, 5, 9);
-
 
             int[] T = new int[]{9, 8, 7, 5, 6};
 
@@ -147,11 +149,10 @@ public class Element1DTest {
             z.remove(5); //new min is 6
             cp.fixPoint();
 
-
             assertFalse(y.contains(0));
             assertFalse(y.contains(3));
         } catch (InconsistencyException e) {
-                fail("should not fail");
+            fail("should not fail");
         } catch (NotImplementedException e) {
             NotImplementedExceptionAssume.fail(e);
         }

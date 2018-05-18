@@ -70,6 +70,7 @@ public class ReversibleSparseSet {
         }
     }
 
+
     private void exchangePositions(int val1, int val2) {
         assert(checkVal(val1));
         assert(checkVal(val2));
