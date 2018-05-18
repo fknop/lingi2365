@@ -73,24 +73,35 @@ public class RCPSP {
 
         // Reading the data
 
+
         String folder = "data/rcpsp/";
         String instance = null;
-//
-        instance = "j30_1_1.rcp";
-//        instance = "j30_1_2.rcp";
-//        instance = "j30_1_3.rcp";
-//        instance = "j60_1_1.rcp";
-//        instance = "j60_1_2.rcp";
-//        instance = "j60_1_3.rcp";
-//        instance = "j90_1_1.rcp";
-//        instance = "j90_1_2.rcp";
-//        instance = "j90_1_3.rcp";
-//        instance = "j120_1_1.rcp";
-//        instance = "j120_1_2.rcp";
-//        instance = "j120_1_3.rcp";
+        String file = null;
+        long timeout = 0;
+        if (args.length > 0) {
+            instance = args[0];
+            file = instance;
+            timeout = 120;
+        }
+        else {
+            instance = "j30_1_1.rcp";
+    //        instance = "j30_1_2.rcp";
+    //        instance = "j30_1_3.rcp";
+    //        instance = "j60_1_1.rcp";
+    //        instance = "j60_1_2.rcp";
+    //        instance = "j60_1_3.rcp";
+    //        instance = "j90_1_1.rcp";
+    //        instance = "j90_1_2.rcp";
+    //        instance = "j90_1_3.rcp";
+    //        instance = "j120_1_1.rcp";
+    //        instance = "j120_1_2.rcp";
+//            instance = "j120_1_3.rcp";
+
+            file = folder + instance;
+        }
 
 
-        InputReader reader = new InputReader(folder + instance);
+        InputReader reader = new InputReader(file);
 
         int nActivities = reader.getInt();
         int nResources = reader.getInt();
@@ -171,63 +182,84 @@ public class RCPSP {
         // TODO 4: implement the search
 
 
-        StartSnapshot[] startSnapshots = new StartSnapshot[start.length];
-        int[] activityIndices = new int[start.length];
-        ArrayList<IntArrayList> graph = new ArrayList<>();
+//        StartSnapshot[] startSnapshots = new StartSnapshot[start.length];
+//        int[] activityIndices = new int[start.length];
+//        ArrayList<IntArrayList> graph = new ArrayList<>();
 
-        for (int i = 0; i < start.length; ++i) {
-            startSnapshots[i] = new StartSnapshot(0, 0);
-            graph.add(new IntArrayList(4));
-        }
+//        for (int i = 0; i < start.length; ++i) {
+//            startSnapshots[i] = new StartSnapshot(0, 0);
+//            graph.add(new IntArrayList(4));
+//        }
 
-        Box<Integer> last = new Box<>(0);
+//        Box<Integer> last = new Box<>(0);
+
+        int[] bests = new int[start.length];
+        Box<Integer> best = new Box<>(null);
+
         search.onSolution(() -> {
-            System.out.println(makespan.getMin());
-
-            int index = -1;
-            int lastValue = -1;
-
-
+            best.set(makespan.getMin());
             for (int i = 0; i < start.length; ++i) {
-                startSnapshots[i].i = i;
-                startSnapshots[i].start = start[i].getMin();
-                graph.get(i).clear();
+                bests[i] = start[i].getMin();
             }
-
-            Arrays.sort(startSnapshots);
-
-            for (int i = 0; i < start.length; ++i) {
-
-                if (lastValue != startSnapshots[i].start) {
-                    index++;
-                    last.set(index);
-                }
-
-                graph.get(index).add(startSnapshots[i].i);
-                lastValue = startSnapshots[i].start;
+//            int index = -1;
+//            int lastValue = -1;
 
 
-                int j = startSnapshots[i].i;
-                activityIndices[j] = index;
-            }
+//            for (int i = 0; i < start.length; ++i) {
+//                startSnapshots[i].i = i;
+//                startSnapshots[i].start = start[i].getMin();
+//                graph.get(i).clear();
+//            }
+//
+//            Arrays.sort(startSnapshots);
+//
+//            for (int i = 0; i < start.length; ++i) {
+//
+//                if (lastValue != startSnapshots[i].start) {
+//                    index++;
+//                    last.set(index);
+//                }
 
-            System.out.println(Arrays.toString(startSnapshots));
-            System.out.println(Arrays.toString(activityIndices));
+//                graph.get(index).add(startSnapshots[i].i);
+//                lastValue = startSnapshots[i].start;
+//
+//
+//                int j = startSnapshots[i].i;
+//                activityIndices[j] = index;
+//            }
 
-           for (int i = 0; i < last.get(); ++i) {
-               for (int j = 0; j < graph.get(i).size(); ++j) {
-                   System.out.print(graph.get(i).get(j) + " ");
-               }
-               System.out.print(" | ");
-           }
-            System.out.println();
+//            System.out.println(Arrays.toString(startSnapshots));
+//            System.out.println(Arrays.toString(activityIndices));
+
+//           for (int i = 0; i < last.get(); ++i) {
+//               for (int j = 0; j < graph.get(i).size(); ++j) {
+//                   System.out.print(graph.get(i).get(j) + " ");
+//               }
+//               System.out.print(" | ");
+//           }
+//            System.out.println();
             // TODO: build tree
 
 
         });
 
-        search.start();
+        final long current = System.currentTimeMillis();
+        // -2 to make sure it ends before 120
+        final long t = timeout == 0L ? 0L : (timeout - 2) * 1000;
+        search.start((stats) -> {
+            if (t == 0L) {
+                return false;
+            }
+            else {
+                return System.currentTimeMillis() - current >= t;
+            }
+        });
 
+        System.out.println(best.get());
+        for (int i = 0; i < bests.length; ++i) {
+            System.out.print(bests[i] + " ");
+        }
+        System.out.println();
 
     }
 

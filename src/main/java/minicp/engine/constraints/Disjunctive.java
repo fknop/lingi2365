@@ -20,12 +20,7 @@ import minicp.engine.core.BoolVar;
 import minicp.engine.core.Constraint;
 import minicp.engine.core.IntVar;
 import minicp.util.InconsistencyException;
-import minicp.util.IntVarPair;
 import minicp.util.SortUtils;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import static minicp.cp.Factory.*;
 import static minicp.util.InconsistencyException.INCONSISTENCY;
@@ -72,7 +67,8 @@ public class Disjunctive extends Constraint {
     private final int[] tmp;
 
     // Theta tree
-    private final ThetaTree thetaTree;
+    private final ThetaLambdaTree thetaLambdaTree;
+//    private final ThetaLambdaTree thetaLambdaTree;
 
     // Flags for propagation
     private boolean changed = true;
@@ -108,7 +104,9 @@ public class Disjunctive extends Constraint {
 
         tmp = new int[nTask];
 
-        thetaTree = new ThetaTree(nTask);
+
+//        thetaLambdaTree = new ThetaTree(nTask);
+        thetaLambdaTree = new ThetaLambdaTree(nTask);
     }
 
 
@@ -139,10 +137,6 @@ public class Disjunctive extends Constraint {
 
         propagate();
 
-        // TODO 5: add the Detectable Precedences algorithm
-
-        // TODO 6: add the Not-Last algorithm
-
         // TODO 7 (optional, for a bonus): implement the Lambda-Theta tree and implement the Edge-Finding
     }
 
@@ -157,7 +151,7 @@ public class Disjunctive extends Constraint {
         setupCurrentValues();
 
         while(!failure && changed) {
-            changed = overloadChecking() || detectablePrecedences() || notLast();
+            changed = overloadChecking() || detectablePrecedences() || notLast() || edgeFinding();
             if (changed) {
                 setupCurrentValues();
             }
@@ -191,7 +185,7 @@ public class Disjunctive extends Constraint {
 
     private boolean overloadChecking() {
 
-        thetaTree.reset();
+        thetaLambdaTree.reset();
 
         sortActivities(currentMinStarts, orderedByIncreasingMinStarts);
         sortActivities(currentMaxEnds, orderedByIncreasingMaxEnds);
@@ -203,9 +197,9 @@ public class Disjunctive extends Constraint {
 
             int index = orderedByIncreasingMaxEnds[i];
 
-            thetaTree.insert(indicesOrder[index], end[index].getMin(), duration[index]);
+            thetaLambdaTree.insert(indicesOrder[index], end[index].getMin(), duration[index]);
 
-            if (thetaTree.getECT() > end[index].getMax()) {
+            if (thetaLambdaTree.getECT() > end[index].getMax()) {
                 failure = true;
                 return true;
             }
@@ -216,7 +210,7 @@ public class Disjunctive extends Constraint {
 
     private boolean detectablePrecedences() throws InconsistencyException {
 
-        thetaTree.reset();
+        thetaLambdaTree.reset();
 
         // sort for inserting into tree
         sortActivities(currentMinStarts, orderedByIncreasingMinStarts);
@@ -232,7 +226,7 @@ public class Disjunctive extends Constraint {
             int jIndex = orderedByIncreasingLctMinDuration[j];
 
             while (currentEstPlusDuration[index] > currentLctMinDuration[jIndex]) {
-                thetaTree.insert(indicesOrder[jIndex], end[jIndex].getMin(), duration[jIndex]);
+                thetaLambdaTree.insert(indicesOrder[jIndex], end[jIndex].getMin(), duration[jIndex]);
                 if (j < nTask - 1) {
                     jIndex = orderedByIncreasingLctMinDuration[++j];
                 }
@@ -242,13 +236,13 @@ public class Disjunctive extends Constraint {
             }
 
 
-            if (thetaTree.isPresent(indicesOrder[index])) {
-                thetaTree.remove(indicesOrder[index]);
-                tmp[index] = Math.max(start[index].getMin(), thetaTree.getECT());
-                thetaTree.insert(indicesOrder[index], end[index].getMin(), duration[index]);
+            if (thetaLambdaTree.isPresent(indicesOrder[index])) {
+                thetaLambdaTree.remove(indicesOrder[index]);
+                tmp[index] = Math.max(start[index].getMin(), thetaLambdaTree.getECT());
+                thetaLambdaTree.insert(indicesOrder[index], end[index].getMin(), duration[index]);
             }
             else {
-                tmp[index] = Math.max(start[index].getMin(), thetaTree.getECT());
+                tmp[index] = Math.max(start[index].getMin(), thetaLambdaTree.getECT());
             }
 
 
@@ -265,7 +259,7 @@ public class Disjunctive extends Constraint {
     }
 
     private boolean notLast() throws InconsistencyException {
-        thetaTree.reset();
+        thetaLambdaTree.reset();
 
         // sort for inserting into tree
         sortActivities(currentMinStarts, orderedByIncreasingMinStarts);
@@ -286,7 +280,7 @@ public class Disjunctive extends Constraint {
 
             while (currentMaxEnds[index] > currentLctMinDuration[jIndex]) {
 
-                thetaTree.insert(indicesOrder[jIndex], end[jIndex].getMin(), duration[jIndex]);
+                thetaLambdaTree.insert(indicesOrder[jIndex], end[jIndex].getMin(), duration[jIndex]);
                 if (j < nTask - 1) {
                     jIndex = orderedByIncreasingLctMinDuration[++j];
                 }
@@ -295,11 +289,11 @@ public class Disjunctive extends Constraint {
                 }
             }
 
-            int ectWithout = thetaTree.getECT();
-            if (thetaTree.isPresent(indicesOrder[index])) {
-                thetaTree.remove(indicesOrder[index]);
-                ectWithout = thetaTree.getECT();
-                thetaTree.insert(indicesOrder[index], end[index].getMin(), duration[index]);
+            int ectWithout = thetaLambdaTree.getECT();
+            if (thetaLambdaTree.isPresent(indicesOrder[index])) {
+                thetaLambdaTree.remove(indicesOrder[index]);
+                ectWithout = thetaLambdaTree.getECT();
+                thetaLambdaTree.insert(indicesOrder[index], end[index].getMin(), duration[index]);
             }
 
             if (ectWithout > currentLctMinDuration[index]) {
@@ -312,6 +306,55 @@ public class Disjunctive extends Constraint {
         for (int i = 0; i < nTask; ++i) {
             changed = changed || tmp[i] != end[i].getMax();
             end[i].removeAbove(tmp[i]);
+        }
+
+        return changed;
+    }
+
+    private boolean edgeFinding() throws InconsistencyException {
+
+        thetaLambdaTree.reset();
+        thetaLambdaTree.useGrayNodes();
+
+        sortActivities(currentMinStarts, orderedByIncreasingMinStarts);
+        getIndicesOrder(orderedByIncreasingMinStarts, indicesOrder);
+
+        sortActivities(currentMaxEnds, orderedByIncreasingMaxEnds);
+
+
+        // orderedByIncreasingMinStarts[i]:
+        // indicesOrder[i]: for activity i, gives the position of activity i
+
+        for (int i = 0; i < nTask; ++i) {
+            thetaLambdaTree.insert(indicesOrder[i], end[i].getMin(), duration[i]);
+        }
+
+        int j = nTask - 1;
+        boolean changed = false;
+
+        while (j > 1) {
+            int index = orderedByIncreasingMaxEnds[j];
+            if (thetaLambdaTree.getECT() > end[index].getMax()) {
+                failure = true;
+                return true;
+            }
+
+            thetaLambdaTree.setGrayActivity(indicesOrder[index]);
+            j--;
+
+            index = orderedByIncreasingMaxEnds[j];
+            while (thetaLambdaTree.getECTBar() > end[index].getMax()) {
+                int responsible = thetaLambdaTree.responsibleEctBar();
+                int i = orderedByIncreasingMinStarts[responsible];
+                int est = Math.max(end[i].getMin(), thetaLambdaTree.getECT());
+
+                if (est != start[i].getMin()) {
+                    changed = true;
+                }
+
+                start[i].removeBelow(est);
+                thetaLambdaTree.remove(responsible);
+            }
         }
 
         return changed;
