@@ -489,7 +489,7 @@ public class XCSP3 implements XCallbacks2 {
         // Constraints
         try {
             IntVar [] xs = Arrays.stream(list).map(mapVar::get).toArray(IntVar[]::new);
-            minicp.post(allDifferent(xs));
+            minicp.post(new AllDifferentAC(xs));
             for (IntVar x: xs) {
                 decisionVars.add(x);
             }
@@ -698,13 +698,13 @@ public class XCSP3 implements XCallbacks2 {
         IntVar[] decisions = decisionVars.toArray(new IntVar[0]);
         FirstFailBranching decisionBranching = new FirstFailBranching(decisions);
 //        DiscrepancyBranching<IntVar> discrepancyBranching = new DiscrepancyBranching<>(decisionBranching, 100);
-        decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new WDeg()));
+        decisionBranching.setVariableSelector(new ConflictOrderingSearch(decisions, decisionBranching, new DomDivDegree()));
         decisionBranching.setValueSelector(isCOP() ? new BIVS(objectiveMinimize.get()) : new LastSuccess(decisions, decisionBranching, new MinValue()));
 
 
         FirstFailBranching secondBranching = new FirstFailBranching(vars);
 //        DiscrepancyBranching<IntVar> secondDiscrepancyBranching = new DiscrepancyBranching<>(secondBranching, 100);
-        secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new WDeg()));
+        secondBranching.setVariableSelector(new ConflictOrderingSearch(vars, secondBranching, new DomDivDegree()));
         secondBranching.setValueSelector(isCOP() ? new BIVS(objectiveMinimize.get()) : new LastSuccess(vars, secondBranching, new MinValue()));
 
 
@@ -763,7 +763,7 @@ public class XCSP3 implements XCallbacks2 {
             int nRestarts = 5000;
 
             Random rand = new Random(0);
-            double percentage = 50.0;
+            double percentage = 50;
 
             SearchStatistics stats = new SearchStatistics();
             for (int i = 0; i < nRestarts; ++i) {

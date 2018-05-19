@@ -140,8 +140,7 @@ public class MaximumMatching {
         return false;
     }
 
-    private boolean findAlternatingPathFromVal
-            (int v) {
+    private boolean findAlternatingPathFromVal(int v) {
         if (valSeen[v - min] != magic) {
             valSeen[v - min] = magic;
             if (valMatch[v - min] == -1)

@@ -25,7 +25,7 @@ public abstract class XCSP3TestHelper {
         try {
             System.out.println(path);
             XCSP3 xcsp3 = new XCSP3(path);
-            String solution = xcsp3.solve(100,40);
+            String solution = xcsp3.solve(1,60);
 
             if(shouldBeSat) {
                 List<String> violatedCtrs = xcsp3.getViolatedCtrs(solution);

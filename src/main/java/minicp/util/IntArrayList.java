@@ -2,6 +2,9 @@ package minicp.util;
 
 import jdk.nashorn.internal.runtime.arrays.ArrayIndex;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
 public class IntArrayList {
 
     final static int DEFAULT_CAPACITY = 10;

@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static minicp.cp.Factory.*;
-import static minicp.cp.Heuristics.firstFail;
 import static minicp.cp.Heuristics.firstFailNoTieBreaker;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -70,7 +69,7 @@ public class AllDifferentACTest {
         try {
             cp.post(new AllDifferentAC(x));
 
-            SearchStatistics stats = makeDfs(cp,firstFail(x)).start();
+            SearchStatistics stats = makeDfs(cp,firstFailNoTieBreaker(x)).start();
             assertEquals(120,stats.nSolutions);
 
         } catch (InconsistencyException e) {

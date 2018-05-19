@@ -15,6 +15,7 @@
 
 package minicp.examples;
 
+import minicp.engine.constraints.AllDifferentAC;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
 import minicp.search.DFSearch;
@@ -60,7 +61,7 @@ public class QAP {
         Solver cp = makeSolver();
         IntVar[] x = makeIntVarArray(cp, n, n);
 
-        cp.post(allDifferent(x));
+        cp.post(new AllDifferentAC(x));
 
         VariableFilter<IntVar> filter = (IntVar v) -> !v.isBound();
         VariableEvaluator<IntVar> evaluator = (IntVar[] vars, int index) -> {

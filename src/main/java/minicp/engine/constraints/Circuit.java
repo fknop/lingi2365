@@ -54,7 +54,7 @@ public class Circuit extends Constraint {
 
     @Override
     public void post() throws InconsistencyException {
-        cp.post(allDifferent(x));
+        cp.post(new AllDifferentAC(x));
 
         for (int i = 0; i < x.length; ++i) {
             int k = i;

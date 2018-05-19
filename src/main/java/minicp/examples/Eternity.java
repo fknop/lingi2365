@@ -15,6 +15,7 @@
 
 package minicp.examples;
 
+import minicp.engine.constraints.AllDifferentAC;
 import minicp.engine.constraints.TableCT;
 import minicp.engine.core.IntVar;
 import minicp.engine.core.Solver;
@@ -58,7 +59,7 @@ public class Eternity {
 
         // Read the data
 
-        InputReader reader = new InputReader("data/eternity8x8.txt");
+        InputReader reader = new InputReader("data/eternity7x7.txt");
 
         int n = reader.getInt();
         int m = reader.getInt();
@@ -142,7 +143,7 @@ public class Eternity {
         // TODO: State the constraints of the problem
 
         // Constraint1: all the pieces placed are different
-        cp.post(allDifferent(flatten(id)));
+        cp.post(new AllDifferentAC(flatten(id)));
 
         // Constraint2: all the pieces placed are valid ones i.e. one of the given mxn pieces possibly rotated
         for (int i = 0; i < n; ++i) {
